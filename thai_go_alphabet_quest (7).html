@@ -1,0 +1,3187 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thai-GO! - พิทักษ์อักษราเวทโบราณ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Mitr & Sarabun (Headed font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for Mystical Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #051417;
+            touch-action: none; /* Disables double tap zoom and default scroll for seamless map dragging */
+        }
+        .title-font {
+            font-family: 'Mitr', sans-serif;
+        }
+        /* Thai head font strictly assigned for runes visibility */
+        .headed-thai-font {
+            font-family: 'Sarabun', sans-serif !important;
+            font-weight: 800 !important;
+        }
+        /* Runic Gold Glow */
+        @keyframes rune-glow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.7)) scale(1); }
+            50% { filter: drop-shadow(0 0 18px rgba(234, 179, 8, 1)) scale(1.08); }
+        }
+        .rune-glow {
+            animation: rune-glow 2.5s infinite ease-in-out;
+        }
+        /* Fire-Ruby Pulse */
+        @keyframes ruby-pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+        .ruby-pulse {
+            animation: ruby-pulse 1.5s infinite ease-in-out;
+        }
+        /* Custom grabbable map cursor */
+        .grabbable {
+            cursor: grab;
+        }
+        .grabbable:active {
+            cursor: grabbing;
+        }
+        /* Glassmorphic Panel Styles */
+        .thai-glass {
+            background: rgba(11, 29, 34, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(234, 179, 8, 0.35);
+        }
+
+        /* Luxurious Gold Metallic Border Style */
+        .gold-border-antique {
+            border: 3px double #eab308;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.25), inset 0 0 10px rgba(234, 179, 8, 0.15);
+            background: radial-gradient(circle at center, #0f2d33 0%, #051417 100%);
+        }
+
+        /* Sparkling keyframes */
+        @keyframes sparkle-float {
+            0% { transform: translateY(0) scale(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+        .sparkle-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkle-float 1.5s infinite linear;
+            box-shadow: 0 0 8px #f59e0b;
+            z-index: 100;
+        }
+
+        /* Dynamic elemental portals for the capture monsters */
+        @keyframes spin-portal {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .elemental-portal {
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            border: 3px dashed transparent;
+            animation: spin-portal 8s infinite linear;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .portal-fire { /* อักษรสูง - แดงชาด */
+            border-top-color: #ef4444;
+            border-bottom-color: #b91c1c;
+            filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.8));
+        }
+        .portal-gold { /* อักษรกลาง - ทองคำเดช */
+            border-left-color: #fbbf24;
+            border-right-color: #d97706;
+            filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.8));
+        }
+        .portal-storm { /* อักษรต่ำ - พายุมรกต */
+            border-top-color: #10b981;
+            border-right-color: #06b6d4;
+            filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.8));
+        }
+
+        /* Character 3D Parallax Card CSS */
+        .showcase-container {
+            perspective: 1000px;
+        }
+        .showcase-card {
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+        }
+        .preserve-3d {
+            transform-style: preserve-3d;
+        }
+    </style>
+</head>
+<body class="text-slate-100 overflow-hidden select-none">
+
+    <!-- Global Loading/Error Screen -->
+    <div id="loading-error-diagnostic" class="hidden absolute inset-0 z-[9999] p-6 text-center flex-col justify-center items-center gap-5 border-4 border-yellow-600 bg-[#051417]">
+        <div class="text-5xl">⚠️</div>
+        <h2 class="text-xl text-yellow-500 title-font font-bold">ตรวจพบข้อขัดข้องในสารบบอักขรา</h2>
+        <p id="diagnostic-err-msg" class="max-w-md text-xs opacity-90 leading-relaxed text-slate-300">
+            แนะนำให้รันเกมผ่านโปรโตคอลรักษาความปลอดภัย HTTPS เพื่อความปลอดภัยสูงสุด
+        </p>
+        <button onclick="window.location.reload()" class="bg-gradient-to-r from-amber-700 to-yellow-600 px-6 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all text-slate-950">
+            โหลดหน้าจอใหม่อีกครั้ง
+        </button>
+    </div>
+
+    <!-- Main Mobile Frame Container -->
+    <div id="app" class="relative max-w-md mx-auto h-[100dvh] w-full bg-[#051417] flex flex-col justify-between shadow-2xl border-x-4 border-yellow-600/50 overflow-hidden">
+        
+        <!-- ==================== HTTPS SECURE-CONTEXT WARNING ==================== -->
+        <div id="https-warning" class="hidden absolute inset-x-4 top-20 z-50 bg-red-950/95 border-2 border-red-500 rounded-2xl p-4 text-center space-y-3 shadow-2xl">
+            <div class="text-3xl text-red-500"><i class="fa-solid fa-triangle-exclamation animate-bounce"></i></div>
+            <h4 class="text-xs font-bold text-white title-font">ตรวจพบการเชื่อมต่อที่ไม่ปลอดภัย (HTTP)</h4>
+            <p class="text-[10px] text-slate-300 leading-relaxed">
+                เบราว์เซอร์จะไม่ยอมรับสิทธิ์ในการเปิดใช้งาน <strong class="text-red-400">กล้องสแกนแผนที่ AR</strong> บนเครือข่ายธรรมดา แนะนำให้คุณเข้าเล่นผ่านลิงก์แบบรักษาความปลอดภัย HTTPS
+            </p>
+            <button onclick="redirectToHttps()" class="w-full py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-[10px] rounded-lg transition-all">
+                เปลี่ยนเป็นรักษาความปลอดภัย (HTTPS)
+            </button>
+        </div>
+
+        <!-- ==================== TUTORIAL GUIDE OVERLAY ==================== -->
+        <div id="tutorial-overlay" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-6">
+            <div class="w-full max-w-xs bg-slate-900 border border-yellow-600 rounded-3xl p-5 text-center space-y-4 shadow-2xl relative flex flex-col justify-between min-h-[380px]">
+                <button onclick="skipTutorial()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-xs font-bold bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
+                    ข้าม <i class="fa-solid fa-angles-right"></i>
+                </button>
+
+                <div class="space-y-3 pt-4 flex-1 flex flex-col justify-center">
+                    <div id="tutorial-icon" class="w-20 h-20 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-full flex items-center justify-center text-4xl border-2 border-white/20 shadow-lg mx-auto rune-glow">
+                        🧭
+                    </div>
+                    <div class="space-y-1.5">
+                        <h3 id="tutorial-title" class="text-sm font-bold text-white title-font"></h3>
+                        <p id="tutorial-description" class="text-[11px] text-slate-300 leading-relaxed min-h-[75px] flex items-center justify-center"></p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-center space-x-1.5" id="tutorial-dots"></div>
+                    <div class="flex justify-between items-center gap-2 pt-2">
+                        <button id="tutorial-prev-btn" onclick="prevTutorialStep()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-lg border border-slate-700 transition">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> ย้อนกลับ
+                        </button>
+                        <button id="tutorial-next-btn" onclick="nextTutorialStep()" class="flex-1 py-2 bg-yellow-500 text-slate-950 text-[10px] font-bold rounded-lg border border-yellow-200 shadow active:scale-95 transition">
+                            ถัดไป <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== LOGIN & SPLASH SCREEN ==================== -->
+        <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col justify-between p-6 bg-gradient-to-b from-[#051417] via-[#09262b] to-[#040f12] text-center transition-all duration-500 overflow-y-auto">
+            <div class="absolute top-10 left-10 text-yellow-500/20 text-3xl"><i class="fa-solid fa-bahai animate-spin" style="animation-duration: 20s"></i></div>
+            <div class="absolute bottom-20 right-10 text-yellow-500/20 text-4xl"><i class="fa-solid fa-compass animate-pulse"></i></div>
+
+            <div class="mt-8 space-y-4 relative z-10">
+                <div class="mx-auto w-24 h-24 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-full flex items-center justify-center shadow-lg border-2 border-white/30 rune-glow">
+                    <span class="text-white text-4xl font-bold title-font">อ</span>
+                </div>
+                <div>
+                    <h1 class="text-4xl font-extrabold text-yellow-400 title-font tracking-wider animate-pulse">THAI-GO!</h1>
+                    <p class="text-xs text-slate-300 mt-1 tracking-wide">สืบค้นจารึกมหาอักษรทั้ง 44 ปลดล็อกทหารเอกประลองชิงเงินพดด้วง</p>
+                </div>
+                
+                <div class="bg-slate-950/90 border border-yellow-600/40 rounded-2xl p-4 text-xs text-slate-300 max-w-xs mx-auto shadow-inner text-left space-y-2">
+                    <p class="font-bold text-yellow-400 text-center text-xs border-b border-yellow-600/30 pb-1">📜 ตำนานพยัญชนะไทยทั้ง ๔๔ อักขระ</p>
+                    <p class="leading-relaxed text-[10px]">บัดนี้ อักขระไทยทั้ง ๔๔ ตัวสถิตในรูปแบบของภูตวิเศษกระจัดกระจายรอบแดนสยาม! จงลากแผนที่เพื่อสำรวจ สแกนจับด้วยสัญชาตญาณเวท รวบรวม "พยัญชนะ" นำมาถวายเหล่าผู้กล้าเพื่อเสริมความแกร่ง แล้วออกประลองชิงเงินพดด้วง!</p>
+                </div>
+            </div>
+
+            <!-- Login Area -->
+            <div class="my-6 space-y-4 max-w-xs mx-auto w-full relative z-10 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 shadow-xl">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-yellow-400 text-left">สิทธิ์เข้าถึงนักวิชาการอักษร</h3>
+                <div class="space-y-2">
+                    <button onclick="handleFacebookLogin()" class="w-full py-2 bg-[#1877f2] hover:bg-[#166fe5] text-white font-bold text-xs rounded-lg shadow transition-all flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-facebook text-sm"></i> เข้าสู่ระบบผ่าน Facebook (บัญชีจริง)
+                    </button>
+                    <div class="flex items-center my-1 text-[10px] text-slate-500">
+                        <div class="flex-1 h-px bg-slate-800"></div>
+                        <span class="px-2">หรือใช้นามแฝงผู้พิทักษ์</span>
+                        <div class="flex-1 h-px bg-slate-800"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] text-slate-400 text-left mb-1">ระบุชื่อผู้เล่น</label>
+                    <input id="login-username" type="text" placeholder="ชื่อผู้พิทักษ์อักขรา" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-yellow-500 transition text-white" />
+                </div>
+
+                <div class="relative">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[10px] text-slate-400 text-left">รหัสผู้เล่นเดิม (เพื่อกู้ข้อมูล)</label>
+                        <span class="text-[9px] text-yellow-400 cursor-pointer hover:underline" onclick="showLocalUidHint()">ดูรหัสในเครื่อง</span>
+                    </div>
+                    <input id="login-uid" type="text" placeholder="ระบุ User ID เพื่อโหลดข้อมูลเดิม" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-yellow-500 transition text-slate-300" />
+                </div>
+
+                <button onclick="handleLoginFlow()" class="w-full py-3 bg-gradient-to-r from-amber-700 to-yellow-600 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-bold text-sm rounded-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-fingerprint"></i> เข้าสู่โลกอักขรเวท
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center px-4 mb-4 text-[10px] text-slate-500">
+                <span>ระบบคุ้มภัยอภิเวทเรียลไทม์</span>
+                <button onclick="openAdminPrompt()" class="text-yellow-600 hover:underline font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-user-shield"></i> แท่นผู้ดูแลระบบ
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== HEADER (HUD STYLES) ==================== -->
+        <header id="main-header" class="hidden absolute top-0 left-0 right-0 z-30 p-3 bg-gradient-to-b from-[#051417] via-[#051417]/85 to-transparent flex justify-between items-center">
+            <div class="flex items-center space-x-2 bg-slate-950/95 border border-yellow-600/40 p-1 pr-3 rounded-full shadow-md">
+                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-slate-950 text-xs border border-yellow-300/40 font-bold" id="hud-avatar">
+                    👑
+                </div>
+                <div>
+                    <div id="hud-username" class="text-[10px] text-slate-300 font-bold leading-none truncate max-w-[80px]">นักอักษรา</div>
+                    <div id="hud-level" class="text-[9px] font-semibold text-yellow-400 leading-none mt-0.5">Lv.1 ผู้เริ่มจารึก</div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-1.5">
+                <button onclick="openDailyCheckinModal()" class="flex items-center space-x-1 bg-gradient-to-r from-amber-950 to-[#ca8a04]/90 border border-yellow-500 rounded-full px-2.5 py-1 text-[9px] font-bold text-yellow-300 hover:scale-105 active:scale-95 transition shadow-lg animate-pulse" title="สัตยาธิษฐานรายวัน">
+                    <span>📅</span>
+                    <span>สัตยาธิษฐาน</span>
+                </button>
+
+                <div class="flex items-center space-x-1 bg-slate-950/95 border border-yellow-600/40 px-2 py-1 rounded-full text-[10px] font-bold text-yellow-400" title="เงินพดด้วง">
+                    <span>🪙</span>
+                    <span id="player-gold">0</span> พดด้วง
+                </div>
+
+                <div class="flex items-center space-x-1 bg-slate-950/95 border border-emerald-500/40 px-2 py-1 rounded-full text-[10px] font-bold text-emerald-400">
+                    <span><i class="fa-solid fa-scroll"></i></span>
+                    <span id="collected-count">0 ใบ</span>
+                </div>
+
+                <!-- Active Shields / Defense Badge -->
+                <div id="hud-shield-badge" class="hidden flex items-center justify-center w-7 h-7 bg-emerald-950 text-emerald-400 border border-emerald-500 rounded-full animate-pulse shadow" title="ยันต์ป้องกันอภิบาลวิหาร">
+                    <i class="fa-solid fa-shield-halved text-xs"></i>
+                </div>
+
+                <button onclick="toggleTreasury(true)" class="w-7 h-7 bg-slate-900 text-yellow-400 border border-yellow-600/40 rounded-full flex items-center justify-center hover:bg-yellow-500 hover:text-slate-950 active:scale-90 transition shadow-md">
+                    <i class="fa-solid fa-vault text-[10px]"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================== MAP SCREEN ==================== -->
+        <div id="map-screen" class="hidden relative w-full h-full bg-[#051417]">
+            <div id="virtual-map" class="absolute w-[2000px] h-[2000px] transition-all duration-75 ease-out z-10 grabbable" style="top: -800px; left: -800px;">
+                <div class="w-full h-full bg-[#051417]/25 relative overflow-hidden" style="background-image: radial-gradient(rgba(234, 179, 8, 0.15) 2px, transparent 2px); background-size: 50px 50px; background-color: #041a1a;">
+                    <!-- Forest Trees Elements -->
+                    <div class="absolute top-[250px] left-[500px] text-2xl opacity-60">🌳</div>
+                    <div class="absolute top-[450px] left-[200px] text-2xl opacity-40">🌲</div>
+                    <div class="absolute top-[600px] left-[700px] text-2xl opacity-50">🌴</div>
+                    <div class="absolute top-[1000px] left-[450px] text-2xl opacity-60">🌳</div>
+                    <div class="absolute top-[1250px] left-[150px] text-2xl opacity-55">🌲</div>
+                    
+                    <!-- Landmark 1 - Mythical Valley -->
+                    <div class="absolute top-[320px] left-[380px] text-center p-4 thai-glass rounded-2xl shadow-lg pointer-events-none w-56 border-yellow-600/40">
+                        <span class="text-3xl block mb-1">⛰️</span>
+                        <h4 class="text-yellow-400 font-bold text-xs title-font">หุบเขาอักขรมนตรา</h4>
+                        <p class="text-[9px] text-slate-300">พิกัดสวรรค์แห่งกลุ่มพยัญชนะอสุรา</p>
+                    </div>
+
+                    <!-- Landmark 2 - Divine Library -->
+                    <div class="absolute top-[820px] left-[920px] text-center p-4 thai-glass rounded-2xl shadow-lg pointer-events-none w-56 border-yellow-600/40">
+                        <span class="text-3xl block mb-1">🏛️</span>
+                        <h4 class="text-yellow-400 font-bold text-xs title-font">วิหารจารึกสัจจธรรม</h4>
+                        <p class="text-[9px] text-slate-300">คลังตำรายุทธศาสตร์ตัวละครสยาม PK</p>
+                    </div>
+
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 500,420 Q 950,550 1050,920 T 1540,1020 M 1050,920 L 640,1450" stroke="#ca8a04" stroke-width="2" stroke-dasharray="10, 10" fill="none" opacity="0.4" />
+                    </svg>
+
+                    <!-- Spawning Dynamic Rune Targets -->
+                    <div id="rune-spawner" class="absolute inset-0"></div>
+                </div>
+            </div>
+
+            <!-- Fixed Player Marker in Screen Center -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 flex flex-col items-center">
+                <div class="absolute w-44 h-44 border border-dashed border-yellow-400/20 rounded-full"></div>
+                <div class="absolute w-28 h-28 border border-dotted border-yellow-400/40 rounded-full animate-spin" style="animation-duration: 15s"></div>
+                
+                <div class="relative w-14 h-14 bg-slate-950 rounded-full flex items-center justify-center border-2 border-yellow-500 shadow-xl">
+                    <span id="player-avatar-map" class="text-2xl">🧭</span>
+                    <div id="active-item-badge" class="absolute -top-1 bg-emerald-600 text-[8px] font-semibold px-1.5 py-0.5 rounded-full border border-emerald-400 leading-none hidden">ACTIVE</div>
+                </div>
+            </div>
+
+            <!-- Quick Info overlay on map -->
+            <div class="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-slate-950/90 border border-yellow-600/40 px-3 py-1.5 rounded-full text-[9px] text-yellow-400 pointer-events-none shadow text-center min-w-[280px]">
+                👉 ใช้นิ้วลากหรือกวาดหน้าจอบนแผนที่เพื่อเคลื่อนไหวสำรวจ
+            </div>
+
+            <!-- Controller overlay for map navigation -->
+            <div class="absolute bottom-6 left-4 right-4 z-20 flex justify-between items-end pointer-events-none">
+                <div class="bg-slate-950/95 border border-yellow-600/40 p-2.5 rounded-xl pointer-events-auto flex flex-col gap-1.5 shadow-xl">
+                    <button onclick="startTutorial()" class="px-2.5 py-1.5 bg-slate-900 text-slate-300 text-[10px] font-semibold rounded border border-slate-800 flex items-center gap-1 hover:bg-yellow-500 hover:text-slate-950 transition">
+                        <i class="fa-solid fa-circle-question text-yellow-500"></i> แนะนำการเล่น
+                    </button>
+                </div>
+                
+                <div class="text-[8px] bg-slate-950/80 px-2 py-1 rounded text-slate-400">ลากเพื่อย้ายพิกัดแผนที่</div>
+            </div>
+        </div>
+
+        <!-- ==================== ENCOUNTER / AR CAPTURE SCREEN ==================== -->
+        <div id="encounter-screen" class="hidden absolute inset-0 z-40 bg-slate-950 flex flex-col justify-between overflow-hidden">
+            <div class="absolute inset-0 z-0 bg-slate-950">
+                <video id="camera-video" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0"></video>
+                <div id="camera-fallback" class="absolute inset-0 bg-cover bg-center" style="background-image: radial-gradient(#1a332d 1px, transparent 1px); background-size: 24px 24px;">
+                    <div class="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950 opacity-90"></div>
+                </div>
+            </div>
+
+            <!-- Gyro navigation indicators -->
+            <div id="indicator-left" class="hidden absolute left-4 top-1/2 -translate-y-1/2 z-30 ruby-pulse pointer-events-none flex flex-col items-center">
+                <div class="w-10 h-10 bg-yellow-500 text-slate-950 rounded-full flex items-center justify-center text-sm shadow-lg border border-yellow-300">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+                <span class="text-[9px] bg-slate-900 text-yellow-400 px-2 py-0.5 rounded border border-yellow-500/30 mt-1 shadow font-semibold">หันซ้าย ⬅️</span>
+            </div>
+            <div id="indicator-right" class="hidden absolute right-4 top-1/2 -translate-y-1/2 z-30 ruby-pulse pointer-events-none flex flex-col items-center">
+                <div class="w-10 h-10 bg-yellow-500 text-slate-950 rounded-full flex items-center justify-center text-sm shadow-lg border border-yellow-300">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+                <span class="text-[9px] bg-slate-900 text-yellow-400 px-2 py-0.5 rounded border border-yellow-500/30 mt-1 shadow font-semibold">หันขวา ➡️</span>
+            </div>
+
+            <!-- AR Header -->
+            <div class="relative z-10 p-3 flex justify-between items-center bg-gradient-to-b from-slate-950 to-transparent">
+                <button onclick="escapeEncounter()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-yellow-500 text-xs font-semibold rounded-lg border border-yellow-600/40 flex items-center gap-1.5 shadow-md transition">
+                    <i class="fa-solid fa-arrow-left"></i> กลับแผนที่
+                </button>
+                <div class="text-center bg-slate-900/90 px-4 py-1.5 rounded-xl border border-yellow-600/30 shadow-md max-w-[150px]">
+                    <div class="text-[8px] text-yellow-500 uppercase tracking-widest font-semibold">สแกนเนอร์ภูตอักษร AR</div>
+                    <div id="catch-char-name" class="font-bold text-xs text-white truncate">อักขรธาตุ</div>
+                </div>
+                <div class="flex gap-1.5">
+                    <button id="cam-toggle-btn" onclick="toggleCameraInput()" title="สลับเปิด/ปิดกล้อง" class="p-2 bg-slate-900 hover:bg-slate-800 border border-yellow-600/40 rounded-lg text-yellow-500 shadow-md transition active:scale-90">
+                        <i id="cam-icon" class="fa-solid fa-video-slash"></i>
+                    </button>
+                    <button onclick="calibrateGyro()" title="ปรับศูนย์ระบบเซนเซอร์" class="p-2 bg-slate-900 hover:bg-slate-800 border border-yellow-600/40 rounded-lg text-yellow-500 shadow-md transition active:scale-90">
+                        <i class="fa-solid fa-arrows-to-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Floating Target & Character Portal -->
+            <div class="relative z-10 flex-1 flex flex-col items-center justify-center">
+                <div class="absolute w-44 h-44 border-2 border-yellow-500/30 rounded-full border-dashed pointer-events-none flex items-center justify-center animate-spin" style="animation-duration: 25s">
+                    <div class="w-36 h-36 border border-yellow-400/10 rounded-full"></div>
+                </div>
+
+                <!-- Bouncing target container -->
+                <div id="encounter-char-container" class="relative flex flex-col items-center transition-transform duration-75 ease-out">
+                    <div class="relative flex flex-col items-center">
+                        <!-- Elementally infused Monster Portal Circle -->
+                        <div id="encounter-char-graphic" class="w-32 h-32 rounded-full border-4 border-yellow-500/80 flex flex-col items-center justify-center bg-[#071d22]/95 shadow-2xl relative transition-all overflow-hidden">
+                            <div id="elemental-ring" class="elemental-portal portal-gold"></div>
+                            <div class="absolute inset-2 rounded-full bg-gradient-to-b from-[#ca8a04]/20 via-transparent to-slate-950/40 animate-pulse"></div>
+                            
+                            <!-- AI Generated Monster Image Placeholder / Fallbacks -->
+                            <img id="encounter-char-image" src="" alt="Himmapan Monster" class="absolute inset-0 w-full h-full object-cover rounded-full hidden z-10 transition-opacity duration-500" style="mix-blend-mode: screen;" />
+                            
+                            <!-- Monster Image Loader -->
+                            <div id="encounter-image-loader" class="absolute inset-0 flex items-center justify-center bg-slate-950/80 rounded-full z-20 hidden">
+                                <div class="w-6 h-6 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+
+                            <span id="encounter-char-avatar" class="text-4xl mt-1 filter drop-shadow(0 4px 6px rgba(0,0,0,0.5)) z-10 animate-bounce" style="animation-duration: 2s">🦅</span>
+                            <span id="encounter-avatar-inner" class="text-3xl font-extrabold text-yellow-400 title-font -mt-1 headed-thai-font z-10 filter drop-shadow(0 0 5px rgba(234,179,8,0.8))">ก</span>
+
+                            <div class="absolute -top-1 -left-1 text-[10px] text-yellow-500/60 font-black z-20">⚜️</div>
+                            <div class="absolute -top-1 -right-1 text-[10px] text-yellow-500/60 font-black z-20">⚜️</div>
+                        </div>
+                        
+                        <div class="mt-4 bg-slate-950/90 border-2 border-[#ca8a04] px-3.5 py-1.5 rounded-2xl text-[9px] text-slate-200 flex flex-col items-center gap-1 shadow-2xl text-center max-w-[200px]">
+                            <span id="char-difficulty" class="font-bold text-yellow-400 uppercase tracking-wider">ประเภทไตรยางศ์: อักษรกลาง</span>
+                            <span class="font-bold text-amber-500 animate-pulse text-[8px] flex items-center gap-1">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> สบอสุราอักษรเวทสถิต
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="encounter-toast" class="absolute top-10 left-1/2 -translate-x-1/2 bg-yellow-500 text-slate-950 text-xs font-bold px-4 py-2 rounded-lg shadow-lg hidden z-30"></div>
+            </div>
+
+            <!-- Capture System Controls -->
+            <div class="relative z-10 bg-gradient-to-t from-[#051417] via-[#051417]/95 to-transparent p-5 flex flex-col items-center space-y-3">
+                <div class="flex items-center justify-between w-full max-w-xs text-[10px] text-slate-400 px-1">
+                    <span>⚡ กดปุ่มปล่อย "ลูกแก้ววิทยาปัญญา" เพื่อสะกดจับ</span>
+                </div>
+                
+                <!-- Throw Ball Frame -->
+                <div class="relative w-full h-20 flex items-center justify-center">
+                    <div id="magic-orb" onclick="tryThrowOrb()" class="w-14 h-14 bg-gradient-to-tr from-amber-700 via-yellow-500 to-yellow-200 rounded-full flex items-center justify-center shadow-lg border-2 border-white/80 hover:scale-105 active:scale-95 cursor-pointer transition-all z-20">
+                        <span class="text-slate-950 font-extrabold text-xs title-font">สะกด</span>
+                    </div>
+                </div>
+
+                <!-- Orb Type Selection -->
+                <div class="flex space-x-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
+                    <button onclick="selectOrb('consonant')" id="orb-consonant" class="px-3.5 py-1.5 bg-yellow-500 text-slate-950 text-[10px] font-bold rounded-lg transition-all shadow-md">
+                        🔮 อัคขรมณีพยัญชนะ
+                    </button>
+                    <button onclick="selectOrb('vowel')" id="orb-vowel" class="px-3.5 py-1.5 bg-slate-800 text-slate-400 text-[10px] font-bold rounded-lg transition-all">
+                        🧪 อัคขรมณีสระ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ACADEMIC LANGUAGE QUIZ BOARD ==================== -->
+        <div id="quiz-screen" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex flex-col justify-center p-6 transition-all">
+            <div class="w-full bg-slate-900 border border-yellow-600/60 rounded-3xl p-5 text-center space-y-4 shadow-2xl relative">
+                <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center text-3xl border-2 border-white shadow-lg">
+                    📜
+                </div>
+
+                <div class="space-y-1.5 pt-6">
+                    <span class="text-[9px] bg-slate-800 text-yellow-400 px-2.5 py-1 rounded border border-slate-700 font-bold uppercase tracking-wider">บททดสอบพฤฒาจารย์</span>
+                    <div class="flex items-center justify-center gap-2">
+                        <h3 class="text-sm font-bold text-white title-font">ไขรหัสอักขราจารึกโบราณ</h3>
+                    </div>
+                    <p class="text-[9px] text-slate-400">จงเลือกคำวิเคราะห์เพื่อผนึกพลังชีวิตสัตว์ทิพย์</p>
+                </div>
+
+                <!-- Quiz Question Box -->
+                <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-left shadow-inner relative">
+                    <p id="quiz-question" class="text-xs text-slate-300 leading-relaxed font-semibold">คำถามเกี่ยวกับหลักไวยากรณ์และวรรณคดีไทยชั้นสูง...</p>
+                </div>
+                
+                <div id="quiz-hint-text" class="hidden text-[10px] text-yellow-400 bg-yellow-950/40 p-2 rounded-lg border border-yellow-600/30 font-medium text-left"></div>
+
+                <div class="flex justify-between items-center pr-1 text-xs">
+                    <button id="font-resizer-btn" onclick="toggleFontSize()" class="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-800 text-yellow-500 text-[9px] font-bold rounded-xl border border-yellow-600/40 transition flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> ขนาดอักษร: <span id="font-size-indicator">ปกติ</span>
+                    </button>
+                    <button id="quiz-hint-btn" onclick="useQuizHint()" class="px-2.5 py-1.5 bg-slate-950 hover:bg-slate-800 text-yellow-500 text-[9px] font-bold rounded-xl border border-yellow-600/40 transition flex items-center gap-1 shadow">
+                        <span>💡 คำใบ้ (จ่าย 30 🪙)</span>
+                    </button>
+                </div>
+
+                <!-- Options are shuffled completely dynamically with JS -->
+                <div id="quiz-options" class="grid grid-cols-1 gap-2"></div>
+                <div class="text-[9px] text-amber-500 italic">⚠️ หากเลือกคำวิเคราะห์ผิดพลาด พลังวิญญาณจะสลายและจะล่าอักษรล้มเหลว!</div>
+            </div>
+        </div>
+
+        <!-- ==================== SIAM PK ARENA (CHARACTER MANAGEMENT) ==================== -->
+        <div id="pk-screen" class="hidden absolute inset-0 z-40 bg-[#051417] flex flex-col justify-between overflow-hidden">
+            <div class="p-4 border-b border-yellow-600/40 bg-slate-950 flex justify-between items-center shadow">
+                <button onclick="switchTab('map')" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-yellow-500 text-[10px] font-bold rounded-lg border border-yellow-600/40 flex items-center gap-1 active:scale-95 transition">
+                    <i class="fa-solid fa-chevron-left"></i> กลับแผนที่หลัก
+                </button>
+                <h3 class="font-bold text-sm text-yellow-400 title-font tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-nodes text-yellow-500"></i> ลานประลองสยามยุทธ์ PK
+                </h3>
+                <span class="text-[9px] bg-amber-950 text-yellow-400 border border-yellow-500/50 px-2 py-0.5 rounded font-black">ARENA PRO</span>
+            </div>
+
+            <div class="flex border-b border-slate-800 bg-slate-950 text-xs text-center">
+                <button onclick="switchPKTab('characters')" id="tab-pk-chars" class="flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400">ทหารเอก & อัปเกรด</button>
+                <button onclick="switchPKTab('duels')" id="tab-pk-duels" class="flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400">บุกแย่งพิกัด & ดวล</button>
+            </div>
+
+            <!-- PK Scroll Content Container -->
+            <div class="flex-1 overflow-y-auto p-4 bg-[#092226] space-y-4">
+                <!-- Tab: Characters & Stats Upgrades -->
+                <div id="pk-tab-characters-content" class="space-y-4">
+                    <div class="thai-glass rounded-2xl p-3 text-xs space-y-1.5">
+                        <h4 class="font-bold text-yellow-400 flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> พลังจากกลุ่มพยัญชนะไตรยางศ์</h4>
+                        <p class="text-[10px] text-slate-300">สะสมพยัญชนะ สูง-กลาง-ต่ำ เพื่อรับบัฟสถานะ หรือสละการ์ดสะสมเพิ่มเลเวลการต่อสู้:</p>
+                        <div class="grid grid-cols-3 gap-2 pt-1 text-center text-[9px] font-bold">
+                            <div class="bg-red-950/40 border border-red-500/30 p-1.5 rounded-lg text-red-300">
+                                <p>อักษรสูง (+Atk)</p>
+                                <p id="stat-high-boost" class="text-xs text-white">Atk +0</p>
+                            </div>
+                            <div class="bg-yellow-950/40 border border-yellow-500/30 p-1.5 rounded-lg text-yellow-300">
+                                <p>อักษรกลาง (+HP/Def)</p>
+                                <p id="stat-mid-boost" class="text-xs text-white">HP +0 / Def +0</p>
+                            </div>
+                            <div class="bg-blue-950/40 border border-blue-500/30 p-1.5 rounded-lg text-blue-300">
+                                <p>อักษรต่ำ (+Speed)</p>
+                                <p id="stat-low-boost" class="text-xs text-white">Spd +0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Highlighted Active Combatant Tag -->
+                    <div class="bg-slate-950/80 p-3 rounded-xl border border-yellow-500/40 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">ทหารเอกคู่ใจที่ใช้งานปัจจุบัน:</span>
+                        <div id="selected-pk-fighter-hud" class="font-black text-yellow-400 flex items-center gap-1.5">
+                            <span>🐒 หนุมาน</span>
+                        </div>
+                    </div>
+
+                    <!-- Character Cards List -->
+                    <div id="pk-character-list" class="space-y-3"></div>
+                </div>
+
+                <!-- Tab: Duel Selection & Raids list -->
+                <div id="pk-tab-duels-content" class="hidden space-y-3">
+                    <div class="bg-red-950/20 border border-red-500/30 rounded-2xl p-3 text-[11px] text-red-300 leading-snug">
+                        ⚡ <strong>กติกาการปล้นชิงพดด้วง:</strong> คุณสามารถร่ายอาคมบุกปล้นคลังผู้พิทักษ์เพื่อแย่งชิงพดด้วงได้สูงสุด <strong>15%</strong> หากเป้าหมายปราศจากยันต์อารักขาวิหารป้องกันภัย!
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400">
+                            <p class="font-bold text-white flex items-center gap-1">🛡️ ยันต์ป้องกันปัจจุบันของคุณ:</p>
+                            <p id="active-ward-label" class="italic text-yellow-500">ไม่มีสิ่งคุ้มครองภัย</p>
+                        </div>
+                        <button onclick="toggleTreasury(true); switchTreasuryTab('items')" class="px-2.5 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-[10px] font-bold rounded-lg border border-yellow-200 transition">
+                            <i class="fa-solid fa-shop"></i> ซื้อคาถาคุ้มภัย
+                        </button>
+                    </div>
+
+                    <h4 class="font-bold text-xs text-yellow-400 pt-1 flex items-center gap-1.5"><i class="fa-solid fa-arrows-down-to-people"></i> ตรวจพบวิหารปราชญ์คนอื่นในอาณาเขตสยาม</h4>
+                    <div id="pk-duel-opponent-list" class="space-y-2"></div>
+                </div>
+            </div>
+            
+            <div class="p-3 bg-slate-950 border-t border-slate-800 text-center text-[10px] text-slate-400">
+                สู้ประลองวรรณศิลป์อย่างซื่อสัตย์สุจริต
+            </div>
+        </div>
+
+        <!-- ==================== ACTIVE turn-based PK BATTLEGROUND OVERLAY ==================== -->
+        <div id="pk-battleground-screen" class="hidden absolute inset-0 z-50 bg-[#030d0f] flex flex-col justify-between p-4">
+            <div class="text-center space-y-1">
+                <span id="battle-turn-indicator" class="px-4 py-1 bg-yellow-500 text-slate-950 text-xs font-bold rounded-full border border-white/20 animate-pulse">รอบของผู้เล่น</span>
+                <p class="text-[10px] text-slate-400">ศึกประลองประจัญบานวัดไตรยางศ์วิทยา</p>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-around my-2 relative">
+                <!-- Opponent Avatar & HP -->
+                <div class="flex items-center justify-end space-x-3 bg-red-950/30 border border-red-500/20 p-2.5 rounded-2xl max-w-[280px] self-end relative z-10">
+                    <div class="text-right">
+                        <h4 id="battle-opp-name" class="font-bold text-xs text-white">ผู้คุ้มกันวิหาร</h4>
+                        <div class="w-24 bg-slate-800 h-2 rounded-full overflow-hidden mt-1 border border-slate-700">
+                            <div id="battle-opp-hp-bar" class="bg-red-500 h-full w-full transition-all duration-300"></div>
+                        </div>
+                        <p id="battle-opp-hp-text" class="text-[9px] text-slate-400 mt-0.5 font-bold">HP 100/100</p>
+                    </div>
+                    <div id="battle-opp-avatar" class="w-12 h-12 rounded-xl bg-slate-950 border-2 border-red-500 flex items-center justify-center text-3xl font-bold">👹</div>
+                </div>
+
+                <!-- Splendid Combat Log overlay inside combat -->
+                <div class="w-full bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-center min-h-[55px] flex items-center justify-center">
+                    <p id="battle-combat-log" class="text-[11px] text-yellow-400 font-semibold leading-relaxed">เตรียมร่ายทักษะและการจู่โจมหลักของทหารเอกพิทักษ์เวท!</p>
+                </div>
+
+                <!-- Player Avatar & HP -->
+                <div class="flex items-center space-x-3 bg-emerald-950/30 border border-emerald-500/20 p-2.5 rounded-2xl max-w-[280px] self-start relative z-10">
+                    <div id="battle-self-avatar" class="w-12 h-12 rounded-xl bg-slate-950 border-2 border-emerald-500 flex items-center justify-center text-3xl font-bold">🐒</div>
+                    <div class="text-left">
+                        <h4 id="battle-self-name" class="font-bold text-xs text-white">หนุมาน</h4>
+                        <div class="w-24 bg-slate-800 h-2 rounded-full overflow-hidden mt-1 border border-slate-700">
+                            <div id="battle-self-hp-bar" class="bg-emerald-500 h-full w-full transition-all duration-300"></div>
+                        </div>
+                        <p id="battle-self-hp-text" class="text-[9px] text-slate-400 mt-0.5 font-bold">HP 120/120</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combat Action Controls Menu -->
+            <div class="bg-slate-950 border border-yellow-600/30 p-3.5 rounded-2xl space-y-3">
+                <div class="flex justify-between items-center text-[10px] text-slate-400">
+                    <span>⚔️ ร่ายทักษะและการโจมตีหลัก</span>
+                    <span id="battle-self-mana" class="font-bold text-cyan-400">ปราณเวท: 100 / 100</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-combat-atk" onclick="executeCombatAction('attack')" class="py-2.5 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-extrabold text-[11px] rounded-xl shadow border border-yellow-300 active:scale-95 transition">
+                        🗡️ โจมตีกายภาพ
+                    </button>
+                    <button id="btn-combat-skill" onclick="executeCombatAction('skill')" class="py-2.5 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-white font-extrabold text-[11px] rounded-xl shadow border border-cyan-400 active:scale-95 transition">
+                        ✨ ร่ายคาถาไม้ตาย
+                    </button>
+                    <button id="btn-combat-def" onclick="executeCombatAction('defend')" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] rounded-xl border border-slate-700 active:scale-95 transition">
+                        🛡️ ตั้งการ์ดฟื้นฟู
+                    </button>
+                    <button id="btn-combat-flee" onclick="forfeitCombat()" class="py-2.5 bg-red-950 hover:bg-red-900 text-red-300 font-bold text-[11px] rounded-xl border border-red-500/30 active:scale-95 transition">
+                        🏳️ ยอมถอนทัพ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ARSENAL / TREASURY ==================== -->
+        <div id="treasury-screen" class="hidden absolute inset-0 z-40 bg-[#051417] flex flex-col justify-between overflow-hidden">
+            <div class="p-4 border-b border-yellow-600/40 bg-slate-950 flex justify-between items-center">
+                <button onclick="toggleTreasury(false)" class="w-8 h-8 rounded-full bg-slate-900 text-yellow-400 border border-slate-800 flex items-center justify-center hover:bg-slate-800 active:scale-90 transition">
+                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                </button>
+                <h3 class="font-bold text-sm text-yellow-400 title-font tracking-wide"><i class="fa-solid fa-vault mr-1"></i> คลังของวิเศษ & จารึกสัจธรรม</h3>
+                <div class="w-8"></div>
+            </div>
+
+            <!-- Shop HUD Balance Sheet -->
+            <div class="px-4 py-2.5 bg-slate-950 border-b border-yellow-600/30 flex justify-between items-center text-xs">
+                <span class="text-yellow-400 font-bold flex items-center gap-1.5">
+                    🪙 เงินพดด้วงสะสม: <strong id="treasury-gold-hud" class="text-white">0</strong> พดด้วง
+                </span>
+                <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-scroll"></i> สัตว์ทิพย์สะสม: <strong id="treasury-runes-hud" class="text-white">0 ใบ</strong>
+                </span>
+            </div>
+
+            <div class="flex border-b border-slate-800 bg-slate-950 text-xs text-center">
+                <button onclick="switchTreasuryTab('runes')" id="tab-sub-runes" class="flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400">จารึกอักขรธาตุทั้ง ๔๔</button>
+                <button onclick="switchTreasuryTab('items')" id="tab-sub-items" class="flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400">เทวภัณฑ์ & คาถาคุ้มภัย</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 bg-[#092226] space-y-4">
+                <!-- RUNES GRID -->
+                <div id="treasury-runes-grid" class="grid grid-cols-2 gap-3"></div>
+                <!-- ITEMS LIST -->
+                <div id="treasury-items-list" class="hidden space-y-3"></div>
+            </div>
+
+            <div class="p-3 bg-slate-950 border-t border-slate-800 text-center">
+                <p id="player-cloud-status" class="text-[8px] text-yellow-400">สิทธิ์ผู้ใช้: บันทึกเฉพาะเครื่อง</p>
+            </div>
+        </div>
+
+        <!-- ==================== DAILY CHECK-IN MODAL ==================== -->
+        <div id="checkin-modal" class="hidden absolute inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <div class="w-full max-w-xs bg-[#092226] border-2 border-yellow-500 p-6 rounded-3xl text-center space-y-4 shadow-2xl relative gold-border-antique">
+                <button onclick="closeCheckInModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-circle-xmark text-lg text-yellow-500"></i>
+                </button>
+                <div class="w-16 h-16 bg-yellow-950 rounded-full flex items-center justify-center text-3xl border border-yellow-400 mx-auto mt-2 rune-glow">📅</div>
+                <div class="space-y-1">
+                    <h3 class="text-sm font-bold text-white title-font">สัตยาธิษฐานเช็คอินรายวัน</h3>
+                    <p id="checkin-event-period" class="text-[9px] text-yellow-400 italic">รับสิทธิ์รับบรรณาการพดด้วงทุกวัน</p>
+                </div>
+                <div class="bg-slate-950/80 p-3.5 rounded-xl border border-yellow-600/30 text-left space-y-2">
+                    <p class="text-[10px] text-slate-400 border-b border-slate-800 pb-1.5 font-bold">🎁 พรประจำวันนี้:</p>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-yellow-400 font-bold">🪙 <span id="reward-gold-text">50</span> พดด้วงโบราณ</span>
+                        <span class="text-emerald-400 font-bold">⚡ <span id="reward-xp-text">100</span> EXP</span>
+                    </div>
+                </div>
+                <div id="checkin-action-area" class="pt-2"></div>
+            </div>
+        </div>
+
+        <!-- ==================== SECRET ADMIN PANEL ==================== -->
+        <div id="admin-panel-modal" class="hidden absolute inset-0 bg-slate-950/95 z-50 flex flex-col justify-between p-6 overflow-y-auto">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="font-bold text-sm text-yellow-400 title-font flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-gear"></i> แผงควบคุมผู้ดูแลอัครวิหาร
+                    </h3>
+                    <button onclick="closeAdminPanel()" class="text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+                
+                <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5">⚙️ ปรับคุณสมบัติเช็คอินสากล</h4>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">เงินพดด้วงต่อการเช็คอิน</label>
+                        <input id="admin-reward-gold" type="number" value="50" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white" />
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">ค่าประสบการณ์ (EXP)</label>
+                        <input id="admin-reward-xp" type="number" value="100" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white" />
+                    </div>
+                </div>
+
+                <!-- Admins Edit Knowledge Base (Quizzes) -->
+                <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5 flex justify-between items-center">
+                        <span>📝 ปรับแต่งคลังปัญญา (ควิซทดสอบ)</span>
+                        <button onclick="openAddNewQuizForm()" class="bg-emerald-800 text-white text-[9px] px-2 py-1 rounded hover:bg-emerald-700 transition">
+                            <i class="fa-solid fa-plus mr-0.5"></i> เพิ่มควิซใหม่
+                        </button>
+                    </h4>
+                    <div class="max-h-48 overflow-y-auto space-y-2 pr-1" id="admin-quizzes-list-container"></div>
+                    
+                    <!-- Quiz editor drawer sub-form -->
+                    <div id="quiz-editor-subform" class="hidden p-3 bg-slate-950 rounded-xl border border-yellow-600/40 space-y-2 text-xs">
+                        <div class="font-bold text-yellow-400 flex justify-between">
+                            <span id="editor-action-title">แก้ไขควิซ</span>
+                            <button onclick="closeQuizEditorSubform()" class="text-red-400">ปิด</button>
+                        </div>
+                        <input type="hidden" id="edit-quiz-index" />
+                        <div>
+                            <label class="block text-[9px] text-slate-400 mb-0.5">คำถามวรรณคดี/อักษรวิธี</label>
+                            <textarea id="edit-quiz-question" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[11px] text-white focus:outline-none"></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <div>
+                                <label class="block text-[8px] text-slate-400">ตัวเลือกที่ 1</label>
+                                <input id="edit-quiz-opt0" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[10px] text-white focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-[8px] text-slate-400">ตัวเลือกที่ 2</label>
+                                <input id="edit-quiz-opt1" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[10px] text-white focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-[8px] text-slate-400">ตัวเลือกที่ 3</label>
+                                <input id="edit-quiz-opt2" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[10px] text-white focus:outline-none" />
+                            </div>
+                            <div>
+                                <label class="block text-[8px] text-slate-400">ตัวเลือกที่ 4</label>
+                                <input id="edit-quiz-opt3" type="text" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[10px] text-white focus:outline-none" />
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center gap-2 pt-1">
+                            <div class="flex-1">
+                                <label class="block text-[9px] text-slate-400 mb-0.5">ข้อที่ถูกต้อง (0-3)</label>
+                                <select id="edit-quiz-correct" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-[10px] text-white focus:outline-none">
+                                    <option value="0">ตัวเลือกที่ 1</option>
+                                    <option value="1">ตัวเลือกที่ 2</option>
+                                    <option value="2">ตัวเลือกที่ 3</option>
+                                    <option value="3">ตัวเลือกที่ 4</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end h-full pt-4">
+                                <button onclick="saveQuizChanges()" class="bg-yellow-500 text-slate-950 font-bold px-4 py-1.5 rounded text-[10px] hover:bg-yellow-400">
+                                    💾 บันทึกสัจธรรมนี้
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
+                        <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie text-yellow-500"></i> สถิติการสอบและตอบคำถาม
+                        </h4>
+                        <button onclick="fetchAndRenderPlayerStats()" class="text-[9px] bg-slate-950 text-yellow-500 px-2 py-1 rounded border border-yellow-600/30 hover:bg-yellow-500 hover:text-slate-950 active:scale-95 transition">
+                            <i class="fa-solid fa-arrows-rotate mr-0.5"></i> ดึงสถิติล่าสุด
+                        </button>
+                    </div>
+                    <div>
+                        <input id="admin-stats-search" type="text" oninput="filterAdminStatsTable()" placeholder="🔍 ค้นหาผู้พิทักษ์ด้วยชื่อ..." class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-[10px] text-white focus:outline-none focus:border-yellow-500" />
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-[9px] text-slate-300">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-yellow-500 font-bold">
+                                    <th class="py-1 pr-1.5">ผู้พิทักษ์</th>
+                                    <th class="py-1 px-1.5 text-center">เลเวล</th>
+                                    <th class="py-1 px-1.5 text-center">ตอบคำถาม</th>
+                                    <th class="py-1 px-1.5 text-center">ถูก / ผิด</th>
+                                    <th class="py-1 pl-1.5 text-right">เปอร์เซ็นต์</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-stats-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="saveAdminConfigFromPanel()" class="w-full py-3 bg-[#ca8a04] hover:bg-[#facc15] text-slate-950 font-bold text-xs rounded-xl shadow-lg transition mt-4">
+                💾 บันทึกประกาศสัจธรรมความปลอดภัย
+            </button>
+        </div>
+
+        <!-- ==================== FOOTER NAV TAB ==================== -->
+        <footer id="main-footer" class="hidden h-14 bg-slate-950 border-t border-slate-800 flex justify-around items-center px-2 relative z-30 shadow-md">
+            <button onclick="switchTab('map')" id="tab-map" class="flex flex-col items-center justify-center flex-1 text-yellow-500 transition-colors">
+                <span class="text-lg"><i class="fa-solid fa-map-location-dot"></i></span>
+                <span class="text-[9px] font-semibold mt-0.5">แผนที่มนตรา</span>
+            </button>
+            <button onclick="switchTab('pk')" id="tab-pk" class="flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors">
+                <span class="text-lg"><i class="fa-solid fa-chess-rook"></i></span>
+                <span class="text-[9px] font-semibold mt-0.5">สยามยุทธ์ PK</span>
+            </button>
+            <button onclick="switchTab('dex')" id="tab-dex" class="flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors">
+                <span class="text-lg"><i class="fa-solid fa-scroll"></i></span>
+                <span class="text-[9px] font-semibold mt-0.5">คลังอักขรา</span>
+            </button>
+            <button onclick="showKnowledgeBase()" class="flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors">
+                <span class="text-lg"><i class="fa-solid fa-book-bookmark"></i></span>
+                <span class="text-[9px] font-semibold mt-0.5">หอสมุดหลวง</span>
+            </button>
+        </footer>
+
+        <!-- Custom Standard Alert Dialog -->
+        <div id="custom-alert" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-2xl text-center space-y-3 max-w-xs shadow-2xl relative">
+                <div id="alert-icon" class="text-4xl mb-1 text-yellow-500">📜</div>
+                <h4 id="alert-title" class="text-sm font-bold text-white title-font">ประกาศราชการอักษร</h4>
+                <p id="alert-message" class="text-[11px] text-slate-300 leading-relaxed break-words">รายละเอียดประกาศสำคัญ...</p>
+                <button onclick="closeAlert()" class="w-full py-2 bg-gradient-to-r from-slate-800 to-slate-950 border border-yellow-600/40 text-yellow-500 font-bold text-xs rounded-lg shadow transition-all">
+                    น้อมรับบัญชาธรรม
+                </button>
+            </div>
+        </div>
+
+        <!-- Trivia / Knowledge Modal (หอสมุดหลวง) -->
+        <div id="trivia-modal" class="hidden absolute inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <div class="bg-slate-900 border border-yellow-600/40 p-5 rounded-2xl space-y-3 max-w-xs shadow-2xl max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h4 class="font-bold text-yellow-400 text-xs title-font"><i class="fa-solid fa-graduation-cap"></i> คลังวิทยาการหอสมุดหลวง</h4>
+                    <button onclick="closeTrivia()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-circle-xmark"></i></button>
+                </div>
+                <!-- Populated dynamically with explanations of all questions -->
+                <div id="library-trivia-list" class="space-y-3 text-[11px] text-slate-300 leading-relaxed"></div>
+                <button onclick="closeTrivia()" class="w-full py-2 bg-yellow-500 text-slate-950 font-bold text-xs rounded-lg active:scale-95 transition">
+                    น้อมรับสาระปัญญา
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== CHARACTER SHOWCASE MODAL (SEMI-3D CARD VIEW) ==================== -->
+        <div id="character-showcase-modal" class="hidden absolute inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col justify-between p-6 overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-sm text-yellow-400 title-font flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> ภาพพินิจรูปลักษณ์ภูตขุนพล (3D Card)
+                </h3>
+                <button onclick="closeCharacterShowcase()" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Interative Card with perspective and gyroscope/mouse dynamic 3D response -->
+            <div class="my-6 flex-1 flex flex-col justify-center items-center">
+                <div class="showcase-container w-64 h-96 relative cursor-pointer" id="3d-card-touchzone">
+                    <div id="hologram-3d-card" class="showcase-card w-full h-full bg-[#071b1f] border-2 border-yellow-500 rounded-3xl p-4 flex flex-col justify-between shadow-[0_0_35px_rgba(234,179,8,0.3)] relative preserve-3d">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none rounded-3xl" style="transform: translateZ(10px);"></div>
+                        
+                        <!-- Traditional Frame Corners -->
+                        <div class="absolute top-2 left-2 text-yellow-500/60 font-black text-xs" style="transform: translateZ(15px);">⚜️</div>
+                        <div class="absolute top-2 right-2 text-yellow-500/60 font-black text-xs" style="transform: translateZ(15px);">⚜️</div>
+                        <div class="absolute bottom-2 left-2 text-yellow-500/60 font-black text-xs" style="transform: translateZ(15px);">⚜️</div>
+                        <div class="absolute bottom-2 right-2 text-yellow-500/60 font-black text-xs" style="transform: translateZ(15px);">⚜️</div>
+
+                        <div class="flex justify-between items-center" style="transform: translateZ(20px);">
+                            <span class="text-[9px] font-bold tracking-widest text-yellow-400/80 bg-slate-900 px-2.5 py-0.5 rounded-full border border-yellow-500/30">SIAM LEGEND</span>
+                            <button onclick="regenerateShowcaseImage()" class="text-[9px] font-extrabold text-cyan-400 bg-slate-950 hover:bg-slate-900 px-2.5 py-1 rounded-full border border-cyan-500/30 flex items-center gap-1 active:scale-95 transition-all">
+                                <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> ร่ายรูปใหม่
+                            </button>
+                            <span id="showcase-fighter-rank" class="text-[9px] font-extrabold text-red-400">LV.1</span>
+                        </div>
+
+                        <!-- Central Detailed Illustration Frame (Semi-3D layered look) -->
+                        <div class="flex-1 flex items-center justify-center relative preserve-3d py-4">
+                            <div class="absolute w-36 h-36 bg-gradient-to-b from-[#ca8a04]/25 to-transparent rounded-full filter blur-md animate-pulse" style="transform: translateZ(-10px);"></div>
+                            <div class="absolute w-32 h-32 border border-yellow-500/20 rounded-full animate-spin" style="animation-duration: 20s; transform: translateZ(-5px);"></div>
+                            
+                            <div class="absolute w-44 h-44 rounded-2xl overflow-hidden border-2 border-yellow-500/40 bg-slate-950/80 flex items-center justify-center shadow-lg" style="transform: translateZ(30px);">
+                                <div id="showcase-image-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/95 z-20 transition-opacity duration-300">
+                                    <div class="w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
+                                    <span class="text-[8px] text-yellow-500 mt-2 font-bold animate-pulse text-center px-2">🪄 กำลังจำลองภาพวาดวิเศษ...</span>
+                                </div>
+                                <img id="showcase-image" src="" alt="Fighter Portrait" class="w-full h-full object-cover hidden transition-all duration-500" />
+                                <span id="showcase-avatar" class="text-6xl filter drop-shadow(0 15px 12px rgba(0,0,0,0.65)) select-none animate-bounce hidden" style="animation-duration: 3s">🐒</span>
+                            </div>
+                        </div>
+
+                        <div class="text-center space-y-1" style="transform: translateZ(25px);">
+                            <h4 id="showcase-name" class="font-extrabold text-base text-yellow-400 title-font">หนุมาน (Hanuman)</h4>
+                            <p id="showcase-type" class="text-[9px] text-slate-300 tracking-wide font-semibold">อักษรกลาง (ไตรยางศ์สยาม)</p>
+                            
+                            <div class="grid grid-cols-3 gap-1.5 pt-2 text-[8px] font-bold text-slate-300">
+                                <div class="bg-slate-950/90 py-1.5 rounded-xl border border-slate-800">
+                                    <p class="text-[7px] text-slate-500">พลังโจมตี</p>
+                                    <p id="showcase-stat-atk" class="text-white text-xs">Atk 18</p>
+                                </div>
+                                <div class="bg-slate-950/90 py-1.5 rounded-xl border border-slate-800">
+                                    <p class="text-[7px] text-slate-500">พลังชีวิต</p>
+                                    <p id="showcase-stat-hp" class="text-white text-xs">HP 120</p>
+                                </div>
+                                <div class="bg-slate-950/90 py-1.5 rounded-xl border border-slate-800">
+                                    <p class="text-[7px] text-slate-500">ความเร็ว</p>
+                                    <p id="showcase-stat-spd" class="text-white text-xs">Spd 15</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <p class="text-[9px] text-slate-400 text-center mt-2">💡 จิ้มแล้วลาก หรือ ขยับหน้าจอเพื่อเอียงการ์ดสัมผัสรูปลักษณ์มิติ!</p>
+            </div>
+
+            <div class="bg-[#092226] border border-yellow-600/30 p-3.5 rounded-2xl text-xs space-y-1">
+                <p class="font-bold text-yellow-400 flex items-center gap-1">📜 ตรรกะจารึกและคาถาเวทไม้ตาย:</p>
+                <p id="showcase-description" class="text-[10px] text-slate-300 leading-relaxed">คำอธิบายประวัติขุนพลเด็ดในการต่อสู้วรรณคดีไทย...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== FIREBASE CONFIG INTEGRATION MODULES ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.firebaseSystem = {
+            db: null,
+            auth: null,
+            appId: null,
+            isConnected: false,
+            signInAnonymously: signInAnonymously,
+            signInWithPopup: signInWithPopup,
+            FacebookAuthProvider: FacebookAuthProvider,
+            doc: doc,
+            getDoc: getDoc,
+            setDoc: setDoc,
+            collection: collection,
+            getDocs: getDocs
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'thai-go-runes-prod-2026';
+        window.firebaseSystem.appId = appId;
+
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                const auth = getAuth(app);
+
+                window.firebaseSystem.db = db;
+                window.firebaseSystem.auth = auth;
+                window.firebaseSystem.isConnected = true;
+                console.log("Firebase system initialized safely.");
+            } catch (err) {
+                console.error("Firebase Setup skipped, using local browser fallback structures.");
+            }
+        }
+    </script>
+
+    <!-- ==================== MAIN GAME RUNTIME SCRIPTS ==================== -->
+    <script>
+        const runesDb = [
+            { id: 1, name: 'ก (กิเลนปักษ์วารี)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ใกล้หุบเขาอักขรมนตรา', phrase: 'กอ ไก่ ผู้ตื่นรุ่งแจ้งเบิกทัศนา', rewardGold: 30, rewardXp: 50, avatar: '🦅' },
+            { id: 2, name: 'ข (ศิขรราชสีห์ผู้เกรียงไกร)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ในหุบเขาอักขรมนตรา', phrase: 'ขอ ไข่ สัญลักษณ์ความพากเพียรตื่นรู้', rewardGold: 30, rewardXp: 50, avatar: '🦁' },
+            { id: 3, name: 'ฃ (ฃวดแก้วพิรอดมนต์)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ขอบทับหลักจารึกโบราณ', phrase: 'ฃอ ขวด บรรจุอัมฤตสติมงคล', rewardGold: 80, rewardXp: 100, avatar: '🧪' },
+            { id: 4, name: 'ค (คชสีห์เทวาภิรักษ์)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ทุ่งหญ้าหน้ารามลัญจกร', phrase: 'คอ ควาย ยอดมงคลกำลังเพียรทำนา', rewardGold: 30, rewardXp: 50, avatar: '🐘' },
+            { id: 5, name: 'ฅ (ฅนเดินสองตีนป่ายปีนอุปสรรค)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ทางทิศใต้ของหอสมุดหลวง', phrase: 'ฅอ คน ยอดนักคิดผู้สลักอารยธรรมไว้บนผืนโลก', rewardGold: 95, rewardXp: 120, avatar: '🧑‍🔧' },
+            { id: 6, name: 'ฆ (ฆ้องสุวรรณสยบมาร)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'หอระฆังทองคำโบราณ', phrase: 'ฆอ ระฆัง ส่งคลื่นขจัดปัดมลทิน', rewardGold: 70, rewardXp: 90, avatar: '🔔' },
+            { id: 7, name: 'ง (งูอนันตนาคราชเวท)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'แอ่งน้ำมรกตชั้นนอก', phrase: 'งอ งู คล่องแคล่วรวดเร็วดังอัคคี', rewardGold: 30, rewardXp: 50, avatar: '🐍' },
+            { id: 8, name: 'จ (จิ้งจอกหิมพานต์เนตรแก้ว)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ท่าน้ำโบราณข้างมหานที', phrase: 'จอ จาน บรรจุตำราพจนานุกรมทอง', rewardGold: 30, rewardXp: 50, avatar: '🦊' },
+            { id: 9, name: 'ฉ (ฉลามวารีอสุราดุร้าย)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ขอบเหวสายฟ้าฟาด', phrase: 'ฉอ ฉิ่ง บรรเลงเพลงพ่ายของอริพาล', rewardGold: 30, rewardXp: 50, avatar: '🦈' },
+            { id: 10, name: 'ช (ช้างเอราวัณสามเศียร)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ป่ารกใกล้หอไตร', phrase: 'ชอ ช้าง ยอดคชาขุนศึกคู่บ้านเมือง', rewardGold: 30, rewardXp: 50, avatar: '🐘' },
+            { id: 11, name: 'ซ (ซอโซ่เวทตรึงวิญญาณ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ค่ายคลังเก็บเงินพดด้วง', phrase: 'ซอ โซ่ พันธนาการสัจจะมั่นคง', rewardGold: 30, rewardXp: 50, avatar: '🎻' },
+            { id: 12, name: 'ฌ (เฌอพฤกษารัศมีธรรม)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ใจกลางสวนพฤกษเวทหลวง', phrase: 'ฌอ เฌอ สวนป่าอารักษ์ร่มเย็นสัตยา', rewardGold: 90, rewardXp: 110, avatar: '🌳' },
+            { id: 13, name: 'ญ (ญานีเทวีพิทักษ์ไพร)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'หอกลางชุมชนอักษรา', phrase: 'ญอ หญิง ยอดกุลสตรีศรีชาติสยาม', rewardGold: 60, rewardXp: 80, avatar: '👩' },
+            { id: 14, name: 'ฎ (ชฎากษัตราธิราช)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ยอดหอพระพุทธสัจธรรม', phrase: 'ฎอ ชฎา ยอดสวมเศียรแห่งกษัตรี', rewardGold: 80, rewardXp: 100, avatar: '👑' },
+            { id: 15, name: 'ฏ (ปฏักวชิรสายฟ้าปราบอริ)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลานประลองฝึกยุทธ์สยาม', phrase: 'ฏอ ปฏัก หอกทะลวงความเขลา', rewardGold: 80, rewardXp: 100, avatar: '🔱' },
+            { id: 16, name: 'ฐ (ฐานบัทม์สลักศิลาเทพ)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ฐานอุโบสถเก่าแก่อัฐิราก', phrase: 'ฐอ ฐาน มั่นคงแข็งแกร่งดุจขุนเขาสวรรค์', rewardGold: 70, rewardXp: 90, avatar: '🧱' },
+            { id: 17, name: 'ฑ (โฉมงามนามมณโฑ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ใจกลางน่านน้ำสวรรค์', phrase: 'ฑอ มณโฑ นางผู้กอปรด้วยคุณธรรมอันเลิศ', rewardGold: 110, rewardXp: 150, avatar: '🧜‍♀️' },
+            { id: 18, name: 'ฒ (ผู้เฒ่าพฤฒาจารย์เวท)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ลานสนธยาเทวานิรนาม', phrase: 'ฒอ ผู้เฒ่า เชื่องช้าแต่มั่นคงด้วยปัญญา', rewardGold: 55, rewardXp: 75, avatar: '👴' },
+            { id: 19, name: 'ณ (เณรรัตนปัญญาสมาธิ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'อารามไตรยางศ์ทิศใต้', phrase: 'ณอ เณร ใฝ่ศีลเพียรศึกษา', rewardGold: 50, rewardXp: 70, avatar: '🧘‍♂️' },
+            { id: 20, name: 'ด (ดรุณกิเลนเกล็ดเพชร)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'แถวชุมชนหน้าลานประลอง', phrase: 'ดอ เด็ก ใฝ่เรียนเกื้อกูลคุณธรรม', rewardGold: 30, rewardXp: 50, avatar: '✨' },
+            { id: 21, name: 'ต (เต่ามังกรคงคามหากาล)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ริมแม่น้ำสะพานมังกรเทวะ', phrase: 'ตอ เต่า รากแห่งความรู้อันยาวนาน', rewardGold: 30, rewardXp: 50, avatar: '🐢' },
+            { id: 22, name: 'ถ (ถุงทรัพย์มหาศาลมงคล)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'อาคารกองกษาปณ์โบราณ', phrase: 'ถอ ถุง เก็บพดด้วงสะสมทองพรั่งพรู', rewardGold: 30, rewardXp: 50, avatar: '💼' },
+            { id: 23, name: 'ท (ทหารยักษ์พิทักษ์ป้อมปราการ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ป้อมค่ายอารักขาวิมุติ', phrase: 'ทอ ทหาร ยอดแกร่งปกป้องภัยพาล', rewardGold: 30, rewardXp: 50, avatar: '🛡️' },
+            { id: 24, name: 'ธ (ธงชัยเฉลิมยศปฐพี)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'หน้าลานยอดสูงสุดปราสาท', phrase: 'ธอ ธง ชูเกียรติเอกราชแห่งชาติเรา', rewardGold: 30, rewardXp: 50, avatar: '🚩' },
+            { id: 25, name: 'น (หนูทองคลังมณี)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ซอกศิลาใต้เหมืองพดด้วง', phrase: 'นอ หนู ปราดเปรียวแทรกซอนเข้าขุมทรัพย์', rewardGold: 30, rewardXp: 50, avatar: '🐭' },
+            { id: 26, name: 'บ (ใบโพธิ์รัตนบารมี)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลานพระศรีมหาโพธิ์จำลอง', phrase: 'บอ ใบไม้ อารักขาหัวใจให้ร่มรื่น', rewardGold: 30, rewardXp: 50, avatar: '🍃' },
+            { id: 27, name: 'ป (ปลามัจฉานุบุตรวานร)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'หนองน้ำอุทยานสวรรค์', phrase: 'ปอ ปลา แหวกว่ายธารน้ำแห่งสัจธรรม', rewardGold: 30, rewardXp: 50, avatar: '🐟' },
+            { id: 28, name: 'ผ (ผึ้งเวทภมรเกสรทิพย์)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'สวนสมุนไพรทิพย์', phrase: 'ผอ ผึ้ง ขยันขันแข็งสร้างสติและปัญญา', rewardGold: 30, rewardXp: 50, avatar: '🐝' },
+            { id: 29, name: 'ฝ (ฝาสลักลายอาคมอารักขา)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'หอหนังสือพระราชจารึก', phrase: 'ฝอ ฝา มิดชิดอารักขาสิ่งวิเศษล้ำค่า', rewardGold: 45, rewardXp: 65, avatar: '🏺' },
+            { id: 30, name: 'พ (พานแก้วพุ่มทองสักการะ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ห้องพิธีการหลวงโบราณ', phrase: 'พอ พาน เชิดชูปราชญ์ภาษาไทย', rewardGold: 30, rewardXp: 50, avatar: '🌸' },
+            { id: 31, name: 'ฟ (ฟีนิกซ์หิมพานต์สลัดปีกเพลิง)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดผาหัวสิงโตทิศตะวันตก', phrase: 'ฟอ ฟัน แกร่งกล้าเคี้ยวมลายสลายมนต์ดำ', rewardGold: 45, rewardXp: 65, avatar: '🦅' },
+            { id: 32, name: 'ภ (ภมรวรารักษ์ป่าหิม)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ท่าน้ำขนส่งค้าขายประวัติศาสตร์', phrase: 'ภอ สำเภา ล่องนำทองพดด้วงพรั่งพรูขึ้นบก', rewardGold: 40, rewardXp: 60, avatar: '🪲' },
+            { id: 33, name: 'ม (ม้านิลมังกรเขาเพชร)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ค่ายควบฝึกหัดอาชาหลวง', phrase: 'มอ ม้า ยอดพาหนะศึกกวัดแกว่งเร็วไว', rewardGold: 30, rewardXp: 50, avatar: '🦄' },
+            { id: 34, name: 'ย (ยักษ์ทวารบาลพิทักษ์วิหาร)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ลานเฝ้าทวารโบราณวิหาร', phrase: 'ยอ ยักษ์ มีฤทธิ์แกล้วกล้าปราบไพรีพาล', rewardGold: 30, rewardXp: 50, avatar: '👹' },
+            { id: 35, name: 'ร (เรือรบสุพรรณหงส์นำชัย)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'แม่น้ำเจ้าพระยาชั้นนอกสุด', phrase: 'รอ เรือ นำชัยเหนืออุปสรรคทั้งหลาย', rewardGold: 30, rewardXp: 50, avatar: '🚢' },
+            { id: 36, name: 'ล (ลิงวานรวายุพัดแกว่ง)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'สวนป่าไผ่ข้างผากำเนิด', phrase: 'ลอ ลิง ซุกซนปราดเปรียวหลบลี้หนีเป็นเลิศ', rewardGold: 30, rewardXp: 50, avatar: '🐒' },
+            { id: 37, name: 'ว (วานรพาลีพิพัตนเดช)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'คลังสะสมแหวนเทวะอักษร', phrase: 'วอ แหวน สวมใส่ค้ำชูวาสนาบารมีสูง', rewardGold: 30, rewardXp: 50, avatar: '🐵' },
+            { id: 38, name: 'ศ (ศาลาจตุรมุขรัตนวิจิต)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ป่ามหามนตราฝั่งขวา', phrase: 'ศอ ศาลา พักกายพักสมองบำรุงจิตใจ', rewardGold: 30, rewardXp: 50, avatar: '🎪' },
+            { id: 39, name: 'ษ (ฤาษีโยคีบำเพ็ญฌานสมาบัติ)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ถ้ำแร่สัจมนตราโบราณ', phrase: 'ษอ ฤๅษี ผู้ปฏิบัติธรรมเพ่งกสิณลึกล้ำ', rewardGold: 75, rewardXp: 100, avatar: '🧙‍♂️' },
+            { id: 40, name: 'ส (สิงหไกรสรคำรณเดโช)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'เขตคุ้มภัยพิทักษ์ไพร', phrase: 'สอ เสือ ยอดจ้าวป่าทระนงสะกดขวัญดุร้าย', rewardGold: 30, rewardXp: 50, avatar: '🦁' },
+            { id: 41, name: 'ห (หงส์สลักดาริกาทองคำพราย)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ห้องลับใต้ดินยอดปราสาทไตร', phrase: 'หอ หีบ บรรจุมรดกพิจิตรแห่งชาติภาษา', rewardGold: 30, rewardXp: 50, avatar: '🦢' },
+            { id: 42, name: 'ฬ (ว่าวจุฬาเหินฟ้าปราบพายุ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดผามหามนตรีเหนือน่านน้ำ', phrase: 'ฬอ จุฬา ลอยโดดเด่นสถิตฟ้าเหนือแคว้น', rewardGold: 75, rewardXp: 110, avatar: '🪁' },
+            { id: 43, name: 'อ (อ่างแก้วนพเก้าสรงมนตรา)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลำธารหลังวัดหลวงด้านเหนือ', phrase: 'ออ อ่าง บรรจุน้ำศักดิ์สิทธิ์สรงความรู้', rewardGold: 30, rewardXp: 50, avatar: '🏺' },
+            { id: 44, name: 'ฮ (นกเค้าโมงส่องเนตรราตรี)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดไพรสนธยาทะมึนทิศใต้', phrase: 'ฮอ นกฮูก ส่องราตรีคุ้มกันจารึกแผ่นดินสยาม', rewardGold: 150, rewardXp: 200, avatar: '🦉' }
+        ];
+
+        const s_characters = [
+            { 
+                id: 'hanuman', 
+                name: 'หนุมาน (Hanuman)', 
+                avatar: '🐒', 
+                desc: 'วานรเผือกผู้มีฤทธิ์เดชสูง รวดเร็ว ว่องไว โจมตีและหลบหลีกได้อย่างพริ้วไหว', 
+                hp: 120, 
+                atk: 18, 
+                def: 8, 
+                speed: 15, 
+                skillName: 'หนุมานหาวเป็นดาวเป็นเดือน',
+                color: 'from-slate-100 to-amber-200',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#f8fafc" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C35 25 30 45 40 55 C42 57 48 57 50 50 C52 57 58 57 60 55 C70 45 65 25 50 25 Z" fill="#e2e8f0"/><circle cx="42" cy="42" r="3" fill="#0f172a"/><circle cx="58" cy="42" r="3" fill="#0f172a"/><path d="M45 62 Q50 67 55 62" stroke="#ef4444" stroke-width="3" fill="none"/><path d="M48 15 L52 15 L50 22 Z" fill="#ca8a04"/></svg>`
+            },
+            { 
+                id: 'tosakanth', 
+                name: 'ทศกัณฐ์ (Tosakanth)', 
+                avatar: '👹', 
+                desc: 'พญายักษ์สิบเศียรยี่สิบกรผู้ครองกรุงลงกา พลังป้องกันและพลังชีวิตสูงดั่งขุนเขา', 
+                hp: 180, 
+                atk: 15, 
+                def: 15, 
+                speed: 6, 
+                skillName: 'ทศกัณฐ์แผลงฤทธิ์สิบเศียร',
+                color: 'from-emerald-950 to-emerald-700',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#064e3b" stroke="#eab308" stroke-width="3"/><path d="M50 20 C32 20 25 45 35 65 C40 75 60 75 65 65 C75 45 68 20 50 20 Z" fill="#047857"/><circle cx="40" cy="45" r="4" fill="#ef4444"/><circle cx="60" cy="45" r="4" fill="#ef4444"/><path d="M40 60 Q50 68 60 60" stroke="#facc15" stroke-width="3" fill="none"/></svg>`
+            },
+            { 
+                id: 'phra_chao_ta', 
+                name: 'พระเจ้าตา (Phra Chao Ta)', 
+                avatar: '🧙‍♂️', 
+                desc: 'พระโยคีผู้บำเพ็ญตบะสมาธิ ณ เกาะแก้วพิสดาร มีมนตราฟื้นฟูเยียวยาชีวิตชั้นสูง', 
+                hp: 110, 
+                atk: 12, 
+                def: 10, 
+                speed: 12, 
+                skillName: 'มนตร์พระเจ้าตาชุบวิญญาณ',
+                color: 'from-amber-950 to-orange-800',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#451a03" stroke="#eab308" stroke-width="3"/><path d="M50 25 C38 25 35 45 38 60 Q50 78 62 60 C65 45 62 25 50 25 Z" fill="#d97706"/><circle cx="43" cy="43" r="3" fill="#0f172a"/><circle cx="57" cy="43" r="3" fill="#0f172a"/><path d="M46 52 Q50 56 54 52" stroke="#ea580c" stroke-width="2" fill="none"/></svg>`
+            },
+            { 
+                id: 'khun_phaen', 
+                name: 'ขุนแผน (Khun Phaen)', 
+                avatar: '⚔️', 
+                desc: 'ยอดนักรบหน้ามนผู้เจนจบในดาบฟ้าฟื้น กุมารทอง และคาถามหาเสน่ห์ ฟาดฟันคริติคอล', 
+                hp: 130, 
+                atk: 22, 
+                def: 6, 
+                speed: 13, 
+                skillName: 'ดาบฟ้าฟื้นฟาดฟันอริ',
+                color: 'from-rose-950 to-red-700',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#881337" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#fda4af"/><circle cx="43" cy="43" r="3" fill="#000"/><circle cx="57" cy="43" r="3" fill="#000"/><path d="M45 53 Q50 58 55 53" stroke="#e11d48" stroke-width="2" fill="none"/></svg>`
+            },
+            { 
+                id: 'cho_cho', 
+                name: 'โจโฉ (Cao Cao)', 
+                avatar: '👑', 
+                desc: 'มหาอุปราชและยอดกวีสามก๊กผู้กุมอำนาจ มีทักษะดูดซับปราณเวทเพื่อเพิ่มเกราะป้องกัน', 
+                hp: 140, 
+                atk: 16, 
+                def: 10, 
+                speed: 10, 
+                skillName: 'ทัพโจโฉสยบปฐพี',
+                color: 'from-violet-950 to-purple-800',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#2e1065" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 62 Q50 70 60 62 C65 45 62 25 50 25 Z" fill="#c084fc"/><circle cx="42" cy="45" r="3" fill="#0f172a"/><circle cx="58" cy="45" r="3" fill="#0f172a"/></svg>`
+            },
+            { 
+                id: 'guan_yu', 
+                name: 'กวนอู (Guan Yu)', 
+                avatar: '🐉', 
+                desc: 'เทพเจ้าแห่งความซื่อสัตย์ ควงง้าวมังกรเขียวทรงพลังเพื่อทะลวงล้างการป้องกันศัตรู', 
+                hp: 160, 
+                atk: 20, 
+                def: 12, 
+                speed: 8, 
+                skillName: 'ง้าวมังกรเขียวทะลวงศึก',
+                color: 'from-teal-950 to-emerald-800',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#022c22" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 65 Q50 72 60 65 C65 45 62 25 50 25 Z" fill="#b91c1c"/><circle cx="43" cy="42" r="3" fill="#000"/><circle cx="57" cy="42" r="3" fill="#000"/></svg>`
+            },
+            { 
+                id: 'choraka', 
+                name: 'จรกา (Choraka)', 
+                avatar: '🐗', 
+                desc: 'ระเด่นจรกาผู้ห้าวหาญทรหด อดทน แข็งแกร่ง บุกตะลุยโจมตีแลกเลือดได้อย่างรุนแรง', 
+                hp: 150, 
+                atk: 14, 
+                def: 9, 
+                speed: 11, 
+                skillName: 'จรกาลุยไฟประจัญบาน',
+                color: 'from-stone-900 to-stone-700',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#1c1917" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 65 Q50 72 60 65 C65 45 62 25 50 25 Z" fill="#44403c"/><circle cx="42" cy="43" r="4.5" fill="#000"/><circle cx="58" cy="43" r="4.5" fill="#000"/></svg>`
+            },
+            { 
+                id: 'inao', 
+                name: 'อิเหนา (Inao)', 
+                avatar: '🦅', 
+                desc: 'ระเด่นอิเหนาเจ้าเสน่ห์ผู้ร่ายรำกริชสุหรานากง ว่องไวและโจมตีสกัดจุดศัตรูได้ชะงัก', 
+                hp: 125, 
+                atk: 17, 
+                def: 7, 
+                speed: 16, 
+                skillName: 'ระเด่นอิเหนาแทงกริช',
+                color: 'from-cyan-950 to-teal-700',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#083344" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#99f6e4"/><circle cx="43" cy="43" r="3" fill="#0f172a"/><circle cx="57" cy="43" r="3" fill="#0f172a"/></svg>`
+            },
+            { 
+                id: 'madana', 
+                name: 'มัทนา (Madana)', 
+                avatar: '🌹', 
+                desc: 'นางในวรรณคดีผู้จุติจากกุหลาบทิพย์ บรรเลงกลิ่นหอมสะกดอิทธิฤทธิ์คู่ต่อสู้ให้อ่อนแรง', 
+                hp: 100, 
+                atk: 14, 
+                def: 8, 
+                speed: 14, 
+                skillName: 'กลีบกุหลาบมัทนาสะกดใจ',
+                color: 'from-pink-950 to-rose-700',
+                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#4c0519" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#fecdd3"/><circle cx="43" cy="43" r="2.5" fill="#4c0519"/><circle cx="57" cy="43" r="2.5" fill="#4c0519"/></svg>`
+            }
+        ];
+
+        const legendaryItems = [
+            { id: 'flute', name: 'ปี่พระอภัยมณี', description: 'ตรึงอักขระเป้าหมายในแผนที่ AR ให้ขยับช้าลง 50% ทำให้จับง่ายพริ้ว', price: 150, icon: '🎺', category: 'weapon' },
+            { id: 'sword', name: 'ดาบฟ้าฟื้นแห่งขุนแผน', description: 'เพิ่มสิทธิ์ความสำเร็จในการสะกดจับภูตอักษร 25%', price: 250, icon: '⚔️', category: 'weapon' },
+            { id: 'shield_diamond', name: 'ยันต์เกราะเพชรคุ้มวิหาร', description: 'บล็อกการโดนบุกขโมยชิงเงินพดด้วงจากปราชญ์อื่นได้แบบ 100% (ใช้หมด 1 ครั้ง)', price: 120, icon: '🛡️', category: 'defense' },
+            { id: 'spell_invisible', name: 'มนตร์สะกดพรางค่ายม่านหมอก', description: 'ลดอัตราการโดนส่องมองหาเพื่อสยบชิงแต้มลงเหลือ 15%', price: 180, icon: '🌫️', category: 'defense' },
+            { id: 'spell_reflect', name: 'ยันต์ตรรกะสะท้อนคุณไสย', description: 'สะท้อนการบุกปล้นกลับไป ทำให้ขโมยพดด้วงคืนจากศัตรูที่กล้ามาโจมตีคุณสำเร็จ!', price: 220, icon: '🧿', category: 'defense' }
+        ];
+
+        const charPrompts = {
+            hanuman: "A highly detailed masterpiece digital fantasy portrait of Hanuman, the white monkey warrior king from Ramayana literature, wearing ornate traditional golden Thai armor and jewel-encrusted crown, glowing cyan eyes, divine power background, dramatic cinematic lighting, 8k",
+            tosakanth: "A spectacular dramatic fantasy portrait of Tosakanth, the epic ten-headed demon king of Lanka, green skin, royal golden Thai crowns, aggressive majestic stance, fiery magical aura, hyper-detailed epic illustration",
+            phra_chao_ta: "A mystical ancient portrait of Phra Chao Ta, the wise hermit monk from Sunthorn Phu poetry, white beard, glowing spiritual eyes of infinite wisdom, traditional orange ascetic robes, magical tropical island background, masterpiece",
+            khun_phaen: "A handsome ancient Thai warrior hero named Khun Phaen, holding a glowing magical sword named Fa Fuen with sparks, wearing red and brass traditional battle armor, masterfully rendered cinematic fantasy character art",
+            cho_cho: "A grand imperial portrait of Cao Cao, the brilliant cunning emperor from Three Kingdoms literature, sharp gaze, rich purple and gold silk royal robes, grand dynasty palace throne room background, high fantasy masterpiece",
+            guan_yu: "A glorious legendary general Guan Yu with a long black beard, green and golden traditional plate armor, wielding the legendary crescent dragon blade, glowing emerald dragon aura, highly detailed digital masterpiece",
+            choraka: "A fierce scarred bronze-skinned ancient warrior Choraka, rough heavy iron tribal armor, burning dark embers and fire in the background, spectacular dramatic cinematic fantasy portrait",
+            inao: "A beautiful elegant Thai prince warrior Inao, gracefully wielding a glowing magical kris dagger, silver and turquoise royal silk armor, divine celestial background, masterpiece fantasy illustration",
+            madana: "A breathtakingly beautiful flower goddess Madana, surrounded by a magical vortex of swirling pink rose petals, ethereal glowing silk garments, warm sacred golden light, masterpiece portrait art"
+        };
+
+        let player = {
+            uid: '',
+            username: 'นักอักษราอาสา',
+            avatar: '👑',
+            pos: { x: 1000, y: 1000 },
+            caughtRunes: [],
+            inventory: [],
+            equippedItem: null,
+            activeWard: null,
+            gold: 300,
+            xp: 0,
+            level: 1,
+            characterLevels: {
+                hanuman: 1, tosakanth: 1, phra_chao_ta: 1, khun_phaen: 1,
+                cho_cho: 1, guan_yu: 1, choraka: 1, inao: 1, madana: 1
+            },
+            activeCharacterId: 'hanuman',
+            quizStats: { total: 0, correct: 0, wrong: 0 }
+        };
+
+        let mapRunes = [];
+        let activeEncounter = null;
+        let selectedOrbType = 'consonant';
+        let cameraStream = null;
+        let isCameraActive = false;
+        let isThrowing = false;
+        let isQuizActive = false;
+        let bounceInterval = null;
+        let targetVelocity = { x: 1.5, y: 1.2 };
+        let targetOffset = { x: 0, y: 0 };
+        let tutorialCurrentStep = 0;
+        let lastCheckinDate = null;
+        let fetchedOnlinePlayersForStats = [];
+        let generatedImagesCache = {};
+
+        // Custom Font Sizer system
+        let currentFontSize = 'normal';
+
+        function toggleFontSize() {
+            playSound('button');
+            const questionEl = document.getElementById('quiz-question');
+            const optionsEl = document.getElementById('quiz-options');
+            const indicatorEl = document.getElementById('font-size-indicator');
+
+            if (currentFontSize === 'normal') {
+                currentFontSize = 'large';
+                questionEl.style.fontSize = '1.1rem';
+                optionsEl.style.fontSize = '1.05rem';
+                indicatorEl.innerText = 'ใหญ่';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '1rem';
+                    btn.style.padding = '0.9rem';
+                }
+            } else if (currentFontSize === 'large') {
+                currentFontSize = 'xlarge';
+                questionEl.style.fontSize = '1.3rem';
+                optionsEl.style.fontSize = '1.25rem';
+                indicatorEl.innerText = 'ใหญ่พิเศษ';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '1.15rem';
+                    btn.style.padding = '1.1rem';
+                }
+            } else {
+                currentFontSize = 'normal';
+                questionEl.style.fontSize = '0.75rem'; // Default tailwind text-xs size equiv
+                optionsEl.style.fontSize = '0.75rem';
+                indicatorEl.innerText = 'ปกติ';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '0.7rem'; // text-[10px] equiv
+                    btn.style.padding = '0.5rem';
+                }
+            }
+        }
+
+        // Pre-baked holographic vector SVGs for Himmapan runes
+        function getHimmapanCreatureSVG(rune) {
+            const char = rune.name.charAt(0);
+            const avatar = rune.avatar;
+            
+            if (rune.type === 'high') { // Fire / Red Coral Elemental Aura
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full absolute inset-0 z-10 animate-pulse">
+                    <defs>
+                        <linearGradient id="runeFireGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#7f1d1d" stop-opacity="0.9"/>
+                            <stop offset="50%" stop-color="#ea580c" stop-opacity="0.75"/>
+                            <stop offset="100%" stop-color="#facc15" stop-opacity="0.95"/>
+                        </linearGradient>
+                        <filter id="runeFireGlow">
+                            <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <circle cx="50" cy="50" r="41" fill="none" stroke="url(#runeFireGrad)" stroke-width="3" stroke-dasharray="14 4" class="animate-spin" style="animation-duration: 5s;"/>
+                    <path d="M 50 12 L 54 32 L 74 32 L 58 44 L 64 64 L 50 52 L 36 64 L 42 44 L 26 32 L 46 32 Z" fill="none" stroke="#f59e0b" stroke-width="2" filter="url(#runeFireGlow)" class="animate-bounce" style="animation-duration: 4s;"/>
+                    <circle cx="50" cy="50" r="28" fill="url(#runeFireGrad)" opacity="0.8"/>
+                    <text x="50" y="55" font-family="'Sarabun', sans-serif" font-weight="900" font-size="30" fill="#ffffff" text-anchor="middle" filter="url(#runeFireGlow)">${char}</text>
+                    <text x="50" y="80" font-family="'Mitr', sans-serif" font-weight="bold" font-size="10" fill="#fef08a" text-anchor="middle">${avatar}</text>
+                </svg>`;
+            } else if (rune.type === 'mid') { // Gold / Celestial Aura
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full absolute inset-0 z-10">
+                    <defs>
+                        <linearGradient id="runeGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#b45309" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.85"/>
+                        </linearGradient>
+                        <filter id="runeGoldGlow">
+                            <feGaussianBlur stdDeviation="3" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="url(#runeGoldGrad)" stroke-width="3.5" stroke-dasharray="8 8" class="animate-spin" style="animation-duration: 8s;"/>
+                    <path d="M 50 18 Q 30 45 50 72 Q 70 45 50 18" fill="url(#runeGoldGrad)" opacity="0.85" filter="url(#runeGoldGlow)" class="animate-pulse"/>
+                    <circle cx="50" cy="50" r="25" fill="#092226" stroke="#fbbf24" stroke-width="1.5"/>
+                    <text x="50" y="56" font-family="'Sarabun', sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle" filter="url(#runeGoldGlow)">${char}</text>
+                    <text x="50" y="82" font-family="'Mitr', sans-serif" font-weight="bold" font-size="11" fill="#fbbf24" text-anchor="middle">${avatar}</text>
+                </svg>`;
+            } else { // Storm / Turquoise Sea Aura
+                return `
+                <svg viewBox="0 0 100 100" class="w-full h-full absolute inset-0 z-10">
+                    <defs>
+                        <linearGradient id="runeAquaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#0891b2" stop-opacity="0.9"/>
+                            <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.75"/>
+                            <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.9"/>
+                        </linearGradient>
+                        <filter id="runeAquaGlow">
+                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="url(#runeAquaGrad)" stroke-width="3" stroke-dasharray="12 4" class="animate-spin" style="animation-duration: 11s;"/>
+                    <path d="M 15 50 C 15 25, 85 25, 85 50 C 85 75, 15 75, 15 50 Z" fill="none" stroke="#22d3ee" stroke-width="1.5" filter="url(#runeAquaGlow)"/>
+                    <ellipse cx="50" cy="50" rx="30" ry="22" fill="url(#runeAquaGrad)" opacity="0.8"/>
+                    <text x="50" y="55" font-family="'Sarabun', sans-serif" font-weight="900" font-size="28" fill="#ffffff" text-anchor="middle" filter="url(#runeAquaGlow)">${char}</text>
+                    <text x="50" y="82" font-family="'Mitr', sans-serif" font-weight="bold" font-size="10" fill="#22d3ee" text-anchor="middle">${avatar}</text>
+                </svg>`;
+            }
+        }
+
+        let quizzes = [
+            { question: '“จะหักอื่นขืนหักก็จักได้ หักอาลัยนี้ไม่หลุดสุดจะหัก สารพัดตัดขาดประหลาดนัก แต่ตัดรักนี้ไม่ขาดประหลาดใจ” จากกลอนข้างต้น สุนทรภู่กล่าวว่าสิ่งใดเป็นสิ่งที่ตัดไม่ขาด', options: ['เขา', 'รัก', 'เรียน', 'อดีต'], answer: 0 },
+            { question: 'ลูกของพระอภัยมณีกับนางปีเสื้อสมุทรมีเชื่อว่าอะไร', options: ['สินสมุทร','นางเงือก', 'สุดสาคร', 'นนทก'], answer: 0 },
+            { question: 'นนทกตายแล้วมาเกิดเป็นใคร', options: ['ทศกัณฐ์', 'พิเภก', 'พระราม', 'มัจฉานุ'], answer: 0 },
+            { question: 'พระอภัยมณีใช้เครื่องดนตรีใด', options: ['ปี่', 'กีตาร์', 'ขลุ่ย', 'ซอ'], answer: 0 },
+            { question: 'ม้านิลมังกรเป็นเพศใด', options: ['กะเทย', 'เมีย', 'ผู้', 'ทอม'], answer: 0 },
+            { question: 'ข้อใดเขียนผิด', options: ['กระเทย', 'ตะกละ', 'ตบะ', 'สมถะ'], answer: 0 },
+            { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการสร้างคำแบบใด', options: ['สมาส', 'ประสม', 'ซ้ำ', 'ซ้อน'], answer: 0 },
+            { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการนำคำคู่ใดสมาสกัน', options: ['พล + อนุกูล', 'พล- + นุกูล', 'พละ + อนุกูล', 'พลานุ + กูล'], answer: 0 },
+            { question: 'สุนทรภู่เสียชีวิตในสมัยรัชกาลใด', options: ['รัชกาลที่ ๔', 'รัชกาลที่ ๒', 'รัชกาลที่ ๓', 'รัชกาลที่ ๕'], answer: 0 },
+            { question: 'นิราศพระบาทเป็นผลงานของใคร', options: ['สุนทรภู่', 'กุลิสรา', 'พุทธชาติ', 'พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย'], answer: 0 },
+            { question: 'อำเภอพระพุทธบาทอยู่ในจังหวัดใด', options: ['สระบุรี', 'อยุธยา', 'ลพบุรี', 'บ้านหมอ'], answer: 0 },
+            { question: 'พระรามจากเรื่องรามเกียรติ์คือเทพองค์ใดอวตาร', options: ['พระนารายณ์', 'พระอินทร์', 'พระศิวะ', 'พระอิศวร'], answer: 0 },
+            { question: 'ข้อใดไม่มีคำผิด', options: ['ครูครับ สวัสดีครับ', 'คูครับ สวัดดีครับ', 'ครูค่ะ สวัสดีคะ', 'คูค่ะ สวัสดีค่ะ'], answer: 0 },
+            { question: 'ไตรยางศ์คืออะไร?', options: ['อักษรสามหมู่ อักษรสูง อักษรกลาง อักษรต่ำ', 'อักษรสี่หมู่ อักษรสูง อักษรกลาง อักษรต่ำเดี่ยว อักษรต่ำคู่', 'อักษรสองหมู่ อักษรสูง อักษรกลาง', 'อักษรห้าหมู่ อักษรสูง อักษรกลาง อักษรต่ำเดี่ยว อักษรต่ำคู่ อักษรสามัญ'], answer: 0 },
+            { question: 'วันภาษาไทยแห่งชาติตรงกับวันที่ ๒๙ กรกฎาคม เนื่องจากเหตุการณ์สำคัญอันยิ่งใหญ่ใดในปี พ.ศ. ๒๕๐๕?', options: ['พระบาทสมเด็จพระเจ้าอยู่หัว รัชกาลที่ ๙ เสด็จฯ ร่วมอภิปรายเรื่องปัญหาการใช้คำไทย ณ จุฬาลงกรณ์มหาวิทยาลัย', 'มีการจัดพิมพ์ตำราอักษรศาสตร์ไทยเล่มแรกของชาติอย่างเป็นทางการ', 'การประกาศใช้จารึกพยัญชนะไทยแบบสุโขทัยอย่างเป็นแบบแผน', 'การลงนามสัญญานานาชาติว่าด้วยการศึกษาร่วมอักษรตะวันออก'], answer: 0 },
+            { question: 'คำว่า ทักษ์ ใน "พิทักษ์" สะกดตามมาตราตัวสะกดในข้อใดจึงถูกต้องตามทฤษฎีอักษรศาสตร์โบราณ?', options: ['มาตรา แม่ กก (สะกดด้วยพยัญชนะวรรค ก.ไก่)', 'มาตรา แม่ กด (สะกดด้วยพยัญชนะวรรค ด.เด็ก)', 'มาตรา แม่ กบ (สะกดด้วยพยัญชนะวรรค บ.ใบไม้)', 'มาตรา แม่ กน (สะกดด้วยพยัญชนะวรรค น.หนู)'], answer: 0 },
+            { question: 'พยัญชนะไทยชุดใดต่อไปนี้ จัดอยู่ในหมวดหมู่อักษรสามหมู่กลุ่ม "อักษรสูง" ทั้งสิ้น?', options: ['ข, ฉ, ถ, ผ, ศ, ห', 'ก, จ, ด, ต, บ, ป', 'ค, ง, ช, ซ, ท, น', 'ร, ล, ว, ม, ย, ณ'], answer: 0 },
+            { question: 'พยัญชนะภาษาไทยลำดับที่ ๔๔ ตัวสุดท้ายคือข้อใด และเป็นอักษรหมู่ใดในไตรยางศ์?', options: ['ฮ. นกฮูก (อักษรต่ำเดี่ยว)', 'อ. อ่าง (อักษรกลางคู่)', 'ฬ. จุฬา (อักษรสูงเดี่ยว)', 'ฑ. มณโฑ (อักษรต่ำคู่)'], answer: 0 }
+        
+        ];
+
+        let adminConfig = {
+            rewardGold: 50,
+            rewardXp: 100
+        };
+
+        const tutorialSteps = [
+            { title: "ยินดีต้อนรับสู่วิหารอักขรา!", icon: "🏛️", description: "สวัสดีผู้พิทักษ์! ภารกิจสูงสุดของท่านคือการออกสืบค้นและสะกดอักขระโบราณทั้ง 44 ที่กระจัดกระจายรอบแดนสยาม" },
+            { title: "การผจญภัยและสแกนแผนที่", icon: "🧭", description: "ใช้นิ้วลากหรือกวาดหน้าจอบนแผนที่เพื่อเคลื่อนที่ มองหาสัญลักษณ์รูนทองคำ แล้วแตะเพื่อเริ่มสะกดจับ!" },
+            { title: "โหมดสแกนเนอร์ AR ไจโรสโคป", icon: "📱", description: "ส่ายล็อกเป้าหมายให้อยู่ตรงกลาง และโยน \'อักขรมณีพยัญชนะ/สระ\' เพื่อจับอักขรธาตุ" },
+            { title: "ด่านท้าทายตอบปริศนาไทย", icon: "📜", description: "ตอบคำถามวรรณคดีและอักษรวิธีให้ถูกต้องเพื่อบันทึกสะกดเป้าหมายลงคลังได้สำเร็จ" }
+        ];
+
+        try {
+            const cached = localStorage.getItem('thaigo_generated_portraits_cache');
+            if (cached) {
+                generatedImagesCache = JSON.parse(cached);
+            }
+        } catch (e) {
+            console.warn("Could not read portrait cache from localStorage:", e);
+        }
+
+        async function fetchImageWithBackoff(prompt, retries = 3, delay = 1000) {
+            const payload = { 
+                instances: { prompt: prompt }, 
+                parameters: { "sampleCount": 1 } 
+            };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                            return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                        }
+                    } else if (response.status === 429) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                        continue;
+                    }
+                    throw new Error(`Failed with status: ${response.status}`);
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        let currentPreviewCharId = null;
+
+        async function updateCharacterPortrait(charId, forceRegenerate = false) {
+            const showcaseImg = document.getElementById('showcase-image');
+            const showcaseLoader = document.getElementById('showcase-image-loader');
+            const showcaseAvatar = document.getElementById('showcase-avatar');
+
+            if (!showcaseImg || !showcaseLoader || !showcaseAvatar) return;
+
+            showcaseLoader.style.opacity = '1';
+            showcaseLoader.classList.remove('hidden');
+            showcaseImg.classList.add('hidden');
+            showcaseAvatar.classList.add('hidden');
+
+            const prompt = charPrompts[charId] || `${charId} fantasy character portrait, masterpiece`;
+
+            try {
+                let imgData = null;
+                if (!forceRegenerate && generatedImagesCache[charId]) {
+                    imgData = generatedImagesCache[charId];
+                } else {
+                    imgData = await fetchImageWithBackoff(prompt);
+                    generatedImagesCache[charId] = imgData;
+                    try {
+                        localStorage.setItem('thaigo_generated_portraits_cache', JSON.stringify(generatedImagesCache));
+                    } catch (e) {
+                        console.warn("Portrait cache limit exceeded.");
+                    }
+                }
+
+                showcaseImg.src = imgData;
+                showcaseImg.classList.remove('hidden');
+                showcaseLoader.style.opacity = '0';
+                setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
+            } catch (err) {
+                console.warn("Imagen generation failed, falling back to emoji:", err);
+                showcaseAvatar.classList.remove('hidden');
+                showcaseLoader.style.opacity = '0';
+                setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
+            }
+        }
+
+        async function regenerateShowcaseImage() {
+            if (!currentPreviewCharId) return;
+            playSound('button');
+            await updateCharacterPortrait(currentPreviewCharId, true);
+        }
+
+        async function startCamera() {
+            const video = document.getElementById('camera-video');
+            const fallback = document.getElementById('camera-fallback');
+            const btnIcon = document.getElementById('cam-icon');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.warn("Camera API not supported in this frame context.");
+                return;
+            }
+
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: "environment" } },
+                    audio: false
+                });
+                video.srcObject = cameraStream;
+                video.classList.remove('hidden');
+                fallback.classList.add('hidden');
+                btnIcon.className = "fa-solid fa-video text-emerald-500";
+                isCameraActive = true;
+            } catch (err) {
+                console.warn("Camera acquisition failed or rejected:", err);
+                fallback.classList.remove('hidden');
+                btnIcon.className = "fa-solid fa-video-slash";
+                isCameraActive = false;
+            }
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('camera-video');
+            if (video) video.classList.add('hidden');
+            document.getElementById('camera-fallback').classList.remove('hidden');
+            document.getElementById('cam-icon').className = "fa-solid fa-video-slash";
+            isCameraActive = false;
+
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function toggleCameraInput() {
+            playSound('button');
+            if (isCameraActive) {
+                stopCamera();
+                showEncounterToast("🔒 พักการใช้งานกล้อง AR");
+            } else {
+                startCamera();
+                showEncounterToast("📷 เปิดใช้งานกล้อง AR อีกครั้ง");
+            }
+        }
+
+        window.onload = function() {
+            checkForSavedPlayer();
+            spawnRunesOnMap();
+            renderMapRunes();
+            setupMapDrag();
+            updatePlayerHUD();
+            renderLibraryTrivia(); 
+            init3DCardParallax();
+        };
+
+        function setupMapDrag() {
+            const mapScreen = document.getElementById('map-screen');
+            let isDragging = false;
+            let startX, startY;
+
+            function onDragStart(clientX, clientY) {
+                isDragging = true;
+                startX = clientX;
+                startY = clientY;
+            }
+
+            function onDragMove(clientX, clientY) {
+                if (!isDragging) return;
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+                
+                player.pos.x = Math.max(100, Math.min(1900, player.pos.x - dx * 0.8));
+                player.pos.y = Math.max(100, Math.min(1900, player.pos.y - dy * 0.8));
+                
+                startX = clientX;
+                startY = clientY;
+                
+                centerMapOnPlayer();
+                renderMapRunes();
+            }
+
+            function onDragEnd() {
+                isDragging = false;
+            }
+
+            mapScreen.addEventListener('mousedown', (e) => {
+                if (e.target.closest('button')) return;
+                onDragStart(e.clientX, e.clientY);
+            });
+            mapScreen.addEventListener('mousemove', (e) => {
+                onDragMove(e.clientX, e.clientY);
+            });
+            window.addEventListener('mouseup', onDragEnd);
+
+            mapScreen.addEventListener('touchstart', (e) => {
+                if (e.target.closest('button')) return;
+                const touch = e.touches[0];
+                onDragStart(touch.clientX, touch.clientY);
+            }, { passive: true });
+            
+            mapScreen.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                onDragMove(touch.clientX, touch.clientY);
+            }, { passive: true });
+            
+            window.addEventListener('touchend', onDragEnd);
+        }
+
+        let synth = null;
+        try {
+            synth = new Tone.Synth({
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.02, decay: 0.1, sustain: 0.2, release: 0.8 }
+            }).toDestination();
+        } catch(e) {
+            console.log("Audio failed to load.");
+        }
+
+        function playSound(type) {
+            if (!synth) return;
+            try {
+                if (Tone.context.state !== 'running') Tone.start();
+                const now = Tone.now();
+                if (type === 'button') synth.triggerAttackRelease("A4", "32n", now);
+                else if (type === 'throw') {
+                    synth.triggerAttackRelease("E5", "32n", now);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "16n", now + 0.05), 50);
+                } else if (type === 'success') {
+                    synth.triggerAttackRelease("E5", "32n", now);
+                    setTimeout(() => synth.triggerAttackRelease("B5", "32n", now + 0.1), 100);
+                    setTimeout(() => synth.triggerAttackRelease("E6", "8n", now + 0.15), 150);
+                } else if (type === 'fail') {
+                    synth.triggerAttackRelease("C4", "8n", now);
+                } else if (type === 'slash') {
+                    synth.triggerAttackRelease("A3", "16n", now);
+                    setTimeout(() => synth.triggerAttackRelease("C3", "16n", now + 0.06), 60);
+                } else if (type === 'shield') {
+                    synth.triggerAttackRelease("G4", "8n", now);
+                }
+            } catch (err) {
+                console.warn("Audio exception:", err);
+            }
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function checkForSavedPlayer() {
+            const cachedUid = localStorage.getItem('thaigo_player_uid');
+            const cachedName = localStorage.getItem('thaigo_player_name');
+            if (cachedUid) document.getElementById('login-uid').value = cachedUid;
+            if (cachedName) document.getElementById('login-username').value = cachedName;
+        }
+
+        function showLocalUidHint() {
+            const cachedUid = localStorage.getItem('thaigo_player_uid');
+            if (cachedUid) showAlert('🔑', 'รหัสกู้คืนปัจจุบัน', `รหัสในเครื่อง: ${cachedUid}`);
+            else showAlert('❓', 'ไม่พบประวัติ', 'ยังไม่พบบันทึกรหัสผ่านในเครื่องนี้');
+        }
+
+        async function handleFacebookLogin() {
+            playSound('button');
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const auth = window.firebaseSystem.auth;
+                    const provider = new window.firebaseSystem.FacebookAuthProvider();
+                    const result = await window.firebaseSystem.signInWithPopup(auth, provider);
+                    const user = result.user;
+                    
+                    player.username = user.displayName || "ผู้พิทักษ์ Facebook";
+                    player.avatar = "👤";
+                    player.uid = user.uid;
+                    localStorage.setItem('thaigo_player_uid', player.uid);
+                    localStorage.setItem('thaigo_player_name', player.username);
+                    await syncStateWithCloudAndLaunch();
+                    showAlert('🔵 FB', 'เชื่อมต่อสิทธิ์เฟซบุ๊กสำเร็จ', `เข้าสู่ระบบในชื่อผู้พิทักษ์: ${player.username}`);
+                } catch (err) {
+                    console.error("Strict Facebook Login failed:", err);
+                    showAlert('❌ Facebook Error', 'ไม่สามารถเข้าสู่ระบบด้วย Facebook ได้', 'เกิดความล้มเหลวในการเชื่อมต่อเครือข่าย หรือเบราว์เซอร์ไม่รองรับการเปิดหน้าต่างภายนอก กรุณากรอกชื่อและกู้รหัสเพื่อลงทะเบียนใช้งานปกติ!');
+                }
+            } else {
+                showAlert('⚠️ เชื่อมต่อขัดข้อง', 'ระบบล็อกอินอภิบาลออฟไลน์', 'เซิร์ฟเวอร์ระบบล็อกอินขัดข้องชั่วคราว หรือไม่พบคอนฟิกเครือข่ายสำหรับติดต่อ Facebook จริงในสภาพแวดล้อมจำลองนี้ กรุณาลงทะเบียนแบบปกติ');
+            }
+        }
+
+        async function handleLoginFlow() {
+            playSound('button');
+            const nameInput = document.getElementById('login-username').value.trim() || 'ปราชญ์นิรนามวิทยา';
+            const manualUid = document.getElementById('login-uid').value.trim();
+            player.username = nameInput;
+            player.uid = manualUid || 'local-' + generateUUID();
+
+            localStorage.setItem('thaigo_player_uid', player.uid);
+            localStorage.setItem('thaigo_player_name', nameInput);
+            await syncStateWithCloudAndLaunch();
+        }
+
+        async function syncStateWithCloudAndLaunch() {
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const stateDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'users', player.uid, 'save_state', 'current');
+                    const snapshot = await window.firebaseSystem.getDoc(stateDocPath);
+
+                    if (snapshot.exists()) {
+                        const savedData = snapshot.data();
+                        player.gold = savedData.gold ?? 300;
+                        player.xp = savedData.xp ?? 0;
+                        player.level = savedData.level ?? 1;
+                        player.caughtRunes = savedData.caughtRunes || [];
+                        player.inventory = savedData.inventory || [];
+                        player.equippedItem = savedData.equippedItem || null;
+                        player.activeWard = savedData.activeWard || null;
+                        player.username = savedData.username || player.username;
+                        player.activeCharacterId = savedData.activeCharacterId || 'hanuman';
+                        
+                        player.characterLevels = savedData.characterLevels || { 
+                            hanuman: 1, tosakanth: 1, phra_chao_ta: 1, khun_phaen: 1, 
+                            cho_cho: 1, guan_yu: 1, choraka: 1, inao: 1, madana: 1 
+                        };
+                        
+                        player.quizStats = savedData.quizStats || { total: 0, correct: 0, wrong: 0 };
+                        lastCheckinDate = savedData.lastCheckinDate || null;
+                    } else {
+                        await saveStateToCloud();
+                    }
+                    await savePlayerLeaderboardData();
+
+                    const quizDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'quizzes_config');
+                    const quizSnapshot = await window.firebaseSystem.getDoc(quizDocPath);
+                    if (quizSnapshot.exists()) {
+                        const cloudQuizzes = quizSnapshot.data().quizzes;
+                        if (cloudQuizzes && cloudQuizzes.length > 0) {
+                            quizzes = cloudQuizzes;
+                        }
+                    }
+                } catch (err) {
+                    console.warn("Could not sync from cloud. Reverting to local browser fallback structures.", err);
+                }
+            }
+            loadLocalSavedProgress();
+            launchGameLayout();
+        }
+
+        function loadLocalSavedProgress() {
+            const cachedProgress = localStorage.getItem('thaigo_progress_v2_' + player.uid);
+            if (cachedProgress) {
+                try {
+                    const parsed = JSON.parse(cachedProgress);
+                    player.gold = parsed.gold ?? player.gold;
+                    player.xp = parsed.xp ?? player.xp;
+                    player.level = parsed.level ?? player.level;
+                    player.caughtRunes = parsed.caughtRunes || player.caughtRunes;
+                    player.inventory = parsed.inventory || player.inventory;
+                    player.activeWard = parsed.activeWard || player.activeWard;
+                    player.activeCharacterId = parsed.activeCharacterId || player.activeCharacterId;
+                    player.characterLevels = parsed.characterLevels || player.characterLevels;
+                    player.quizStats = parsed.quizStats || { total: 0, correct: 0, wrong: 0 };
+                    lastCheckinDate = parsed.lastCheckinDate || null;
+                } catch (e) {}
+            }
+            const locallySavedQuizzes = localStorage.getItem('thaigo_custom_quizzes');
+            if (locallySavedQuizzes) {
+                try { quizzes = JSON.parse(locallySavedQuizzes); } catch(e){}
+            }
+        }
+
+        function launchGameLayout() {
+            updatePlayerHUD();
+            document.getElementById('splash-screen').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('map-screen').classList.remove('hidden');
+            document.getElementById('main-footer').classList.remove('hidden');
+            centerMapOnPlayer();
+            
+            const hasCompletedTutorial = localStorage.getItem('thaigo_tutorial_completed_v2');
+            if (!hasCompletedTutorial) startTutorial();
+        }
+
+        async function saveStateToCloud() {
+            const localBackup = {
+                gold: player.gold,
+                xp: player.xp,
+                level: player.level,
+                caughtRunes: player.caughtRunes,
+                inventory: player.inventory,
+                equippedItem: player.equippedItem,
+                activeWard: player.activeWard,
+                username: player.username,
+                activeCharacterId: player.activeCharacterId,
+                characterLevels: player.characterLevels,
+                quizStats: player.quizStats,
+                lastCheckinDate: lastCheckinDate
+            };
+            localStorage.setItem('thaigo_progress_v2_' + player.uid, JSON.stringify(localBackup));
+
+            if (window.firebaseSystem && window.firebaseSystem.isConnected && player.uid) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const stateDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'users', player.uid, 'save_state', 'current');
+                    await window.firebaseSystem.setDoc(stateDocPath, {
+                        ...localBackup,
+                        uid: player.uid,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.warn("Cloud save failed. Local backup active.");
+                }
+            }
+        }
+
+        async function savePlayerLeaderboardData() {
+            if (window.firebaseSystem && window.firebaseSystem.isConnected && player.uid) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const lDoc = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'players', player.uid);
+                    await window.firebaseSystem.setDoc(lDoc, {
+                        uid: player.uid,
+                        username: player.username,
+                        level: player.level,
+                        xp: player.xp,
+                        gold: player.gold,
+                        activeWard: player.activeWard,
+                        quizStats: player.quizStats, 
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (e) {}
+            }
+        }
+
+        function spawnRunesOnMap() {
+            mapRunes = [];
+            runesDb.forEach((rune, index) => {
+                const angle = (index / 44) * Math.PI * 2;
+                const distance = 250 + (index % 5) * 140 + Math.random() * 90;
+                let rx = 1000 + Math.cos(angle) * distance;
+                let ry = 1000 + Math.sin(angle) * distance;
+                mapRunes.push({ ...rune, x: Math.floor(rx), y: Math.floor(ry), visible: true });
+            });
+        }
+
+        function centerMapOnPlayer() {
+            const map = document.getElementById('virtual-map');
+            const targetX = -(player.pos.x - (window.innerWidth / 2));
+            const targetY = -(player.pos.y - (window.innerHeight / 2));
+            map.style.left = `${targetX}px`;
+            map.style.top = `${targetY}px`;
+        }
+
+        function renderMapRunes() {
+            const spawner = document.getElementById('rune-spawner');
+            if (!spawner) return;
+            spawner.innerHTML = '';
+            const sunLensActive = player.equippedItem === 'lens';
+
+            mapRunes.forEach((rune) => {
+                if (!rune.visible) return;
+                const dx = rune.x - player.pos.x;
+                const dy = rune.y - player.pos.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const isNear = dist <= 210;
+
+                if (!isNear && !sunLensActive) return;
+
+                const div = document.createElement('div');
+                div.className = `absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300 flex flex-col items-center ${isNear ? 'cursor-pointer scale-110' : 'opacity-60 scale-90 pointer-events-none'}`;
+                div.style.left = `${rune.x}px`;
+                div.style.top = `${rune.y}px`;
+
+                if (isNear) div.setAttribute('onclick', `triggerEncounter(${rune.id})`);
+
+                div.innerHTML = `
+                    <div class="relative flex flex-col items-center">
+                        ${isNear ? '<div class="absolute inset-0 bg-yellow-500/20 rounded-full w-14 h-14 -m-2 animate-ping"></div>' : ''}
+                        <div class="w-14 h-14 bg-[#092226] border-2 ${isNear ? 'border-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.6)]' : 'border-slate-700'} rounded-2xl flex flex-col items-center justify-center text-xl font-bold text-yellow-400 rune-glow relative">
+                            <span class="text-sm leading-none opacity-80 mt-0.5">${rune.avatar}</span>
+                            <span class="headed-thai-font text-base leading-none -mt-0.5 filter drop-shadow(0 0 3px rgba(251,191,36,0.7))">${rune.name.charAt(0)}</span>
+                        </div>
+                        <div class="mt-1 px-2 py-0.5 bg-slate-950 border-2 ${isNear ? 'border-yellow-400' : 'border-slate-700'} text-[8px] font-bold rounded-lg text-white whitespace-nowrap shadow-2xl">
+                            ${rune.name.charAt(0)} (${rune.type === 'mid' ? 'อักษรกลาง' : rune.type === 'high' ? 'อักษรสูง' : 'อักษรต่ำ'})
+                        </div>
+                    </div>
+                `;
+                spawner.appendChild(div);
+            });
+        }
+
+        async function triggerEncounter(runeId) {
+            playSound('success');
+            const rune = mapRunes.find(r => r.id === runeId);
+            if (!rune) return;
+            activeEncounter = rune;
+
+            document.getElementById('catch-char-name').innerText = rune.name;
+            document.getElementById('encounter-char-avatar').innerText = rune.avatar;
+            document.getElementById('encounter-avatar-inner').innerText = rune.name.charAt(0);
+            document.getElementById('char-difficulty').innerText = `ประเภทไตรยางศ์: ${rune.level}`;
+
+            const elementalRing = document.getElementById('elemental-ring');
+            const encounterGraphic = document.getElementById('encounter-char-graphic');
+            
+            if (rune.type === 'high') { 
+                elementalRing.className = "elemental-portal portal-fire";
+                encounterGraphic.style.borderColor = "#ef4444";
+                encounterGraphic.style.boxShadow = "0 0 25px rgba(239, 68, 68, 0.7)";
+            } else if (rune.type === 'mid') { 
+                elementalRing.className = "elemental-portal portal-gold";
+                encounterGraphic.style.borderColor = "#fbbf24";
+                encounterGraphic.style.boxShadow = "0 0 25px rgba(251, 191, 36, 0.7)";
+            } else { 
+                elementalRing.className = "elemental-portal portal-storm";
+                encounterGraphic.style.borderColor = "#06b6d4";
+                encounterGraphic.style.boxShadow = "0 0 25px rgba(6, 182, 212, 0.7)";
+            }
+
+            createMysticalSparkles(6);
+            startTargetBouncing();
+            await startCamera(); 
+            document.getElementById('encounter-screen').classList.remove('hidden');
+
+            const encImage = document.getElementById('encounter-char-image');
+            const encLoader = document.getElementById('encounter-image-loader');
+            const fallbackAvatar = document.getElementById('encounter-char-avatar');
+            const fallbackInner = document.getElementById('encounter-avatar-inner');
+
+            let vectorContainer = document.getElementById('encounter-vector-container');
+            if (!vectorContainer) {
+                vectorContainer = document.createElement('div');
+                vectorContainer.id = 'encounter-vector-container';
+                vectorContainer.className = 'absolute inset-0 z-20 flex items-center justify-center';
+                encounterGraphic.appendChild(vectorContainer);
+            }
+            vectorContainer.innerHTML = getHimmapanCreatureSVG(rune);
+
+            if (encImage) encImage.classList.add('hidden');
+            if (encLoader) encLoader.classList.add('hidden');
+            if (fallbackAvatar) fallbackAvatar.classList.add('hidden');
+            if (fallbackInner) fallbackInner.classList.add('hidden');
+        }
+
+        function createMysticalSparkles(count) {
+            const container = document.getElementById('app');
+            for (let i = 0; i < count; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle-dot';
+                sparkle.style.left = `${Math.random() * 80 + 10}%`;
+                sparkle.style.top = `${Math.random() * 60 + 20}%`;
+                sparkle.style.animationDelay = `${Math.random() * 0.8}s`;
+                container.appendChild(sparkle);
+                setTimeout(() => { sparkle.remove(); }, 1600);
+            }
+        }
+
+        function escapeEncounter() {
+            playSound('button');
+            stopTargetBouncing();
+            stopCamera(); 
+            document.getElementById('encounter-screen').classList.add('hidden');
+            activeEncounter = null;
+
+            const encImage = document.getElementById('encounter-char-image');
+            const fallbackAvatar = document.getElementById('encounter-char-avatar');
+            const fallbackInner = document.getElementById('encounter-avatar-inner');
+            if (encImage) encImage.classList.add('hidden');
+            if (fallbackAvatar) fallbackAvatar.classList.remove('hidden');
+            if (fallbackInner) fallbackInner.classList.remove('hidden');
+        }
+
+        function startTargetBouncing() {
+            if (bounceInterval) clearInterval(bounceInterval);
+            let multiplier = activeEncounter.type === 'high' ? 2.5 : 1.4;
+            targetVelocity = {
+                x: (Math.random() > 0.5 ? 1 : -1) * 1.5 * multiplier,
+                y: (Math.random() > 0.5 ? 1 : -1) * 1.5 * multiplier
+            };
+            targetOffset = { x: 0, y: 0 };
+            bounceInterval = setInterval(() => {
+                if (!activeEncounter) return;
+                targetOffset.x += targetVelocity.x;
+                targetOffset.y += targetVelocity.y;
+                const limit = 80;
+                if (Math.abs(targetOffset.x) > limit) targetVelocity.x = -targetVelocity.x;
+                if (Math.abs(targetOffset.y) > limit) targetVelocity.y = -targetVelocity.y;
+                updateEncounterARPosition();
+            }, 30);
+        }
+
+        function stopTargetBouncing() {
+            if (bounceInterval) { clearInterval(bounceInterval); bounceInterval = null; }
+        }
+
+        function updateEncounterARPosition() {
+            const c = document.getElementById('encounter-char-container');
+            if (!c) return;
+            c.style.transform = `translate(${targetOffset.x}px, ${targetOffset.y}px)`;
+        }
+
+        function selectOrb(type) {
+            playSound('button');
+            selectedOrbType = type;
+            const btnC = document.getElementById('orb-consonant');
+            const btnV = document.getElementById('orb-vowel');
+            if (type === 'consonant') {
+                btnC.className = "px-3.5 py-1.5 bg-yellow-500 text-slate-950 text-[10px] font-bold rounded-lg transition-all shadow-md";
+                btnV.className = "px-3.5 py-1.5 bg-slate-800 text-slate-400 text-[10px] font-bold rounded-lg transition-all";
+            } else {
+                btnV.className = "px-3.5 py-1.5 bg-yellow-500 text-slate-950 text-[10px] font-bold rounded-lg transition-all shadow-md";
+                btnC.className = "px-3.5 py-1.5 bg-slate-800 text-slate-400 text-[10px] font-bold rounded-lg transition-all";
+            }
+        }
+
+        function tryThrowOrb() {
+            if (!activeEncounter || isThrowing || isQuizActive) return;
+            
+            isThrowing = true;
+            playSound('throw');
+            const orb = document.getElementById('magic-orb');
+            orb.classList.add('scale-[0.2]', '-translate-y-[240px]', 'duration-500');
+            setTimeout(() => {
+                orb.classList.remove('scale-[0.2]', '-translate-y-[240px]', 'duration-500');
+                evaluateThrow();
+            }, 500);
+        }
+
+        function startTutorial() {
+            tutorialCurrentStep = 0;
+            updateTutorialUI();
+            document.getElementById('tutorial-overlay').classList.remove('hidden');
+        }
+
+        function updatePlayerHUD() {
+            document.getElementById('player-gold').innerText = player.gold;
+            document.getElementById('collected-count').innerText = `${player.caughtRunes.length} ใบ`;
+            document.getElementById('hud-username').innerText = player.username;
+            
+            const activeFighter = s_characters.find(c => c.id === player.activeCharacterId) || s_characters[0];
+            document.getElementById('hud-avatar').innerText = activeFighter.avatar;
+            document.getElementById('player-avatar-map').innerText = activeFighter.avatar;
+
+            let rName = 'ผู้พิทักษ์ฝึกงาน';
+            if (player.level === 2) rName = 'ขุนศึกจารึกอักขรา';
+            if (player.level === 3) rName = 'จอมทัพไตรยางศ์ศึกษา';
+            if (player.level === 4) rName = 'อัครปราชญ์แห่งหิมพานต์';
+            document.getElementById('hud-level').innerText = `Lv.${player.level} ${rName}`;
+
+            const sh = document.getElementById('hud-shield-badge');
+            if (player.activeWard) {
+                sh.classList.remove('hidden');
+                let word = 'ยันต์ป้องกันภัย';
+                if (player.activeWard === 'shield_diamond') word = 'ยันต์เกราะเพชร';
+                if (player.activeWard === 'spell_invisible') word = 'หมอกสะกดจารชน';
+                if (player.activeWard === 'spell_reflect') word = 'สะท้อนสัมฤทธิ์คุณไสย';
+                sh.title = word;
+            } else {
+                sh.classList.add('hidden');
+            }
+
+            const tGold = document.getElementById('treasury-gold-hud');
+            const tRunes = document.getElementById('treasury-runes-hud');
+            if (tGold && tRunes) {
+                tGold.innerText = player.gold;
+                tRunes.innerText = `${player.caughtRunes.length} ใบ`;
+            }
+        }
+
+        function evaluateThrow() {
+            let roll = Math.random();
+            let successRate = 0.60;
+            if (player.inventory.includes('sword')) successRate += 0.25;
+
+            if (roll <= successRate) {
+                playSound('success');
+                showEncounterToast("สะกดเป้าได้มั่นคง! ดึงพลังสัตว์ป่าประลองปัญญาควิซ");
+                isThrowing = false;
+                isQuizActive = true;
+                setTimeout(triggerQuizChallenge, 1000);
+            } else {
+                playSound('fail');
+                showEncounterToast("สัตว์ป่าดีดดิ้นสลัดอัญมณีหลุด! ปาใหม่อีกครั้ง");
+                isThrowing = false;
+            }
+        }
+
+        let activeQuiz = null;
+
+        function triggerQuizChallenge() {
+            if (quizzes.length === 0) {
+                showEncounterToast("ไม่มีข้อมูลคำถามควิซขณะนี้");
+                escapeEncounter();
+                return;
+            }
+            activeQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+            document.getElementById('quiz-question').innerText = activeQuiz.question;
+            const container = document.getElementById('quiz-options');
+            container.innerHTML = '';
+            
+            document.getElementById('quiz-hint-text').classList.add('hidden');
+            document.getElementById('quiz-hint-text').innerText = '';
+
+            let shuffledOptions = activeQuiz.options.map((opt, index) => ({ opt, originalIndex: index }));
+            shuffledOptions.sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach((item, optionIndex) => {
+                const displayIndex = optionIndex + 1;
+                const b = document.createElement('div');
+                b.className = "w-full py-2 px-3 bg-slate-950 text-slate-300 font-bold rounded-xl border border-slate-800 transition flex justify-between items-center";
+                
+                b.innerHTML = `
+                    <button onclick="submitQuizAnswer(${item.originalIndex})" class="w-full text-left py-1 text-slate-200">
+                        ${displayIndex}. <span>${item.opt}</span>
+                    </button>
+                `;
+                container.appendChild(b);
+            });
+
+            // Force dynamic font sizes to persist correctly on reload
+            const questionEl = document.getElementById('quiz-question');
+            const optionsEl = document.getElementById('quiz-options');
+            if (currentFontSize === 'large') {
+                questionEl.style.fontSize = '1.1rem';
+                optionsEl.style.fontSize = '1.05rem';
+                setTimeout(() => {
+                    const buttons = optionsEl.getElementsByTagName('button');
+                    for (let btn of buttons) { btn.style.fontSize = '1rem'; btn.style.padding = '0.9rem'; }
+                }, 20);
+            } else if (currentFontSize === 'xlarge') {
+                questionEl.style.fontSize = '1.3rem';
+                optionsEl.style.fontSize = '1.25rem';
+                setTimeout(() => {
+                    const buttons = optionsEl.getElementsByTagName('button');
+                    for (let btn of buttons) { btn.style.fontSize = '1.15rem'; btn.style.padding = '1.1rem'; }
+                }, 20);
+            }
+
+            document.getElementById('quiz-screen').classList.remove('hidden');
+        }
+
+        function useQuizHint() {
+            if (player.gold < 30) {
+                showAlert('❌', 'ทองโบราณไม่พอ', 'ต้องการ 30 ทองโบราณในการเปิดคำใบ้');
+                return;
+            }
+            player.gold -= 30;
+            updatePlayerHUD();
+            document.getElementById('quiz-hint-text').innerText = `ปราชญ์ชี้เบาะแส: ข้อที่ถูกคือตัวเลือกที่มีคำว่า "${activeQuiz.options[activeQuiz.answer]}"`;
+            document.getElementById('quiz-hint-text').classList.remove('hidden');
+        }
+
+        function relocateRune(runeId) {
+            const mapRune = mapRunes.find(r => r.id === runeId);
+            if (mapRune) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 250 + (mapRune.id % 5) * 140 + Math.random() * 90;
+                mapRune.x = Math.max(150, Math.min(1850, Math.floor(1000 + Math.cos(angle) * distance)));
+                mapRune.y = Math.max(150, Math.min(1850, Math.floor(1000 + Math.sin(angle) * distance)));
+                mapRune.visible = true; 
+            }
+        }
+
+        async function submitQuizAnswer(selectedIdx) {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            isQuizActive = false;
+            player.quizStats.total += 1;
+
+            if (selectedIdx === activeQuiz.answer) {
+                player.quizStats.correct += 1;
+                player.caughtRunes.push(activeEncounter.id);
+                
+                relocateRune(activeEncounter.id);
+
+                const gEarned = activeEncounter.rewardGold || 30;
+                player.gold += gEarned;
+                player.xp += activeEncounter.rewardXp || 50;
+                
+                updatePlayerLevel();
+                updatePlayerHUD();
+                await saveStateToCloud();
+                await savePlayerLeaderboardData();
+
+                showAlert('🏆🎓', 'สะกดบันทึกสัตว์ทิพย์สำเร็จ!', `สัตว์วิเศษหิมพานต์ "${activeEncounter.name}" สยบอยู่ใต้บัญชาและบรรจุลงในคลังอักขราเรียบร้อย\n\nได้รับ: +${gEarned} พดด้วงโบราณ 🪙 / +50 EXP ⚡`);
+                escapeEncounter();
+                renderMapRunes();
+            } else {
+                player.quizStats.wrong += 1;
+                playSound('fail');
+                
+                relocateRune(activeEncounter.id);
+
+                await saveStateToCloud();
+                await savePlayerLeaderboardData();
+
+                showAlert('❌⚠️', 'สัตว์ทิพย์เตลิดหนี', 'วิเคราะห์ปริศนาไม่ถูกต้อง พลังสัจจะสั่นคลอน สัตว์หิมพานต์จึงดีดตัวเตลิดหนีหายไปในม่านหมอก');
+                escapeEncounter();
+                renderMapRunes();
+            }
+        }
+
+        function updatePlayerLevel() {
+            if (player.xp >= 1500) player.level = 4;
+            else if (player.xp >= 800) player.level = 3;
+            else if (player.xp >= 300) player.level = 2;
+            else player.level = 1;
+        }
+
+        function openDailyCheckinModal() {
+            playSound('button');
+            const modal = document.getElementById('checkin-modal');
+            const actionArea = document.getElementById('checkin-action-area');
+            const todayStr = new Date().toDateString();
+
+            document.getElementById('reward-gold-text').innerText = adminConfig.rewardGold || 50;
+            document.getElementById('reward-xp-text').innerText = adminConfig.rewardXp || 100;
+
+            if (lastCheckinDate === todayStr) {
+                actionArea.innerHTML = `
+                    <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-center text-xs text-emerald-400 font-bold">
+                        <i class="fa-solid fa-circle-check animate-bounce"></i> วันนี้ท่านอัญเชิญสัตยาธิษฐานบรรณาการเรียบร้อยแล้ว
+                    </div>
+                `;
+            } else {
+                actionArea.innerHTML = `
+                    <button onclick="claimDailyCheckinReward()" class="w-full py-3 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg border-2 border-yellow-200 active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-signature"></i> ถวายสัตยาธิษฐานเช็คอินรับพร
+                    </button>
+                `;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        async function claimDailyCheckinReward() {
+            playSound('success');
+            const todayStr = new Date().toDateString();
+            lastCheckinDate = todayStr;
+
+            const goldReward = adminConfig.rewardGold || 50;
+            const xpReward = adminConfig.rewardXp || 100;
+
+            player.gold += goldReward;
+            player.xp += xpReward;
+
+            updatePlayerLevel();
+            updatePlayerHUD();
+            await saveStateToCloud();
+
+            createMysticalSparkles(20);
+            openDailyCheckinModal();
+
+            showAlert('✨💖🪙', 'สัตยาธิษฐานสำเร็จ!', `พรผู้พิทักษ์ภาษาไทยอวยพรแด่ท่าน!\n\nได้รับ: +${goldReward} พดด้วงโบราณ 🪙 / +${xpReward} EXP ⚡`);
+        }
+
+        function closeCheckInModal() {
+            playSound('button');
+            document.getElementById('checkin-modal').classList.add('hidden');
+        }
+
+        function renderLibraryTrivia() {
+            const container = document.getElementById('library-trivia-list');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = "bg-yellow-950/20 p-3 rounded-xl border border-yellow-600/30 text-xs mb-2 text-yellow-300";
+            headerDiv.innerHTML = `<strong>📖 บันทึกสาระปัญญาราชวิหารสยาม</strong><br>รวบรวมเกร็ดความรู้และเฉลยความหมายทางวรรณคดีจากชุดคำถามทั้งหมดของผู้พิทักษ์เพื่อสืบสานศาสตร์ความรู้ภาษาไทยสืบไป`;
+            container.appendChild(headerDiv);
+
+            quizzes.forEach((item, index) => {
+                const isCorrectStr = item.options[item.answer];
+                const card = document.createElement('div');
+                card.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-left text-[10.5px]";
+                card.innerHTML = `
+                    <div class="text-yellow-500 font-bold">คัมภีร์เรื่องที่ ${index + 1}</div>
+                    <p class="font-bold text-white leading-snug">${item.question}</p>
+                    <div class="p-2 bg-[#092226] border border-[#ca8a04]/30 rounded text-slate-300">
+                        🔑 เกร็ดความรู้: <strong class="text-yellow-400 font-extrabold">${isCorrectStr}</strong>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderTreasuryRunes() {
+            const grid = document.getElementById('treasury-runes-grid');
+            grid.innerHTML = '';
+
+            runesDb.forEach((rune) => {
+                const caughtInstances = player.caughtRunes.filter(id => id === rune.id).length;
+                const isCaught = caughtInstances > 0;
+                const card = document.createElement('div');
+                
+                if (isCaught) {
+                    card.className = "bg-slate-900 border border-slate-800 p-3 flex flex-col items-center text-center space-y-1.5 shadow relative overflow-hidden";
+                    card.innerHTML = `
+                        <div class="absolute top-1.5 right-1.5 bg-emerald-950 text-emerald-300 text-[8px] font-black px-1.5 py-0.5 rounded border border-emerald-500/20">x${caughtInstances}</div>
+                        <div class="w-12 h-12 bg-slate-950 text-yellow-400 font-bold text-2xl rounded-2xl flex items-center justify-center border border-yellow-500 rune-glow">
+                            <span>${rune.avatar}</span>
+                        </div>
+                        <h4 class="font-bold text-[10px] text-white leading-none">${rune.name}</h4>
+                        <p class="text-[8px] text-slate-400 leading-snug line-clamp-2">${rune.level}</p>
+                    `;
+                } else {
+                    card.className = "bg-slate-950/40 border border-dashed border-slate-800 p-3 flex flex-col items-center text-center space-y-1.5 opacity-45";
+                    card.innerHTML = `
+                        <div class="w-12 h-12 bg-slate-900 text-slate-600 text-xl rounded-2xl flex items-center justify-center border border-slate-800">🔒</div>
+                        <h4 class="font-bold text-[9.5px] text-slate-500 leading-none">สัตว์ทิพย์อักขราโบราณ</h4>
+                        <p class="text-[8px] text-slate-500 leading-tight truncate w-full">${rune.hints}</p>
+                    `;
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        function renderTreasuryItems() {
+            const list = document.getElementById('treasury-items-list');
+            list.innerHTML = '';
+
+            legendaryItems.forEach((item) => {
+                const isPurchased = player.inventory.includes(item.id);
+                const isEquipped = player.equippedItem === item.id;
+                const isWardActive = player.activeWard === item.id;
+
+                const card = document.createElement('div');
+                card.className = `bg-slate-900 border ${isEquipped || isWardActive ? 'border-emerald-500' : 'border-slate-800'} p-3 rounded-xl flex items-center justify-between gap-3 shadow`;
+                
+                let buttonHtml = '';
+                if (item.category === 'defense') {
+                    if (isWardActive) {
+                        buttonHtml = `<span class="bg-emerald-950 text-emerald-400 text-[9px] font-black px-2.5 py-1.5 rounded border border-emerald-500">ลงยันต์คุ้มค่ายอยู่</span>`;
+                    } else if (isPurchased) {
+                        buttonHtml = `<button onclick="activateDefenseWard('${item.id}')" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-bold text-[9px] rounded-lg border border-yellow-200 transition">ร่ายคาถาป้องกัน</button>`;
+                    } else {
+                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition">🪙 ${item.price} พดด้วง</button>`;
+                    }
+                } else {
+                    if (isEquipped) {
+                        buttonHtml = `<span class="text-emerald-400 font-bold text-[9px]">ถือใช้งานในตัว</span>`;
+                    } else if (isPurchased) {
+                        buttonHtml = `<button onclick="equipItem('${item.id}')" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-bold text-[9px] rounded-lg border border-yellow-200 transition">ถือสวมใส่</button>`;
+                    } else {
+                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition">🪙 ${item.price} พดด้วง</button>`;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                        <div class="w-11 h-11 bg-slate-950 text-2xl rounded-xl flex items-center justify-center border border-slate-800 flex-shrink-0">${item.icon}</div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-xs text-white leading-tight flex items-center gap-1">
+                                ${item.name}
+                                ${item.category === 'defense' ? '<span class="text-[8px] bg-emerald-950 text-emerald-400 px-1 py-0.2 rounded">คาถาคุ้มวิหาร</span>' : ''}
+                            </h4>
+                            <p class="text-[9px] text-slate-400 leading-snug mt-0.5">${item.description}</p>
+                        </div>
+                    </div>
+                    <div class="flex-shrink-0">${buttonHtml}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function buyItem(itemId, price) {
+            playSound('button');
+            if (player.gold < price) {
+                showAlert('❌', 'เงินพดด้วงไม่เพียงพอ', 'พดด้วงสะสมขัดสนยิ่งนัก กรุณาออกล่าสะกดจารึกอักขรเพิ่มเติมเพื่อรับรางวัล!');
+                return;
+            }
+            player.gold -= price;
+            player.inventory.push(itemId);
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+            updatePlayerHUD();
+            renderTreasuryItems();
+            showAlert('🔮🛒', 'ปลดล็อกของวิเศษสัมฤทธิ์!', `ท่านได้รับมอบของมงคลวิเศษลงคลังส่วนบุคคลเสร็จสมบูรณ์!`);
+        }
+
+        async function equipItem(itemId) {
+            playSound('button');
+            player.equippedItem = itemId;
+            await saveStateToCloud();
+            updatePlayerHUD();
+            renderTreasuryItems();
+            showEncounterToast("สวมใส่อาวุธโบราณหนุนพลังแล้ว");
+        }
+
+        async function activateDefenseWard(itemId) {
+            playSound('success');
+            player.activeWard = itemId;
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+            updatePlayerHUD();
+            renderTreasuryItems();
+            showAlert('🛡️🧿', 'เปิดอารักขาวิหารสำเร็จ', 'คาถาและยันต์เกราะเพชรป้องกันค่ายจะทำงานอัตโนมัติ เพื่อสกัดการปล้นชิงแต้มทอง!');
+        }
+
+        function switchTab(tab) {
+            playSound('button');
+            const tabMap = document.getElementById('tab-map');
+            const tabDex = document.getElementById('tab-dex');
+            const tabPK = document.getElementById('tab-pk');
+
+            tabMap.className = "flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors";
+            tabDex.className = "flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors";
+            tabPK.className = "flex flex-col items-center justify-center flex-1 text-slate-500 hover:text-yellow-500 transition-colors";
+
+            document.getElementById('pk-screen').classList.add('hidden');
+            toggleTreasury(false);
+
+            if (tab === 'map') {
+                tabMap.className = "flex flex-col items-center justify-center flex-1 text-yellow-500 transition-colors";
+            } else if (tab === 'dex') {
+                tabDex.className = "flex flex-col items-center justify-center flex-1 text-yellow-500 transition-colors";
+                toggleTreasury(true);
+            } else if (tab === 'pk') {
+                tabPK.className = "flex flex-col items-center justify-center flex-1 text-yellow-500 transition-colors";
+                document.getElementById('pk-screen').classList.remove('hidden');
+                switchPKTab('characters');
+            }
+        }
+
+        function showKnowledgeBase() {
+            playSound('button');
+            document.getElementById('trivia-modal').classList.remove('hidden');
+        }
+
+        function closeTrivia() {
+            playSound('button');
+            document.getElementById('trivia-modal').classList.add('hidden');
+        }
+
+        function nextTutorialStep() {
+            playSound('button');
+            if (tutorialCurrentStep < tutorialSteps.length - 1) {
+                tutorialCurrentStep++;
+                updateTutorialUI();
+            } else {
+                skipTutorial();
+            }
+        }
+
+        function prevTutorialStep() {
+            if (tutorialCurrentStep > 0) {
+                playSound('button');
+                tutorialCurrentStep--;
+                updateTutorialUI();
+            }
+        }
+
+        function skipTutorial() {
+            localStorage.setItem('thaigo_tutorial_completed_v2', 'true');
+            document.getElementById('tutorial-overlay').classList.add('hidden');
+        }
+
+        async function fetchAndRenderPlayerStats() {
+            const tbody = document.getElementById('admin-stats-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-yellow-500"><i class="fa-solid fa-circle-notch animate-spin"></i> กำลังโหลดทำเนียบสถิติจากวิหาร...</td></tr>`;
+
+            fetchedOnlinePlayersForStats = [];
+
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const q = window.firebaseSystem.collection(db, 'artifacts', appId, 'public', 'data', 'players');
+                    const snap = await window.firebaseSystem.getDocs(q);
+                    
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        fetchedOnlinePlayersForStats.push(d);
+                    });
+                } catch (e) {}
+            }
+
+            if (fetchedOnlinePlayersForStats.length === 0) {
+                fetchedOnlinePlayersForStats = [
+                    { username: 'ขุนพลกุมภกรรณสยาม', level: 3, quizStats: { total: 18, correct: 14, wrong: 4 } },
+                    { username: 'นางเบญกายชลจิต', level: 2, quizStats: { total: 10, correct: 9, wrong: 1 } },
+                    { username: 'ศรีปราชญ์นิพนธ์ลักษณ์', level: 4, quizStats: { total: 32, correct: 30, wrong: 2 } }
+                ];
+                fetchedOnlinePlayersForStats.push({
+                    username: player.username + " (ตัวคุณ)",
+                    level: player.level,
+                    quizStats: player.quizStats
+                });
+            } else {
+                const idx = fetchedOnlinePlayersForStats.findIndex(p => p.uid === player.uid);
+                if (idx !== -1) {
+                    fetchedOnlinePlayersForStats[idx].quizStats = player.quizStats;
+                    fetchedOnlinePlayersForStats[idx].username = player.username + " (ตัวคุณ)";
+                } else {
+                    fetchedOnlinePlayersForStats.push({
+                        username: player.username + " (ตัวคุณ)",
+                        level: player.level,
+                        quizStats: player.quizStats
+                    });
+                }
+            }
+
+            renderAdminStatsTable(fetchedOnlinePlayersForStats);
+        }
+
+        function renderAdminStatsTable(list) {
+            const tbody = document.getElementById('admin-stats-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-2 text-center text-slate-500">ไม่พบข้อมูลรายชื่อใดๆ</td></tr>`;
+                return;
+            }
+
+            list.forEach(p => {
+                const q = p.quizStats || { total: 0, correct: 0, wrong: 0 };
+                const pct = q.total > 0 ? Math.round((q.correct / q.total) * 100) : 0;
+                
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-900 hover:bg-slate-950/40";
+                tr.innerHTML = `
+                    <td class="py-2 pr-1.5 font-semibold text-white max-w-[100px] truncate" title="${p.username}">${p.username}</td>
+                    <td class="py-2 px-1.5 text-center text-yellow-400 font-bold">Lv.${p.level}</td>
+                    <td class="py-2 px-1.5 text-center text-slate-300 font-medium">${q.total} ครั้ง</td>
+                    <td class="py-2 px-1.5 text-center">
+                        <span class="text-emerald-400 font-semibold">${q.correct}</span>
+                        <span class="text-slate-600">/</span>
+                        <span class="text-red-400 font-semibold">${q.wrong}</span>
+                    </td>
+                    <td class="py-2 pl-1.5 text-right font-black text-[#ca8a04]">${pct}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAdminStatsTable() {
+            const q = document.getElementById('admin-stats-search').value.toLowerCase();
+            const filtered = fetchedOnlinePlayersForStats.filter(p => p.username.toLowerCase().includes(q));
+            renderAdminStatsTable(filtered);
+        }
+
+        function openAdminPrompt() {
+            const pass = prompt("ระบุคีย์ผู้พัฒนาเพื่อสลักเกณฑ์ตรวจรางวัล:");
+            if (pass === 'kulisara24') { // Admin Key updated as requested
+                document.getElementById('admin-reward-gold').value = adminConfig.rewardGold;
+                document.getElementById('admin-reward-xp').value = adminConfig.rewardXp;
+                document.getElementById('admin-panel-modal').classList.remove('hidden');
+                
+                renderAdminQuizzesEditorList();
+                fetchAndRenderPlayerStats(); 
+            } else {
+                alert("ปฏิเสธสิทธิ์เข้าใช้ระบบแอดมิน!");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel-modal').classList.add('hidden');
+        }
+
+        async function saveAdminConfigFromPanel() {
+            adminConfig.rewardGold = parseInt(document.getElementById('admin-reward-gold').value) || 50;
+            adminConfig.rewardXp = parseInt(document.getElementById('admin-reward-xp').value) || 100;
+            closeAdminPanel();
+            showAlert('⚙️💾', 'อัปเดตสากลเสร็จสมบูรณ์', 'ประกาศใช้มาตรฐานเกณฑ์รางวัลสัตยาธิษฐานเช็คอินสากลแล้วครับ');
+        }
+
+        function renderAdminQuizzesEditorList() {
+            const container = document.getElementById('admin-quizzes-list-container');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            quizzes.forEach((quiz, idx) => {
+                const item = document.createElement('div');
+                item.className = "p-2 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center text-[10px]";
+                item.innerHTML = `
+                    <div class="flex-1 min-w-0 pr-2 text-left">
+                        <span class="text-yellow-500 font-bold block">ข้อที่ ${idx+1}</span>
+                        <p class="truncate text-slate-300 font-medium">${quiz.question}</p>
+                    </div>
+                    <button onclick="openQuizEditorSubform(${idx})" class="bg-[#ca8a04] text-slate-950 font-black px-2 py-1 rounded text-[9px] hover:bg-yellow-400 transition-all flex-shrink-0">
+                        <i class="fa-solid fa-edit"></i> แก้ไข
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function openQuizEditorSubform(index) {
+            playSound('button');
+            const subform = document.getElementById('quiz-editor-subform');
+            subform.classList.remove('hidden');
+            
+            document.getElementById('editor-action-title').innerText = "แก้ไขควิซคำถามหลัก";
+            document.getElementById('edit-quiz-index').value = index;
+            
+            const quiz = quizzes[index];
+            document.getElementById('edit-quiz-question').value = quiz.question;
+            document.getElementById('edit-quiz-opt0').value = quiz.options[0] || '';
+            document.getElementById('edit-quiz-opt1').value = quiz.options[1] || '';
+            document.getElementById('edit-quiz-opt2').value = quiz.options[2] || '';
+            document.getElementById('edit-quiz-opt3').value = quiz.options[3] || '';
+            document.getElementById('edit-quiz-correct').value = quiz.answer;
+        }
+
+        function openAddNewQuizForm() {
+            playSound('button');
+            const subform = document.getElementById('quiz-editor-subform');
+            subform.classList.remove('hidden');
+            
+            document.getElementById('editor-action-title').innerText = "สร้างควิซวรรณคดีใหม่";
+            document.getElementById('edit-quiz-index').value = "-1"; // Indicate dynamic push
+            document.getElementById('edit-quiz-question').value = "";
+            document.getElementById('edit-quiz-opt0').value = "";
+            document.getElementById('edit-quiz-opt1').value = "";
+            document.getElementById('edit-quiz-opt2').value = "";
+            document.getElementById('edit-quiz-opt3').value = "";
+            document.getElementById('edit-quiz-correct').value = "0";
+        }
+
+        function closeQuizEditorSubform() {
+            playSound('button');
+            document.getElementById('quiz-editor-subform').classList.add('hidden');
+        }
+
+        async function saveQuizChanges() {
+            playSound('success');
+            const index = parseInt(document.getElementById('edit-quiz-index').value);
+            const questionText = document.getElementById('edit-quiz-question').value.trim();
+            const opt0 = document.getElementById('edit-quiz-opt0').value.trim();
+            const opt1 = document.getElementById('edit-quiz-opt1').value.trim();
+            const opt2 = document.getElementById('edit-quiz-opt2').value.trim();
+            const opt3 = document.getElementById('edit-quiz-opt3').value.trim();
+            const correctAns = parseInt(document.getElementById('edit-quiz-correct').value);
+
+            if (!questionText || !opt0 || !opt1 || !opt2 || !opt3) {
+                alert("กรุณากรอกข้อมูลคำถามและตัวเลือกให้ครบทั้ง 4 ช่อง!");
+                return;
+            }
+
+            const updatedQuizObj = {
+                question: questionText,
+                options: [opt0, opt1, opt2, opt3],
+                answer: correctAns
+            };
+
+            if (index === -1) {
+                quizzes.push(updatedQuizObj);
+            } else {
+                quizzes[index] = updatedQuizObj;
+            }
+
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const quizDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'quizzes_config');
+                    await window.firebaseSystem.setDoc(quizDocPath, {
+                        quizzes: quizzes,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch(e) {
+                    console.warn("Could not sync updated quizzes to Firestore:", e);
+                }
+            }
+
+            localStorage.setItem('thaigo_custom_quizzes', JSON.stringify(quizzes));
+
+            closeQuizEditorSubform();
+            renderAdminQuizzesEditorList();
+            renderLibraryTrivia(); 
+            showEncounterToast("💾 บันทึกจารึกคำถามลงคลังวิทยาการเรียบร้อย!");
+        }
+
+        function showEncounterToast(msg) {
+            const toast = document.getElementById('encounter-toast');
+            if (toast) {
+                toast.innerText = msg;
+                toast.classList.remove('hidden');
+                setTimeout(() => { if (toast) toast.classList.add('hidden'); }, 2000);
+            }
+        }
+
+        function showAlert(icon, title, msg) {
+            document.getElementById('alert-icon').innerText = icon;
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = msg;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            playSound('button');
+            document.getElementById('custom-alert').classList.add('hidden');
+        }
+
+        function calibrateGyro() {
+            showEncounterToast("🎯 ปรับระนาบกลางเป้าสำเร็จ");
+        }
+
+        function updateTutorialUI() {
+            const step = tutorialSteps[tutorialCurrentStep];
+            const titleEl = document.getElementById('tutorial-title');
+            const iconEl = document.getElementById('tutorial-icon');
+            const descEl = document.getElementById('tutorial-description');
+            
+            if (titleEl) titleEl.innerText = step.title;
+            if (iconEl) iconEl.innerText = step.icon;
+            if (descEl) descEl.innerText = step.description;
+
+            const dotsContainer = document.getElementById('tutorial-dots');
+            if (dotsContainer) {
+                dotsContainer.innerHTML = '';
+                tutorialSteps.forEach((_, idx) => {
+                    const dot = document.createElement('div');
+                    dot.className = `w-2 h-2 rounded-full transition-all duration-300 ${idx === tutorialCurrentStep ? 'bg-yellow-500 w-4' : 'bg-slate-700'}`;
+                    dotsContainer.appendChild(dot);
+                });
+            }
+
+            const prevBtn = document.getElementById('tutorial-prev-btn');
+            const nextBtn = document.getElementById('tutorial-next-btn');
+
+            if (prevBtn) {
+                if (tutorialCurrentStep === 0) prevBtn.classList.add('opacity-40', 'pointer-events-none');
+                else prevBtn.classList.remove('opacity-40', 'pointer-events-none');
+            }
+
+            if (nextBtn) {
+                if (tutorialCurrentStep === tutorialSteps.length - 1) {
+                    nextBtn.innerHTML = `เริ่มต้นเดินทาง <i class="fa-solid fa-wand-magic-sparkles ml-1"></i>`;
+                } else {
+                    nextBtn.innerHTML = `ถัดไป <i class="fa-solid fa-chevron-right ml-1"></i>`;
+                }
+            }
+        }
+
+        function toggleTreasury(show) {
+            playSound('button');
+            const screen = document.getElementById('treasury-screen');
+            if (screen) {
+                if (show) {
+                    renderTreasuryRunes();
+                    renderTreasuryItems();
+                    screen.classList.remove('hidden');
+                } else {
+                    screen.classList.add('hidden');
+                }
+            }
+        }
+
+        function switchTreasuryTab(tab) {
+            playSound('button');
+            const runesTab = document.getElementById('tab-sub-runes');
+            const itemsTab = document.getElementById('tab-sub-items');
+            const runesGrid = document.getElementById('treasury-runes-grid');
+            const itemsList = document.getElementById('treasury-items-list');
+
+            if (tab === 'runes') {
+                if (runesTab) runesTab.className = "flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400";
+                if (itemsTab) itemsTab.className = "flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400";
+                if (runesGrid) runesGrid.classList.remove('hidden');
+                if (itemsList) itemsList.classList.add('hidden');
+            } else {
+                if (itemsTab) itemsTab.className = "flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400";
+                if (runesTab) runesTab.className = "flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400";
+                if (runesGrid) runesGrid.classList.add('hidden');
+                if (itemsList) itemsList.classList.remove('hidden');
+            }
+        }
+
+        async function attemptPointSteal(oppUid, oppUsername, oppGold, oppWard) {
+            playSound('throw');
+            if (oppGold <= 0) {
+                showAlert('🪙', 'คลังเป้าหมายว่างเปล่า', 'ผู้พิทักษ์ท่านนี้ไม่มีเงินพดด้วงคงเหลือให้ท่านขโมยในขณะนี้!');
+                return;
+            }
+
+            const stealAmount = Math.max(10, Math.floor(oppGold * 0.15));
+
+            if (oppWard && oppWard !== 'null' && oppWard !== 'undefined') {
+                if (oppWard === 'shield_diamond') {
+                    playSound('shield');
+                    showAlert('🛡️', 'การปล้นล้มเหลว!', `แย่แล้ว! ${oppUsername} ลงอักขระ "ยันต์เกราะเพชรคุ้มวิหาร" ป้องปัดความเสียหายได้แบบร้อยเปอร์เซ็นต์!`);
+                    return;
+                } else if (oppWard === 'spell_reflect') {
+                    playSound('fail');
+                    const reflectedLoss = Math.min(player.gold, stealAmount);
+                    player.gold -= reflectedLoss;
+                    updatePlayerHUD();
+                    await saveStateToCloud();
+                    showAlert('🧿⚠️', 'คุณไสยสะท้อนโต้กลับ!', `${oppUsername} มี "ยันต์ตรรกะสะท้อนคุณไสย" สะท้อนการโจมตีกลับมาดูดกลืนแต้มพดด้วงของคุณไปแทน -${reflectedLoss} พดด้วง!`);
+                    return;
+                } else if (oppWard === 'spell_invisible') {
+                    if (Math.random() > 0.15) {
+                        playSound('fail');
+                        showAlert('🌫️', 'ส่องหาค่ายไม่เจอ', `${oppUsername} ร่าย "มนตร์สะกดพรางค่ายม่านหมอก" บดบังรัศมีวิหาร ทำให้ท่านบุกเข้าไม่ถูกตำแหน่ง!`);
+                        return;
+                    }
+                }
+            }
+
+            player.gold += stealAmount;
+            updatePlayerHUD();
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+            showAlert('🪙🗡️', 'Raiding สัมฤทธิผล!', `ท่านลอบบุกฝ่าด่านปราชญ์และแย่งชิงพดด้วงจาก ${oppUsername} สำเร็จ: +${stealAmount} 🪙!`);
+            renderOpponentListsForStealing();
+        }
+
+        let battleState = { active: false, opponent: null, playerHp: 0, playerMaxHp: 0, opponentHp: 0, opponentMaxHp: 0, turn: 'player' };
+
+        function calculatePlayerStats(char) {
+            const lvl = player.characterLevels[char.id] || 1;
+            const highCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'high').length;
+            const midCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'mid').length;
+            const lowCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'low').length;
+
+            const atkBoost = highCount * 2 + (lvl - 1) * 3;
+            const hpBoost = midCount * 8 + (lvl - 1) * 15;
+            const defBoost = midCount * 1.5 + (lvl - 1) * 2;
+            const speedBoost = lowCount * 1.5 + (lvl - 1) * 2;
+
+            return {
+                hp: char.hp + hpBoost,
+                atk: char.atk + atkBoost,
+                def: Math.floor(char.def + defBoost),
+                speed: Math.floor(char.speed + speedBoost)
+            };
+        }
+
+        function previewCharacterShowcase(charId) {
+            playSound('success');
+            const char = s_characters.find(c => c.id === charId);
+            if (!char) return;
+
+            const stats = calculatePlayerStats(char);
+            const lvl = player.characterLevels[charId] || 1;
+
+            currentPreviewCharId = charId;
+            updateCharacterPortrait(charId);
+
+            document.getElementById('showcase-fighter-rank').innerText = `LEVEL ${lvl}`;
+            document.getElementById('showcase-avatar').innerText = char.avatar;
+            document.getElementById('showcase-name').innerText = char.name;
+            document.getElementById('showcase-description').innerText = char.desc + ` มีทักษะไม้ตายคือ "${char.skillName}" ซึ่งจะปลดปล่อยอานุภาพสูงสุดเมื่อประลองในลานสยามยุทธ์`;
+            
+            document.getElementById('showcase-stat-atk').innerText = `Atk ${stats.atk}`;
+            document.getElementById('showcase-stat-hp').innerText = `HP ${stats.hp}`;
+            document.getElementById('showcase-stat-spd').innerText = `Spd ${stats.speed}`;
+
+            document.getElementById('character-showcase-modal').classList.remove('hidden');
+        }
+
+        function closeCharacterShowcase() {
+            playSound('button');
+            document.getElementById('character-showcase-modal').classList.add('hidden');
+        }
+
+        function init3DCardParallax() {
+            const cardZone = document.getElementById('3d-card-touchzone');
+            const holoCard = document.getElementById('hologram-3d-card');
+            if(!cardZone || !holoCard) return;
+
+            function handleMove(pageX, pageY, clientWidth, clientHeight, offsetLeft, offsetTop) {
+                const xVal = pageX - offsetLeft;
+                const yVal = pageY - offsetTop;
+                
+                const yRotation = 22 * ((xVal - clientWidth / 2) / (clientWidth / 2));
+                const xRotation = -22 * ((yVal - clientHeight / 2) / (clientHeight / 2));
+                
+                holoCard.style.transform = `rotateX(${xRotation}deg) rotateY(${yRotation}deg) scale(1.05)`;
+            }
+
+            cardZone.addEventListener('mousemove', (e) => {
+                const rect = cardZone.getBoundingClientRect();
+                handleMove(e.clientX, e.clientY, rect.width, rect.height, rect.left, rect.top);
+            });
+
+            cardZone.addEventListener('touchmove', (e) => {
+                if(e.touches.length === 0) return;
+                const touch = e.touches[0];
+                const rect = cardZone.getBoundingClientRect();
+                handleMove(touch.clientX, touch.clientY, rect.width, rect.height, rect.left, rect.top);
+            }, { passive: true });
+
+            const resetCard = () => {
+                holoCard.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+            };
+
+            cardZone.addEventListener('mouseleave', resetCard);
+            cardZone.addEventListener('touchend', resetCard);
+        }
+
+        function updatePKStatsUI() {
+            const highCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'high').length;
+            const midCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'mid').length;
+            const lowCount = player.caughtRunes.filter(id => runesDb.find(r => r.id === id)?.type === 'low').length;
+
+            document.getElementById('stat-high-boost').innerText = `Atk +${highCount * 2}`;
+            document.getElementById('stat-mid-boost').innerText = `HP +${midCount * 8} / Def +${Math.floor(midCount * 1.5)}`;
+            document.getElementById('stat-low-boost').innerText = `Spd +${lowCount * 1.5}`;
+
+            const activeFighter = s_characters.find(c => c.id === player.activeCharacterId) || s_characters[0];
+            document.getElementById('selected-pk-fighter-hud').innerHTML = `${activeFighter.avatar} ${activeFighter.name.split(' ')[0]}`;
+        }
+
+        async function selectActiveFighter(charId) {
+            playSound('button');
+            player.activeCharacterId = charId;
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+            updatePKStatsUI();
+            updatePlayerHUD();
+            renderPKCharacters();
+            showEncounterToast(`อัญเชิญขุนพลหลัก: ${s_characters.find(c => c.id === charId).name.split(' ')[0]}`);
+        }
+
+        function renderPKCharacters() {
+            const list = document.getElementById('pk-character-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            s_characters.forEach((char) => {
+                const lvl = player.characterLevels[char.id] || 1;
+                const isSelected = player.activeCharacterId === char.id;
+                const stats = calculatePlayerStats(char);
+
+                const card = document.createElement('div');
+                card.className = `bg-gradient-to-br ${char.color} border-2 ${isSelected ? 'border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.45)] scale-[1.01]' : 'border-slate-800'} p-4 rounded-3xl space-y-3 transition-all duration-300 relative overflow-hidden`;
+                card.style.backgroundColor = 'rgba(11, 29, 34, 0.9)';
+
+                card.innerHTML = `
+                    <div class="absolute -right-6 -top-6 text-yellow-500/10 text-7xl font-bold select-none pointer-events-none">${char.avatar}</div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3 z-10">
+                            <div class="w-16 h-16 rounded-2xl bg-slate-950 flex items-center justify-center border-2 border-yellow-500/30 shadow-md">
+                                ${char.illustration}
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-sm text-yellow-400 title-font">${char.name}</h4>
+                                <p class="text-[9.5px] text-yellow-500/80 font-black tracking-wide">เลเวลสัประยุทธ์: ${lvl}</p>
+                            </div>
+                        </div>
+                        <div class="z-10 flex flex-col gap-1.5 items-end">
+                            ${isSelected ? 
+                                `<span class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-[9px] font-black px-3 py-1 rounded-full border border-white/20 shadow">ใช้งานอยู่ 🎯</span>` : 
+                                `<button onclick="selectActiveFighter('${char.id}')" class="bg-slate-900 hover:bg-yellow-500 text-yellow-400 hover:text-slate-950 text-[9px] font-black px-3 py-1 rounded-full border border-yellow-600/40 transition active:scale-95">อัญเชิญใช้งาน ⚔️</button>`
+                            }
+                            <button onclick="previewCharacterShowcase('${char.id}')" class="bg-blue-900/80 text-blue-200 border border-blue-500/30 text-[8px] px-2.5 py-0.5 rounded-full hover:bg-blue-800 transition">
+                                <i class="fa-solid fa-eye"></i> พินิจรูปลักษณ์
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-300 leading-relaxed font-medium pl-1">${char.desc}</p>
+                    <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-bold bg-slate-950/90 p-2.5 rounded-2xl border border-slate-800 text-slate-300">
+                        <div>
+                            <p class="text-slate-500 text-[8px] uppercase tracking-wider">HP ชีวา</p>
+                            <p class="text-white text-xs">${stats.hp}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-[8px] uppercase tracking-wider">Atk โจมตี</p>
+                            <p class="text-white text-xs">${stats.atk}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-[8px] uppercase tracking-wider">Def ป้องกัน</p>
+                            <p class="text-white text-xs">${stats.def}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-[8px] uppercase tracking-wider">Spd ปราดเปรียว</p>
+                            <p class="text-white text-xs">${stats.speed}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-2.5 border-t border-slate-800/60 text-[10.5px]">
+                        <span class="text-slate-400 flex items-center gap-1"><i class="fa-solid fa-scroll text-emerald-500"></i> สละจารึก 1 ใบเพื่อฝนฝีมือ:</span>
+                        <button onclick="upgradeFighter('${char.id}')" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-black text-[9px] rounded-xl border border-yellow-200 shadow active:scale-95 transition-all flex items-center gap-1">
+                            ⚡ อัปเลเวล
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function upgradeFighter(charId) {
+            playSound('success');
+            if (player.caughtRunes.length < 1) {
+                showAlert('❌', 'การสังเวยไม่สำเร็จ', 'ต้องการสะสมพยัญชนะ (การ์ดสัตว์ทิพย์) อย่างน้อย 1 ใบในคลังเพื่อประกอบพิธีอัปเลเวล!');
+                return;
+            }
+
+            player.caughtRunes.pop();
+            player.characterLevels[charId] = (player.characterLevels[charId] || 1) + 1;
+            
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+            renderPKCharacters();
+            updatePKStatsUI();
+            updatePlayerHUD();
+            
+            const targetChar = s_characters.find(c => c.id === charId);
+            showAlert('⚡🥋', 'อัปเกรดสำเร็จ!', `อักขรเวทมนตราได้เพิ่มพลังให้แก่ ${targetChar.name.split(' ')[0]} จนเลเวลเพิ่มขึ้นเป็น ${player.characterLevels[charId]}!`);
+        }
+
+        function switchPKTab(tab) {
+            playSound('button');
+            const tabChars = document.getElementById('tab-pk-chars');
+            const tabDuels = document.getElementById('tab-pk-duels');
+            const contentChars = document.getElementById('pk-tab-characters-content');
+            const contentDuels = document.getElementById('pk-tab-duels-content');
+
+            if (tab === 'characters') {
+                tabChars.className = "flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400";
+                tabDuels.className = "flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400";
+                contentChars.classList.remove('hidden');
+                contentDuels.classList.add('hidden');
+                renderPKCharacters();
+                updatePKStatsUI();
+            } else {
+                tabDuels.className = "flex-1 py-2 font-bold border-b-2 border-yellow-500 text-yellow-400";
+                tabChars.className = "flex-1 py-2 font-bold border-b-2 border-transparent text-slate-400";
+                contentDuels.classList.remove('hidden');
+                contentChars.classList.add('hidden');
+                renderOpponentListsForStealing();
+            }
+        }
+
+        async function renderOpponentListsForStealing() {
+            const list = document.getElementById('pk-duel-opponent-list');
+            if (!list) return;
+            list.innerHTML = `
+                <div class="p-4 text-center text-xs text-yellow-500"><i class="fa-solid fa-spinner animate-spin"></i> กำลังค้นหาผู้พิทักษ์ในอาณาจักร...</div>
+            `;
+
+            let players = [];
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const q = window.firebaseSystem.collection(db, 'artifacts', appId, 'public', 'data', 'players');
+                    const snap = await window.firebaseSystem.getDocs(q);
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        if (d.uid !== player.uid) players.push(d);
+                    });
+                } catch (e) {}
+            }
+
+            if (players.length === 0) {
+                players = [
+                    { uid: 'opp-1', username: 'ขุนศึกสุโขทัยเดช', level: 2, gold: 240, activeWard: 'spell_invisible' },
+                    { uid: 'opp-2', username: 'พญาลิไทครองไกร', level: 3, gold: 510, activeWard: null },
+                    { uid: 'opp-3', username: 'มโนรามรดกแก้ว', level: 1, gold: 90, activeWard: 'shield_diamond' }
+                ];
+            }
+
+            list.innerHTML = '';
+            players.forEach(opp => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs shadow-md";
+                
+                let wardBadge = '<span class="text-slate-500 italic text-[9px]">ไม่มีการป้องกัน</span>';
+                if (opp.activeWard === 'shield_diamond') wardBadge = '<span class="text-emerald-400 font-bold text-[9px]"><i class="fa-solid fa-shield-halved"></i> ยันต์เกราะเพชร</span>';
+                if (opp.activeWard === 'spell_invisible') wardBadge = '<span class="text-cyan-400 font-bold text-[9px]"><i class="fa-solid fa-ghost"></i> ม่านหมอก</span>';
+                if (opp.activeWard === 'spell_reflect') wardBadge = '<span class="text-purple-400 font-bold text-[9px]"><i class="fa-solid fa-bahai"></i> สะท้อนกลับ</span>';
+
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-white flex items-center gap-1.5">
+                            <span>👹 ${opp.username}</span>
+                            <span class="text-[9px] bg-slate-800 text-yellow-400 px-1.5 py-0.2 rounded font-black">Lv.${opp.level}</span>
+                        </h4>
+                        <p class="text-[9.5px] text-slate-400 flex items-center gap-2">
+                            <span>🪙 พดด้วงสะสม: <strong class="text-white">${opp.gold}</strong></span>
+                            <span>•</span>
+                            <span>${wardBadge}</span>
+                        </p>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button onclick="attemptPointSteal('${opp.uid}', '${opp.username}', ${opp.gold}, '${opp.activeWard}')" class="px-2.5 py-1.5 bg-red-950 text-red-300 border border-red-500/30 text-[10px] font-bold rounded-lg hover:bg-red-900 transition flex items-center gap-1">
+                            <i class="fa-solid fa-mask"></i> บุกปล้น
+                        </button>
+                        <button onclick="initiatePKDuel('${opp.uid}', '${opp.username}', ${opp.level}, '👹')" class="px-2.5 py-1.5 bg-yellow-500 text-slate-950 text-[10px] font-black rounded-lg hover:bg-yellow-400 transition flex items-center gap-1">
+                            <i class="fa-solid fa-chess-rook"></i> ท้าดวล
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function initiatePKDuel(oppUid, oppUsername, oppLevel, oppAvatar) {
+            playSound('success');
+            
+            const activeFighter = s_characters.find(c => c.id === player.activeCharacterId) || s_characters[0];
+            const fighterStats = calculatePlayerStats(activeFighter);
+
+            battleState.active = true;
+            battleState.opponent = { uid: oppUid, username: oppUsername, level: oppLevel, avatar: oppAvatar };
+            
+            battleState.playerHp = fighterStats.hp;
+            battleState.playerMaxHp = fighterStats.hp;
+            
+            battleState.opponentHp = 100 + oppLevel * 25;
+            battleState.opponentMaxHp = 100 + oppLevel * 25;
+            battleState.turn = 'player';
+
+            document.getElementById('battle-self-name').innerText = activeFighter.name.split(' ')[0];
+            document.getElementById('battle-self-avatar').innerText = activeFighter.avatar;
+            document.getElementById('battle-opp-name').innerText = oppUsername;
+            document.getElementById('battle-opp-avatar').innerText = oppAvatar || '👹';
+            
+            updateBattleBars();
+            
+            document.getElementById('battle-combat-log').innerText = `การดวลเริ่มต้น! ${activeFighter.name.split(' ')[0]} เผชิญหน้า ${oppUsername}! ท่านเริ่มโจมตีก่อน`;
+            document.getElementById('battle-turn-indicator').innerText = "รอบของผู้เล่น";
+            document.getElementById('battle-turn-indicator').className = "px-4 py-1 bg-yellow-500 text-slate-950 text-xs font-bold rounded-full border border-white/20 animate-pulse";
+
+            document.getElementById('pk-battleground-screen').classList.remove('hidden');
+        }
+
+        function updateBattleBars() {
+            const selfHpBar = document.getElementById('battle-self-hp-bar');
+            const selfHpText = document.getElementById('battle-self-hp-text');
+            const oppHpBar = document.getElementById('battle-opp-hp-bar');
+            const oppHpText = document.getElementById('battle-opp-hp-text');
+
+            if (selfHpBar && selfHpText) {
+                const selfPct = Math.max(0, Math.min(100, (battleState.playerHp / battleState.playerMaxHp) * 100));
+                selfHpBar.style.width = `${selfPct}%`;
+                selfHpText.innerText = `HP ${battleState.playerHp} / ${battleState.playerMaxHp}`;
+            }
+
+            if (oppHpBar && oppHpText) {
+                const oppPct = Math.max(0, Math.min(100, (battleState.opponentHp / battleState.opponentMaxHp) * 100));
+                oppHpBar.style.width = `${oppPct}%`;
+                oppHpText.innerText = `HP ${battleState.opponentHp} / ${battleState.opponentMaxHp}`;
+            }
+        }
+
+        function executeCombatAction(action) {
+            if (!battleState.active || battleState.turn !== 'player') return;
+
+            playSound('slash');
+            const activeFighter = s_characters.find(c => c.id === player.activeCharacterId) || s_characters[0];
+            const fighterStats = calculatePlayerStats(activeFighter);
+            const logEl = document.getElementById('battle-combat-log');
+
+            if (action === 'attack') {
+                const dmg = Math.max(5, Math.floor(fighterStats.atk * (0.8 + Math.random() * 0.4)));
+                battleState.opponentHp = Math.max(0, battleState.opponentHp - dmg);
+                logEl.innerText = `⚔️ ${activeFighter.name.split(' ')[0]} โจมตีกายภาพ สร้างความเสียหาย ${dmg} หน่วย!`;
+            } else if (action === 'skill') {
+                const dmg = Math.max(12, Math.floor(fighterStats.atk * 1.6));
+                battleState.opponentHp = Math.max(0, battleState.opponentHp - dmg);
+                logEl.innerText = `✨ ร่ายคาถาไม้ตาย "${activeFighter.skillName}" อัดใส่ศัตรูอย่างสาหัส ${dmg} หน่วย!`;
+            } else if (action === 'defend') {
+                const heal = Math.max(10, Math.floor(fighterStats.hp * 0.15));
+                battleState.playerHp = Math.min(battleState.playerMaxHp, battleState.playerHp + heal);
+                logEl.innerText = `🛡️ ${activeFighter.name.split(' ')[0]} ตั้งการ์ดฟื้นฟูปราณ คืนพลังชีวิตได้ +${heal} หน่วย!`;
+            }
+
+            updateBattleBars();
+
+            if (battleState.opponentHp <= 0) {
+                endBattle('player');
+            } else {
+                battleState.turn = 'opponent';
+                document.getElementById('battle-turn-indicator').innerText = "รอบของศัตรู";
+                document.getElementById('battle-turn-indicator').className = "px-4 py-1 bg-red-600 text-white text-xs font-bold rounded-full border border-white/20 animate-pulse";
+                setTimeout(opponentTurn, 1500);
+            }
+        }
+
+        function opponentTurn() {
+            if (!battleState.active) return;
+
+            playSound('fail');
+            const activeFighter = s_characters.find(c => c.id === player.activeCharacterId) || s_characters[0];
+            const fighterStats = calculatePlayerStats(activeFighter);
+            const logEl = document.getElementById('battle-combat-log');
+            
+            const roll = Math.random();
+            if (roll < 0.7) {
+                const rawDmg = Math.max(5, Math.floor((10 + battleState.opponent.level * 3) * (0.8 + Math.random() * 0.4)));
+                const dmg = Math.max(3, rawDmg - Math.floor(fighterStats.def * 0.5));
+                
+                battleState.playerHp = Math.max(0, battleState.playerHp - dmg);
+                logEl.innerText = `👹 ${battleState.opponent.username} โจมตีตบะตอบกลับ หักล้างจากพลังรับของท่าน สร้างความเสียหายสุทธิ ${dmg} หน่วย!`;
+            } else {
+                const heal = Math.max(5, Math.floor(battleState.opponentMaxHp * 0.1));
+                battleState.opponentHp = Math.min(battleState.opponentMaxHp, battleState.opponentHp + heal);
+                logEl.innerText = `🛡️ ${battleState.opponent.username} ถอยไปรั้งสมาธิเพื่อฟื้น HP +${heal} หน่วย!`;
+            }
+
+            updateBattleBars();
+
+            if (battleState.playerHp <= 0) {
+                endBattle('opponent');
+            } else {
+                battleState.turn = 'player';
+                document.getElementById('battle-turn-indicator').innerText = "รอบของผู้เล่น";
+                document.getElementById('battle-turn-indicator').className = "px-4 py-1 bg-yellow-500 text-slate-950 text-xs font-bold rounded-full border border-white/20 animate-pulse";
+            }
+        }
+
+        function forfeitCombat() {
+            playSound('button');
+            showAlert('🏳️', 'ล่าถอยจากศึก', 'คุณตัดสินใจโบกธงขาวถอนกำลังทหารออกอย่างปลอดภัย!');
+            document.getElementById('pk-battleground-screen').classList.add('hidden');
+            battleState.active = false;
+        }
+
+        async function endBattle(winner) {
+            battleState.active = false;
+            document.getElementById('pk-battleground-screen').classList.add('hidden');
+
+            if (winner === 'player') {
+                const rewardGold = 100 + battleState.opponent.level * 20;
+                player.gold += rewardGold;
+                player.xp += 150;
+                updatePlayerLevel();
+                updatePlayerHUD();
+                await saveStateToCloud();
+                await savePlayerLeaderboardData();
+
+                showAlert('🏆🥋', 'ชัยชนะในการดวล!', `ทหารพิทักษ์ของท่านสยบ ${battleState.opponent.username} ได้อย่างงดงาม!\n\nได้รับ: +${rewardGold} พดด้วง 🪙 / +150 EXP ⚡`);
+            } else {
+                playSound('fail');
+                showAlert('💀⚠️', 'พ่ายแพ้ศึกยุทธ์', 'ทหารเอกหมดกำลังใจสู้ก่อน จำเป็นต้องล่าถอยเพื่อบำรุงพลังปัญญาเพิ่มเติม!');
+            }
+            renderOpponentListsForStealing();
+        }
+    </script>
+</body>
+</html>
