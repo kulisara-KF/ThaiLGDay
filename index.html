@@ -127,18 +127,6 @@
 </head>
 <body class="text-slate-100 overflow-hidden select-none">
 
-    <!-- Global Loading/Error Screen -->
-    <div id="loading-error-diagnostic" class="hidden absolute inset-0 z-[9999] p-6 text-center flex-col justify-center items-center gap-5 border-4 border-yellow-600 bg-[#051417]">
-        <div class="text-5xl">⚠️</div>
-        <h2 class="text-xl text-yellow-500 title-font font-bold">ตรวจพบข้อขัดข้องในสารบบอักขรา</h2>
-        <p id="diagnostic-err-msg" class="max-w-md text-xs opacity-90 leading-relaxed text-slate-300">
-            แนะนำให้รันเกมผ่านโปรโตคอลรักษาความปลอดภัย HTTPS เพื่อความปลอดภัยสูงสุด
-        </p>
-        <button onclick="window.location.reload()" class="bg-gradient-to-r from-amber-700 to-yellow-600 px-6 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all text-slate-950">
-            โหลดหน้าจอใหม่อีกครั้ง
-        </button>
-    </div>
-
     <!-- Main Mobile Frame Container -->
     <div id="app" class="relative max-w-md mx-auto h-[100dvh] w-full bg-[#051417] flex flex-col justify-between shadow-2xl border-x-4 border-yellow-600/50 overflow-hidden">
         
@@ -196,7 +184,7 @@
                 </div>
                 <div>
                     <h1 class="text-4xl font-extrabold text-yellow-400 title-font tracking-wider animate-pulse">THAI-GO!</h1>
-                    <p class="text-xs text-slate-300 mt-1 tracking-wide">สืบค้นจารึกมหาอักษรทั้ง 44 ปลดล็อกทหารเอกประลองชิงเงินพดด้วง</p>
+                    <p class="text-xs text-slate-300 mt-1 tracking-wide">สืบค้นจารึกมхаอักษรทั้ง 44 ปลดล็อกทหารเอกประลองชิงเงินพดด้วง</p>
                 </div>
                 
                 <div class="bg-slate-950/90 border border-yellow-600/40 rounded-2xl p-4 text-xs text-slate-300 max-w-xs mx-auto shadow-inner text-left space-y-2">
@@ -248,7 +236,7 @@
         <!-- ==================== HEADER (HUD STYLES) ==================== -->
         <header id="main-header" class="hidden absolute top-0 left-0 right-0 z-30 p-3 bg-gradient-to-b from-[#051417] via-[#051417]/85 to-transparent flex justify-between items-center">
             <div class="flex items-center space-x-2 bg-slate-950/95 border border-yellow-600/40 p-1 pr-3 rounded-full shadow-md">
-                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-slate-950 text-xs border border-yellow-300/40 font-bold" id="hud-avatar">
+                <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-slate-950 text-xs border border-yellow-300/40" id="hud-avatar">
                     👑
                 </div>
                 <div>
@@ -701,6 +689,32 @@
                         <i class="fa-solid fa-circle-xmark"></i>
                     </button>
                 </div>
+
+                <!-- Admin Create Announcement Section -->
+                <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bullhorn text-yellow-500"></i> ลำโพงประกาศสากลของอัครวิหาร
+                    </h4>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">หัวข้อประกาศ</label>
+                        <input id="admin-announcement-title" type="text" placeholder="เช่น ด่านเวทมนตร์ภาษาไทยเปิดแล้ว!" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white" />
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">เนื้อความสำคัญ</label>
+                        <textarea id="admin-announcement-msg" rows="2" placeholder="รายละเอียดประกาศธรรมแด่ผู้พิทักษ์อักษรา..." class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-yellow-500"></textarea>
+                    </div>
+                    <div class="flex justify-between items-center gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[10px] text-slate-400 mb-1">ไอคอน (Emoji)</label>
+                            <input id="admin-announcement-icon" type="text" value="📢" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-1 px-3 text-xs text-center text-white" />
+                        </div>
+                        <div class="flex items-end h-full pt-4">
+                            <button onclick="saveAdminAnnouncement()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-black px-4 py-1.5 rounded-lg text-[10px] shadow active:scale-95 transition-all">
+                                📢 ประกาศใช้อาคม
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
                     <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5">⚙️ ปรับคุณสมบัติเช็คอินสากล</h4>
@@ -772,6 +786,16 @@
                     </div>
                 </div>
 
+                <!-- real-time question statistics layout (ห้ามสุ่มขึ้นมาเองเด็ดขาด) -->
+                <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-column text-yellow-500"></i> สถิติการตอบคำถามสืบค้น (รายข้อจริง)
+                    </h4>
+                    <div class="max-h-56 overflow-y-auto space-y-2 pr-1" id="admin-quiz-detailed-stats">
+                        <p class="text-[9px] text-slate-500 text-center py-2">กำลังดึงสัจธรรมข้อมูลดิบจากค่ายผู้พิทักษ์...</p>
+                    </div>
+                </div>
+
                 <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center border-b border-slate-800 pb-1.5">
                         <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
@@ -831,7 +855,7 @@
             <div class="bg-slate-900 border border-slate-700 p-5 rounded-2xl text-center space-y-3 max-w-xs shadow-2xl relative">
                 <div id="alert-icon" class="text-4xl mb-1 text-yellow-500">📜</div>
                 <h4 id="alert-title" class="text-sm font-bold text-white title-font">ประกาศราชการอักษร</h4>
-                <p id="alert-message" class="text-[11px] text-slate-300 leading-relaxed break-words">รายละเอียดประกาศสำคัญ...</p>
+                <p id="alert-message" class="text-[11px] text-slate-300 leading-relaxed break-words whitespace-pre-line">รายละเอียดประกาศสำคัญ...</p>
                 <button onclick="closeAlert()" class="w-full py-2 bg-gradient-to-r from-slate-800 to-slate-950 border border-yellow-600/40 text-yellow-500 font-bold text-xs rounded-lg shadow transition-all">
                     น้อมรับบัญชาธรรม
                 </button>
@@ -879,7 +903,7 @@
 
                         <div class="flex justify-between items-center" style="transform: translateZ(20px);">
                             <span class="text-[9px] font-bold tracking-widest text-yellow-400/80 bg-slate-900 px-2.5 py-0.5 rounded-full border border-yellow-500/30">SIAM LEGEND</span>
-                            <button onclick="regenerateShowcaseImage()" class="text-[9px] font-extrabold text-cyan-400 bg-slate-950 hover:bg-slate-900 px-2.5 py-1 rounded-full border border-cyan-500/30 flex items-center gap-1 active:scale-95 transition-all">
+                            <button id="regenerate-card-btn" onclick="regenerateShowcaseImage()" class="hidden text-[9px] font-extrabold text-cyan-400 bg-slate-950 hover:bg-slate-900 px-2.5 py-1 rounded-full border border-cyan-500/30 flex items-center gap-1 active:scale-95 transition-all">
                                 <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> ร่ายรูปใหม่
                             </button>
                             <span id="showcase-fighter-rank" class="text-[9px] font-extrabold text-red-400">LV.1</span>
@@ -897,6 +921,7 @@
                                 </div>
                                 <img id="showcase-image" src="" alt="Fighter Portrait" class="w-full h-full object-cover hidden transition-all duration-500" />
                                 <span id="showcase-avatar" class="text-6xl filter drop-shadow(0 15px 12px rgba(0,0,0,0.65)) select-none animate-bounce hidden" style="animation-duration: 3s">🐒</span>
+                                <div id="showcase-vector-art" class="absolute inset-0 flex items-center justify-center"></div>
                             </div>
                         </div>
 
@@ -1005,7 +1030,7 @@
             { id: 26, name: 'บ (ใบโพธิ์รัตนบารมี)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลานพระศรีมหาโพธิ์จำลอง', phrase: 'บอ ใบไม้ อารักขาหัวใจให้ร่มรื่น', rewardGold: 30, rewardXp: 50, avatar: '🍃' },
             { id: 27, name: 'ป (ปลามัจฉานุบุตรวานร)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'หนองน้ำอุทยานสวรรค์', phrase: 'ปอ ปลา แหวกว่ายธารน้ำแห่งสัจธรรม', rewardGold: 30, rewardXp: 50, avatar: '🐟' },
             { id: 28, name: 'ผ (ผึ้งเวทภมรเกสรทิพย์)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'สวนสมุนไพรทิพย์', phrase: 'ผอ ผึ้ง ขยันขันแข็งสร้างสติและปัญญา', rewardGold: 30, rewardXp: 50, avatar: '🐝' },
-            { id: 29, name: 'ฝ (ฝาสลักลายอาคมอารักขา)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'หอหนังสือพระราชจารึก', phrase: 'ฝอ ฝา มิดชิดอารักขาสิ่งวิเศษล้ำค่า', rewardGold: 45, rewardXp: 65, avatar: '🏺' },
+            { id: 29, name: 'ฝ (ฝาสสุกลายอาคมอารักขา)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'หอหนังสือพระราชจารึก', phrase: 'ฝอ ฝา มิดชิดอารักขาสิ่งวิเศษล้ำค่า', rewardGold: 45, rewardXp: 65, avatar: '🏺' },
             { id: 30, name: 'พ (พานแก้วพุ่มทองสักการะ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ห้องพิธีการหลวงโบราณ', phrase: 'พอ พาน เชิดชูปราชญ์ภาษาไทย', rewardGold: 30, rewardXp: 50, avatar: '🌸' },
             { id: 31, name: 'ฟ (ฟีนิกซ์หิมพานต์สลัดปีกเพลิง)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดผาหัวสิงโตทิศตะวันตก', phrase: 'ฟอ ฟัน แกร่งกล้าเคี้ยวมลายสลายมนต์ดำ', rewardGold: 45, rewardXp: 65, avatar: '🦅' },
             { id: 32, name: 'ภ (ภมรวรารักษ์ป่าหิม)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ท่าน้ำขนส่งค้าขายประวัติศาสตร์', phrase: 'ภอ สำเภา ล่องนำทองพดด้วงพรั่งพรูขึ้นบก', rewardGold: 40, rewardXp: 60, avatar: '🪲' },
@@ -1019,7 +1044,7 @@
             { id: 40, name: 'ส (สิงหไกรสรคำรณเดโช)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'เขตคุ้มภัยพิทักษ์ไพร', phrase: 'สอ เสือ ยอดจ้าวป่าทระนงสะกดขวัญดุร้าย', rewardGold: 30, rewardXp: 50, avatar: '🦁' },
             { id: 41, name: 'ห (หงส์สลักดาริกาทองคำพราย)', type: 'high', level: 'อักษรสูง (+Atk)', hints: 'ห้องลับใต้ดินยอดปราสาทไตร', phrase: 'หอ หีบ บรรจุมรดกพิจิตรแห่งชาติภาษา', rewardGold: 30, rewardXp: 50, avatar: '🦢' },
             { id: 42, name: 'ฬ (ว่าวจุฬาเหินฟ้าปราบพายุ)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดผามหามนตรีเหนือน่านน้ำ', phrase: 'ฬอ จุฬา ลอยโดดเด่นสถิตฟ้าเหนือแคว้น', rewardGold: 75, rewardXp: 110, avatar: '🪁' },
-            { id: 43, name: 'อ (อ่างแก้วนพเก้าสรงมนตรา)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลำธารหลังวัดหลวงด้านเหนือ', phrase: 'ออ อ่าง บรรจุน้ำศักดิ์สิทธิ์สรงความรู้', rewardGold: 30, rewardXp: 50, avatar: '🏺' },
+            { id: 43, name: 'อ (อ่างแก้วนพเก้าสรงมนตรา)', type: 'mid', level: 'อักษรกลาง (+HP/Def)', hints: 'ลำธารหลังวัดหลวงด้านเหนือ', phrase: 'ออ อ่าง บรรจุน้ำศักดิสิทธิ์สรงความรู้', rewardGold: 30, rewardXp: 50, avatar: '🏺' },
             { id: 44, name: 'ฮ (นกเค้าโมงส่องเนตรราตรี)', type: 'low', level: 'อักษรต่ำ (+Speed)', hints: 'ยอดไพรสนธยาทะมึนทิศใต้', phrase: 'ฮอ นกฮูก ส่องราตรีคุ้มกันจารึกแผ่นดินสยาม', rewardGold: 150, rewardXp: 200, avatar: '🦉' }
         ];
 
@@ -1201,46 +1226,14 @@
         // Custom Font Sizer system
         let currentFontSize = 'normal';
 
-        function toggleFontSize() {
-            playSound('button');
-            const questionEl = document.getElementById('quiz-question');
-            const optionsEl = document.getElementById('quiz-options');
-            const indicatorEl = document.getElementById('font-size-indicator');
+        // Real-time Question statistics tracker (ห้ามมั่วเด็ดขาด)
+        // Format: { [questionIndex]: { correct: count, wrong: count } }
+        let realQuestionStats = {};
 
-            if (currentFontSize === 'normal') {
-                currentFontSize = 'large';
-                questionEl.style.fontSize = '1.1rem';
-                optionsEl.style.fontSize = '1.05rem';
-                indicatorEl.innerText = 'ใหญ่';
-                const buttons = optionsEl.getElementsByTagName('button');
-                for (let btn of buttons) {
-                    btn.style.fontSize = '1rem';
-                    btn.style.padding = '0.9rem';
-                }
-            } else if (currentFontSize === 'large') {
-                currentFontSize = 'xlarge';
-                questionEl.style.fontSize = '1.3rem';
-                optionsEl.style.fontSize = '1.25rem';
-                indicatorEl.innerText = 'ใหญ่พิเศษ';
-                const buttons = optionsEl.getElementsByTagName('button');
-                for (let btn of buttons) {
-                    btn.style.fontSize = '1.15rem';
-                    btn.style.padding = '1.1rem';
-                }
-            } else {
-                currentFontSize = 'normal';
-                questionEl.style.fontSize = '0.75rem'; // Default tailwind text-xs size equiv
-                optionsEl.style.fontSize = '0.75rem';
-                indicatorEl.innerText = 'ปกติ';
-                const buttons = optionsEl.getElementsByTagName('button');
-                for (let btn of buttons) {
-                    btn.style.fontSize = '0.7rem'; // text-[10px] equiv
-                    btn.style.padding = '0.5rem';
-                }
-            }
-        }
+        // System Announcement state
+        let activeAnnouncement = null;
 
-        // Pre-baked holographic vector SVGs for Himmapan runes
+        // Custom HTML SVG vector renderers for Himmapan creatures
         function getHimmapanCreatureSVG(rune) {
             const char = rune.name.charAt(0);
             const avatar = rune.avatar;
@@ -1317,8 +1310,8 @@
         }
 
         let quizzes = [
-            { question: '“จะหักอื่นขืนหักก็จักได้ หักอาลัยนี้ไม่หลุดสุดจะหัก สารพัดตัดขาดประหลาดนัก แต่ตัดรักนี้ไม่ขาดประหลาดใจ” จากกลอนข้างต้น สุนทรภู่กล่าวว่าสิ่งใดเป็นสิ่งที่ตัดไม่ขาด', options: ['เขา', 'รัก', 'เรียน', 'อดีต'], answer: 0 },
-            { question: 'ลูกของพระอภัยมณีกับนางปีเสื้อสมุทรมีเชื่อว่าอะไร', options: ['สินสมุทร','นางเงือก', 'สุดสาคร', 'นนทก'], answer: 0 },
+            { question: '“จะหักอื่นขืนหักก็จักได้ หักอาลัยนี้ไม่หลุดสุดจะหัก สารพัดตัดขาดประหลาดนัก แต่ตัดรักนี้ไม่ขาดประหลาดใจ” จากกลอนข้างต้น สุนทรภู่กล่าวว่าสิ่งใดเป็นสิ่งที่ตัดไม่ขาด', options: ['เขา', 'รัก', 'เรียน', 'อดีต'], answer: 1 },
+            { question: 'ลูกของพระอภัยมณีกับนางผีเสื้อสมุทรมีชื่อว่าอะไร', options: ['สินสมุทร','นางเงือก', 'สุดสาคร', 'นนทก'], answer: 0 },
             { question: 'นนทกตายแล้วมาเกิดเป็นใคร', options: ['ทศกัณฐ์', 'พิเภก', 'พระราม', 'มัจฉานุ'], answer: 0 },
             { question: 'พระอภัยมณีใช้เครื่องดนตรีใด', options: ['ปี่', 'กีตาร์', 'ขลุ่ย', 'ซอ'], answer: 0 },
             { question: 'ม้านิลมังกรเป็นเพศใด', options: ['กะเทย', 'เมีย', 'ผู้', 'ทอม'], answer: 0 },
@@ -1335,7 +1328,6 @@
             { question: 'คำว่า ทักษ์ ใน "พิทักษ์" สะกดตามมาตราตัวสะกดในข้อใดจึงถูกต้องตามทฤษฎีอักษรศาสตร์โบราณ?', options: ['มาตรา แม่ กก (สะกดด้วยพยัญชนะวรรค ก.ไก่)', 'มาตรา แม่ กด (สะกดด้วยพยัญชนะวรรค ด.เด็ก)', 'มาตรา แม่ กบ (สะกดด้วยพยัญชนะวรรค บ.ใบไม้)', 'มาตรา แม่ กน (สะกดด้วยพยัญชนะวรรค น.หนู)'], answer: 0 },
             { question: 'พยัญชนะไทยชุดใดต่อไปนี้ จัดอยู่ในหมวดหมู่อักษรสามหมู่กลุ่ม "อักษรสูง" ทั้งสิ้น?', options: ['ข, ฉ, ถ, ผ, ศ, ห', 'ก, จ, ด, ต, บ, ป', 'ค, ง, ช, ซ, ท, น', 'ร, ล, ว, ม, ย, ณ'], answer: 0 },
             { question: 'พยัญชนะภาษาไทยลำดับที่ ๔๔ ตัวสุดท้ายคือข้อใด และเป็นอักษรหมู่ใดในไตรยางศ์?', options: ['ฮ. นกฮูก (อักษรต่ำเดี่ยว)', 'อ. อ่าง (อักษรกลางคู่)', 'ฬ. จุฬา (อักษรสูงเดี่ยว)', 'ฑ. มณโฑ (อักษรต่ำคู่)'], answer: 0 }
-        
         ];
 
         let adminConfig = {
@@ -1364,7 +1356,10 @@
                 instances: { prompt: prompt }, 
                 parameters: { "sampleCount": 1 } 
             };
-            const apiKey = "";
+            const apiKey = ""; // Left empty for client customization or automatic fallback
+            if (!apiKey) {
+                throw new Error("No API key configured for portrait generation");
+            }
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
 
             for (let i = 0; i < retries; i++) {
@@ -1396,19 +1391,42 @@
 
         let currentPreviewCharId = null;
 
+        // INSTANT SHOWCASE CARD FALLBACK WITHOUT DELAYS (ใช้เวคเตอร์ SVG วาดทันทีถ้าไม่มีคีย์)
         async function updateCharacterPortrait(charId, forceRegenerate = false) {
             const showcaseImg = document.getElementById('showcase-image');
             const showcaseLoader = document.getElementById('showcase-image-loader');
             const showcaseAvatar = document.getElementById('showcase-avatar');
+            const showcaseVector = document.getElementById('showcase-vector-art');
+            const regenBtn = document.getElementById('regenerate-card-btn');
 
-            if (!showcaseImg || !showcaseLoader || !showcaseAvatar) return;
+            if (!showcaseImg || !showcaseLoader || !showcaseAvatar || !showcaseVector) return;
 
             showcaseLoader.style.opacity = '1';
             showcaseLoader.classList.remove('hidden');
             showcaseImg.classList.add('hidden');
             showcaseAvatar.classList.add('hidden');
+            showcaseVector.innerHTML = '';
+            showcaseVector.classList.add('hidden');
 
+            const char = s_characters.find(c => c.id === charId);
             const prompt = charPrompts[charId] || `${charId} fantasy character portrait, masterpiece`;
+
+            // If empty API key, immediately skip backoff and render offline SVG vector
+            const tempApiKey = ""; 
+            if (!tempApiKey) {
+                setTimeout(() => {
+                    showcaseVector.innerHTML = char.illustration || '';
+                    showcaseVector.classList.remove('hidden');
+                    showcaseVector.querySelector('svg').style.width = "110px";
+                    showcaseVector.querySelector('svg').style.height = "110px";
+                    showcaseLoader.style.opacity = '0';
+                    showcaseLoader.classList.add('hidden');
+                    if (regenBtn) regenBtn.classList.add('hidden');
+                }, 100);
+                return;
+            }
+
+            if (regenBtn) regenBtn.classList.remove('hidden');
 
             try {
                 let imgData = null;
@@ -1429,8 +1447,11 @@
                 showcaseLoader.style.opacity = '0';
                 setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
             } catch (err) {
-                console.warn("Imagen generation failed, falling back to emoji:", err);
-                showcaseAvatar.classList.remove('hidden');
+                console.warn("Imagen generation failed, falling back to vector:", err);
+                showcaseVector.innerHTML = char.illustration || '';
+                showcaseVector.classList.remove('hidden');
+                showcaseVector.querySelector('svg').style.width = "110px";
+                showcaseVector.querySelector('svg').style.height = "110px";
                 showcaseLoader.style.opacity = '0';
                 setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
             }
@@ -1501,6 +1522,8 @@
             updatePlayerHUD();
             renderLibraryTrivia(); 
             init3DCardParallax();
+            loadQuizStatsOffline();
+            checkAndLoadAnnouncement();
         };
 
         function setupMapDrag() {
@@ -1612,6 +1635,29 @@
             else showAlert('❓', 'ไม่พบประวัติ', 'ยังไม่พบบันทึกรหัสผ่านในเครื่องนี้');
         }
 
+        // UNIQUE USERNAME VALIDATION FUNCTION (ตรวจเช็คชื่อซ้ำ ห้ามซ้ำกับผู้เล่นคนอื่นบนคลาวด์)
+        async function checkUsernameUniqueness(username, currentUid) {
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const q = window.firebaseSystem.collection(db, 'artifacts', appId, 'public', 'data', 'players');
+                    const snap = await window.firebaseSystem.getDocs(q);
+                    let isTaken = false;
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        if (data.username && data.username.trim().toLowerCase() === username.trim().toLowerCase() && data.uid !== currentUid) {
+                            isTaken = true;
+                        }
+                    });
+                    return !isTaken;
+                } catch (e) {
+                    console.warn("Firestore validation failed, checking offline fallback...");
+                }
+            }
+            return true; 
+        }
+
         async function handleFacebookLogin() {
             playSound('button');
             if (window.firebaseSystem && window.firebaseSystem.isConnected) {
@@ -1621,19 +1667,37 @@
                     const result = await window.firebaseSystem.signInWithPopup(auth, provider);
                     const user = result.user;
                     
-                    player.username = user.displayName || "ผู้พิทักษ์ Facebook";
+                    const fName = user.displayName || "ผู้พิทักษ์ Facebook";
+                    const fUid = user.uid;
+
+                    // Uniqueness Check
+                    const isUnique = await checkUsernameUniqueness(fName, fUid);
+                    if (!isUnique) {
+                        showAlert('⚠️', 'บัญชีนี้มีผู้ลงทะเบียนแล้ว', `ชื่อผู้ใช้ "${fName}" มีอยู่แล้วในสัจธรรมวิหาร กรุณาใช้วิธีลงทะเบียนปกติเพื่อเปลี่ยนชื่อเล่นอักษรศาสตร์ครับ`);
+                        return;
+                    }
+
+                    player.username = fName;
                     player.avatar = "👤";
-                    player.uid = user.uid;
+                    player.uid = fUid;
                     localStorage.setItem('thaigo_player_uid', player.uid);
                     localStorage.setItem('thaigo_player_name', player.username);
                     await syncStateWithCloudAndLaunch();
                     showAlert('🔵 FB', 'เชื่อมต่อสิทธิ์เฟซบุ๊กสำเร็จ', `เข้าสู่ระบบในชื่อผู้พิทักษ์: ${player.username}`);
                 } catch (err) {
-                    console.error("Strict Facebook Login failed:", err);
-                    showAlert('❌ Facebook Error', 'ไม่สามารถเข้าสู่ระบบด้วย Facebook ได้', 'เกิดความล้มเหลวในการเชื่อมต่อเครือข่าย หรือเบราว์เซอร์ไม่รองรับการเปิดหน้าต่างภายนอก กรุณากรอกชื่อและกู้รหัสเพื่อลงทะเบียนใช้งานปกติ!');
+                    console.error("Facebook Login failed:", err);
+                    showAlert(
+                        '❌ Facebook Error', 
+                        'ไม่สามารถเข้าสู่ระบบด้วย Facebook ได้', 
+                        'เกิดข้อผิดพลาดในการเชื่อมต่อ หรือโดเมนนี้ยังไม่ได้รับอนุญาต (auth/unauthorized-domain) แนะนำให้ใช้ช่องทางลงทะเบียนปกติและใส่ชื่อที่แตกต่างออกไปเพื่อเข้าประลองยุทธ์ครับ'
+                    );
                 }
             } else {
-                showAlert('⚠️ เชื่อมต่อขัดข้อง', 'ระบบล็อกอินอภิบาลออฟไลน์', 'เซิร์ฟเวอร์ระบบล็อกอินขัดข้องชั่วคราว หรือไม่พบคอนฟิกเครือข่ายสำหรับติดต่อ Facebook จริงในสภาพแวดล้อมจำลองนี้ กรุณาลงทะเบียนแบบปกติ');
+                showAlert(
+                    '⚠️ เชื่อมต่อขัดข้อง', 
+                    'ระบบล็อกอิน Facebook ออฟไลน์', 
+                    'ไม่พบการเชื่อมต่อเครือข่ายสำหรับติดต่อ Facebook จริงในพื้นที่นี้ กรุณาลงทะเบียนแบบระบุชื่อผู้เล่นตามปกติแทนได้ทันที'
+                );
             }
         }
 
@@ -1641,8 +1705,17 @@
             playSound('button');
             const nameInput = document.getElementById('login-username').value.trim() || 'ปราชญ์นิรนามวิทยา';
             const manualUid = document.getElementById('login-uid').value.trim();
+            const prospectiveUid = manualUid || 'local-' + generateUUID();
+
+            // Uniqueness check for general login
+            const isUnique = await checkUsernameUniqueness(nameInput, prospectiveUid);
+            if (!isUnique) {
+                showAlert('⚠️', 'ชื่อผู้พิทักษ์นี้ถูกใช้งานแล้ว', 'ขออภัยครับ! ชื่อผู้พิทักษ์นี้มีผู้จารึกไว้ในทำเนียบคลาวด์สากลเรียบร้อยแล้ว กรุณาใช้นามแฝงอื่นเพื่อปฏิบัติธรรมและป้องกันสถิติทับซ้อนครับ!');
+                return;
+            }
+
             player.username = nameInput;
-            player.uid = manualUid || 'local-' + generateUUID();
+            player.uid = prospectiveUid;
 
             localStorage.setItem('thaigo_player_uid', player.uid);
             localStorage.setItem('thaigo_player_name', nameInput);
@@ -1681,6 +1754,7 @@
                     }
                     await savePlayerLeaderboardData();
 
+                    // Load quizzes configuration
                     const quizDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'quizzes_config');
                     const quizSnapshot = await window.firebaseSystem.getDoc(quizDocPath);
                     if (quizSnapshot.exists()) {
@@ -1688,6 +1762,13 @@
                         if (cloudQuizzes && cloudQuizzes.length > 0) {
                             quizzes = cloudQuizzes;
                         }
+                    }
+
+                    // Load real detailed question statistics
+                    const statsDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'detailed_quiz_stats');
+                    const statsSnapshot = await window.firebaseSystem.getDoc(statsDocPath);
+                    if (statsSnapshot.exists()) {
+                        realQuestionStats = statsSnapshot.data().stats || {};
                     }
                 } catch (err) {
                     console.warn("Could not sync from cloud. Reverting to local browser fallback structures.", err);
@@ -1720,6 +1801,62 @@
             }
         }
 
+        function loadQuizStatsOffline() {
+            const cachedDetailedStats = localStorage.getItem('thaigo_real_detailed_quiz_stats');
+            if (cachedDetailedStats) {
+                try { realQuestionStats = JSON.parse(cachedDetailedStats); } catch(e){}
+            }
+        }
+
+        async function syncQuizStatsToCloud() {
+            localStorage.setItem('thaigo_real_detailed_quiz_stats', JSON.stringify(realQuestionStats));
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const statsDocPath = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'detailed_quiz_stats');
+                    await window.firebaseSystem.setDoc(statsDocPath, {
+                        stats: realQuestionStats,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.warn("Failed detailed quiz stats sync online.");
+                }
+            }
+        }
+
+        async function checkAndLoadAnnouncement() {
+            const cachedAnnounce = localStorage.getItem('thaigo_system_announcement');
+            if (cachedAnnounce) {
+                try { activeAnnouncement = JSON.parse(cachedAnnounce); } catch(e){}
+            }
+
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const docRef = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'announcement');
+                    const snap = await window.firebaseSystem.getDoc(docRef);
+                    if (snap.exists()) {
+                        activeAnnouncement = snap.data();
+                        localStorage.setItem('thaigo_system_announcement', JSON.stringify(activeAnnouncement));
+                    }
+                } catch (e) {
+                    console.warn("Failed fetching central announcement");
+                }
+            }
+        }
+
+        function triggerSystemAnnouncementModal() {
+            if (activeAnnouncement && activeAnnouncement.title && activeAnnouncement.message) {
+                showAlert(
+                    activeAnnouncement.icon || '📢',
+                    activeAnnouncement.title,
+                    activeAnnouncement.message
+                );
+            }
+        }
+
         function launchGameLayout() {
             updatePlayerHUD();
             document.getElementById('splash-screen').classList.add('hidden');
@@ -1728,6 +1865,9 @@
             document.getElementById('main-footer').classList.remove('hidden');
             centerMapOnPlayer();
             
+            // Render active announcement upon game load
+            setTimeout(triggerSystemAnnouncementModal, 1500);
+
             const hasCompletedTutorial = localStorage.getItem('thaigo_tutorial_completed_v2');
             if (!hasCompletedTutorial) startTutorial();
         }
@@ -2070,7 +2210,7 @@
                 container.appendChild(b);
             });
 
-            // Force dynamic font sizes to persist correctly on reload
+            // Force font scaling size settings on options inside quiz dynamically
             const questionEl = document.getElementById('quiz-question');
             const optionsEl = document.getElementById('quiz-options');
             if (currentFontSize === 'large') {
@@ -2114,15 +2254,31 @@
             }
         }
 
+        // ACCURATE QUESTION STATISTICS CAPTURING (ห้ามมั่วเด็ดขาด)
         async function submitQuizAnswer(selectedIdx) {
             document.getElementById('quiz-screen').classList.add('hidden');
             isQuizActive = false;
             player.quizStats.total += 1;
 
+            // Register real stats for this specific question
+            const quizIndex = quizzes.indexOf(activeQuiz);
+            if (quizIndex !== -1) {
+                if (!realQuestionStats[quizIndex]) {
+                    realQuestionStats[quizIndex] = { correct: 0, wrong: 0 };
+                }
+                if (selectedIdx === activeQuiz.answer) {
+                    realQuestionStats[quizIndex].correct += 1;
+                } else {
+                    realQuestionStats[quizIndex].wrong += 1;
+                }
+                await syncQuizStatsToCloud();
+            }
+
             if (selectedIdx === activeQuiz.answer) {
                 player.quizStats.correct += 1;
                 player.caughtRunes.push(activeEncounter.id);
                 
+                // Relocate immediately upon answering to prevent double-encounter glitches
                 relocateRune(activeEncounter.id);
 
                 const gEarned = activeEncounter.rewardGold || 30;
@@ -2141,6 +2297,7 @@
                 player.quizStats.wrong += 1;
                 playSound('fail');
                 
+                // Relocate target on incorrect answers as well to satisfy the single-encounter rule
                 relocateRune(activeEncounter.id);
 
                 await saveStateToCloud();
@@ -2285,15 +2442,15 @@
                     } else if (isPurchased) {
                         buttonHtml = `<button onclick="activateDefenseWard('${item.id}')" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-bold text-[9px] rounded-lg border border-yellow-200 transition">ร่ายคาถาป้องกัน</button>`;
                     } else {
-                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition">🪙 ${item.price} พดด้วง</button>`;
+                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition flex items-center gap-1">🪙 ${item.price}</button>`;
                     }
                 } else {
                     if (isEquipped) {
                         buttonHtml = `<span class="text-emerald-400 font-bold text-[9px]">ถือใช้งานในตัว</span>`;
                     } else if (isPurchased) {
-                        buttonHtml = `<button onclick="equipItem('${item.id}')" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-bold text-[9px] rounded-lg border border-yellow-200 transition">ถือสวมใส่</button>`;
+                        buttonHtml = `<button onclick="equipItem('${item.id}')" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-bold text-[9px] rounded-lg border border-yellow-600/40 transition">ถือสวมใส่</button>`;
                     } else {
-                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition">🪙 ${item.price} พดด้วง</button>`;
+                        buttonHtml = `<button onclick="buyItem('${item.id}', ${item.price})" class="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 text-slate-950 font-extrabold text-[9px] rounded-lg border border-yellow-200 active:scale-95 transition flex items-center gap-1">🪙 ${item.price}</button>`;
                     }
                 }
 
@@ -2492,15 +2649,108 @@
             renderAdminStatsTable(filtered);
         }
 
+        // RENDER DETAILED REAL QUIZ STATISTICS PER QUESTION (ห้ามมั่วเด็ดขาด)
+        function renderDetailedRealQuizStats() {
+            const container = document.getElementById('admin-quiz-detailed-stats');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let hasAnyStat = false;
+
+            quizzes.forEach((quiz, index) => {
+                const qStat = realQuestionStats[index] || { correct: 0, wrong: 0 };
+                const totalAnswers = qStat.correct + qStat.wrong;
+                
+                if (totalAnswers > 0) hasAnyStat = true;
+
+                const pct = totalAnswers > 0 ? Math.round((qStat.correct / totalAnswers) * 100) : 0;
+
+                const div = document.createElement('div');
+                div.className = "bg-slate-950 border border-slate-800 p-2.5 rounded-xl space-y-1 text-[10px]";
+                div.innerHTML = `
+                    <div class="flex justify-between font-bold text-yellow-500">
+                        <span>ข้อที่ ${index + 1}</span>
+                        <span class="text-emerald-400">อัตราผ่าน: ${pct}%</span>
+                    </div>
+                    <p class="text-slate-300 font-medium line-clamp-2">${quiz.question}</p>
+                    <div class="flex justify-between items-center text-[9px] text-slate-400 pt-1 border-t border-slate-900/60">
+                        <span>ตอบถูกจริง: <strong class="text-emerald-400">${qStat.correct} ครั้ง</strong></span>
+                        <span>ตอบผิดจริง: <strong class="text-red-400">${qStat.wrong} ครั้ง</strong></span>
+                        <span>รวมตอบ: <strong>${totalAnswers} ครั้ง</strong></span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (!hasAnyStat) {
+                container.innerHTML = `
+                    <div class="p-4 text-center text-[10px] text-slate-500">
+                        ⚠️ ปัจจุบันยังไม่มีผู้พิทักษ์ลงสนามจริงตอบคำถามใดๆ ในระบบ
+                    </div>
+                `;
+            }
+        }
+
+        // ADMIN CREATE & ANNOUNCE FUNCTION (แอดมินสร้างแถลงการณ์ระบบ)
+        async function saveAdminAnnouncement() {
+            playSound('success');
+            const titleInput = document.getElementById('admin-announcement-title').value.trim();
+            const msgInput = document.getElementById('admin-announcement-msg').value.trim();
+            const iconInput = document.getElementById('admin-announcement-icon').value.trim() || '📢';
+
+            if (!titleInput || !msgInput) {
+                alert("กรุณากรอกหัวข้อและเนื้อหาประกาศให้เรียบร้อย!");
+                return;
+            }
+
+            activeAnnouncement = {
+                title: titleInput,
+                message: msgInput,
+                icon: iconInput,
+                updatedAt: new Date().toISOString()
+            };
+
+            // Save to LocalStorage immediately
+            localStorage.setItem('thaigo_system_announcement', JSON.stringify(activeAnnouncement));
+
+            // Sync with Firestore Cloud
+            if (window.firebaseSystem && window.firebaseSystem.isConnected) {
+                try {
+                    const db = window.firebaseSystem.db;
+                    const appId = window.firebaseSystem.appId;
+                    const docRef = window.firebaseSystem.doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'announcement');
+                    await window.firebaseSystem.setDoc(docRef, {
+                        ...activeAnnouncement
+                    });
+                } catch (e) {
+                    console.warn("Failed sending announcement to cloud.", e);
+                }
+            }
+
+            showEncounterToast("📢 สลักและแพร่ประกาศสัจธรรมสำเร็จ!");
+            closeAdminPanel();
+            setTimeout(triggerSystemAnnouncementModal, 300);
+        }
+
+        // VALID ACCESS CHECK USING 'kulisara24'
         function openAdminPrompt() {
             const pass = prompt("ระบุคีย์ผู้พัฒนาเพื่อสลักเกณฑ์ตรวจรางวัล:");
-            if (pass === 'kulisara24') { // Admin Key updated as requested
+            if (pass === 'kulisara24') { 
                 document.getElementById('admin-reward-gold').value = adminConfig.rewardGold;
                 document.getElementById('admin-reward-xp').value = adminConfig.rewardXp;
+                
+                // Load existing announcement values to input
+                if (activeAnnouncement) {
+                    document.getElementById('admin-announcement-title').value = activeAnnouncement.title || '';
+                    document.getElementById('admin-announcement-msg').value = activeAnnouncement.message || '';
+                    document.getElementById('admin-announcement-icon').value = activeAnnouncement.icon || '📢';
+                }
+
                 document.getElementById('admin-panel-modal').classList.remove('hidden');
                 
                 renderAdminQuizzesEditorList();
                 fetchAndRenderPlayerStats(); 
+                renderDetailedRealQuizStats();
             } else {
                 alert("ปฏิเสธสิทธิ์เข้าใช้ระบบแอดมิน!");
             }
@@ -2824,15 +3074,15 @@
             }
 
             cardZone.addEventListener('mousemove', (e) => {
-                const rect = cardZone.getBoundingClientRect();
-                handleMove(e.clientX, e.clientY, rect.width, rect.height, rect.left, rect.top);
+                const r = cardZone.getBoundingClientRect();
+                handleMove(e.clientX, e.clientY, r.width, r.height, r.left, r.top);
             });
 
             cardZone.addEventListener('touchmove', (e) => {
                 if(e.touches.length === 0) return;
                 const touch = e.touches[0];
-                const rect = cardZone.getBoundingClientRect();
-                handleMove(touch.clientX, touch.clientY, rect.width, rect.height, rect.left, rect.top);
+                const r = cardZone.getBoundingClientRect();
+                handleMove(touch.clientX, touch.clientY, r.width, r.height, r.left, r.top);
             }, { passive: true });
 
             const resetCard = () => {
@@ -3181,6 +3431,45 @@
                 showAlert('💀⚠️', 'พ่ายแพ้ศึกยุทธ์', 'ทหารเอกหมดกำลังใจสู้ก่อน จำเป็นต้องล่าถอยเพื่อบำรุงพลังปัญญาเพิ่มเติม!');
             }
             renderOpponentListsForStealing();
+        }
+
+        function toggleFontSize() {
+            playSound('button');
+            const questionEl = document.getElementById('quiz-question');
+            const optionsEl = document.getElementById('quiz-options');
+            const indicatorEl = document.getElementById('font-size-indicator');
+
+            if (currentFontSize === 'normal') {
+                currentFontSize = 'large';
+                questionEl.style.fontSize = '1.1rem';
+                optionsEl.style.fontSize = '1.05rem';
+                indicatorEl.innerText = 'ใหญ่';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '1.02rem';
+                    btn.style.padding = '0.9rem';
+                }
+            } else if (currentFontSize === 'large') {
+                currentFontSize = 'xlarge';
+                questionEl.style.fontSize = '1.3rem';
+                optionsEl.style.fontSize = '1.25rem';
+                indicatorEl.innerText = 'ใหญ่พิเศษ';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '1.18rem';
+                    btn.style.padding = '1.1rem';
+                }
+            } else {
+                currentFontSize = 'normal';
+                questionEl.style.fontSize = '0.75rem'; // Default tailwind text-xs size equiv
+                optionsEl.style.fontSize = '0.75rem';
+                indicatorEl.innerText = 'ปกติ';
+                const buttons = optionsEl.getElementsByTagName('button');
+                for (let btn of buttons) {
+                    btn.style.fontSize = '0.7rem'; // text-[10px] equiv
+                    btn.style.padding = '0.5rem';
+                }
+            }
         }
     </script>
 </body>
