@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Mitr for headings, Sarabun for body text -->
-    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght=300;400;500;600;700&family=Sarabun:ital,wght=0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tone.js for Mystical Synthesized Sound Effects -->
@@ -1191,6 +1191,12 @@
             spawnRunesOnMap();
             renderMapRunes();
             setupMapDragEngine();
+            
+            // Re-center map properly on orientation or resize changes
+            window.addEventListener('resize', () => {
+                centerMapOnPlayer();
+                renderMapRunes();
+            });
         };
 
         function setupMapDragEngine() {
@@ -1209,7 +1215,7 @@
                 if (!isDraggingMap) return;
                 const dx = e.clientX - dragStartX;
                 const dy = e.clientY - dragStartY;
-                const speedFactor = 1.2;
+                const speedFactor = 1.0; // Natural 1:1 movement
                 player.pos.x = Math.max(100, Math.min(2900, playerStartX - dx * speedFactor));
                 player.pos.y = Math.max(100, Math.min(2900, playerStartY - dy * speedFactor));
                 centerMapOnPlayer();
@@ -1233,7 +1239,7 @@
                 if (!isDraggingMap) return;
                 const dx = e.touches[0].clientX - dragStartX;
                 const dy = e.touches[0].clientY - dragStartY;
-                const speedFactor = 1.2;
+                const speedFactor = 1.0;
                 player.pos.x = Math.max(100, Math.min(2900, playerStartX - dx * speedFactor));
                 player.pos.y = Math.max(100, Math.min(2900, playerStartY - dy * speedFactor));
                 centerMapOnPlayer();
@@ -1283,6 +1289,7 @@
                 const interactionLimit = (player.equippedItem === 'steed' ? 280 : 200) + 120;
                 const isNear = dist <= interactionLimit;
 
+                // Only render inside spawner viewport if close or lens active
                 if (!isNear && !sunLensActive) return;
 
                 const div = document.createElement('div');
@@ -1538,9 +1545,15 @@
         }
 
         function centerMapOnPlayer() {
+            const app = document.getElementById('app');
+            const rect = app.getBoundingClientRect();
+            const appWidth = rect.width || 448;
+            const appHeight = rect.height || window.innerHeight;
+            
+            const targetX = -(player.pos.x - (appWidth / 2));
+            const targetY = -(player.pos.y - (appHeight / 2));
+            
             const map = document.getElementById('virtual-map');
-            const targetX = -(player.pos.x - (window.innerWidth / 2));
-            const targetY = -(player.pos.y - (window.innerHeight / 2));
             map.style.left = `${targetX}px`;
             map.style.top = `${targetY}px`;
         }
