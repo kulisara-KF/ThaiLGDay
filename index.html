@@ -184,7 +184,7 @@
                 </div>
                 <div>
                     <h1 class="text-4xl font-extrabold text-yellow-400 title-font tracking-wider animate-pulse">THAI-GO!</h1>
-                    <p class="text-xs text-slate-300 mt-1 tracking-wide">สืบค้นจารึกมхаอักษรทั้ง 44 ปลดล็อกทหารเอกประลองชิงเงินพดด้วง</p>
+                    <p class="text-xs text-slate-300 mt-1 tracking-wide">สืบค้นจารึกมหาอักษรทั้ง 44 ปลดล็อกทหารเอกประลองชิงเงินพดด้วง</p>
                 </div>
                 
                 <div class="bg-slate-950/90 border border-yellow-600/40 rounded-2xl p-4 text-xs text-slate-300 max-w-xs mx-auto shadow-inner text-left space-y-2">
@@ -547,7 +547,13 @@
                         </button>
                     </div>
 
-                    <h4 class="font-bold text-xs text-yellow-400 pt-1 flex items-center gap-1.5"><i class="fa-solid fa-arrows-down-to-people"></i> ตรวจพบวิหารปราชญ์คนอื่นในอาณาเขตสยาม</h4>
+                    <h4 class="font-bold text-xs text-yellow-400 pt-1 flex items-center gap-1.5"><i class="fa-solid fa-arrows-down-to-people"></i> ตรวจพบวิหารปราชญ์ในอาณาเขตสยาม</h4>
+                    
+                    <!-- Search Input for Opponent list -->
+                    <div class="relative">
+                        <input id="pk-opponents-search" type="text" oninput="filterPKOpponents()" placeholder="🔍 ค้นหาผู้พิทักษ์คนอื่นเพื่อท้าประลอง (พิมพ์ชื่อ)..." class="w-full bg-slate-950 border border-yellow-500/30 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-yellow-500 placeholder-slate-500 transition shadow-inner" />
+                    </div>
+
                     <div id="pk-duel-opponent-list" class="space-y-2"></div>
                 </div>
             </div>
@@ -652,7 +658,7 @@
             </div>
 
             <div class="p-3 bg-slate-950 border-t border-slate-800 text-center">
-                <p id="player-cloud-status" class="text-[8px] text-yellow-400">สิทธิ์ผู้ใช้: บันทึกเฉพาะเครื่อง</p>
+                <p id="player-cloud-status" class="text-[8px] text-yellow-400 font-semibold">สิทธิ์ผู้ใช้: บันทึกเฉพาะเครื่อง</p>
             </div>
         </div>
 
@@ -786,7 +792,7 @@
                     </div>
                 </div>
 
-                <!-- real-time question statistics layout (ห้ามสุ่มขึ้นมาเองเด็ดขาด) -->
+                <!-- Real-time question statistics layout -->
                 <div class="bg-slate-900 border border-yellow-600/40 p-4 rounded-2xl space-y-3">
                     <h4 class="text-xs font-bold text-white border-b border-slate-800 pb-1.5 flex items-center gap-1.5">
                         <i class="fa-solid fa-chart-column text-yellow-500"></i> สถิติการตอบคำถามสืบค้น (รายข้อจริง)
@@ -1060,7 +1066,36 @@
                 speed: 15, 
                 skillName: 'หนุมานหาวเป็นดาวเป็นเดือน',
                 color: 'from-slate-100 to-amber-200',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#f8fafc" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C35 25 30 45 40 55 C42 57 48 57 50 50 C52 57 58 57 60 55 C70 45 65 25 50 25 Z" fill="#e2e8f0"/><circle cx="42" cy="42" r="3" fill="#0f172a"/><circle cx="58" cy="42" r="3" fill="#0f172a"/><path d="M45 62 Q50 67 55 62" stroke="#ef4444" stroke-width="3" fill="none"/><path d="M48 15 L52 15 L50 22 Z" fill="#ca8a04"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(255,255,255,0.25)]">
+                    <defs>
+                        <radialGradient id="hanumanGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="70%" stop-color="#f1f5f9"/>
+                            <stop offset="100%" stop-color="#cbd5e1"/>
+                        </radialGradient>
+                        <linearGradient id="goldCrown" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="50%" stop-color="#ca8a04"/>
+                            <stop offset="100%" stop-color="#854d0e"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4 2"/>
+                    <!-- Wind elemental glow -->
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#22d3ee" stroke-width="1" class="animate-pulse" opacity="0.4"/>
+                    <!-- Majestic Monkey Silhouette Face -->
+                    <path d="M50 20 C35 20 30 42 38 58 C41 64 47 64 50 56 C53 64 59 64 62 58 C70 42 65 20 50 20 Z" fill="url(#hanumanGrad)"/>
+                    <!-- Detailed traditional red and gold patterns -->
+                    <path d="M42 42 C45 38 55 38 58 42 C60 48 40 48 42 42 Z" fill="#b91c1c" opacity="0.8"/>
+                    <!-- Cyan Glowing eyes of power -->
+                    <circle cx="43" cy="38" r="3.5" fill="#22d3ee" filter="drop-shadow(0 0 3px #06b6d4)"/>
+                    <circle cx="57" cy="38" r="3.5" fill="#22d3ee" filter="drop-shadow(0 0 3px #06b6d4)"/>
+                    <path d="M44 54 Q50 62 56 54" stroke="#ef4444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <!-- Exquisite Golden Crown structure -->
+                    <path d="M46 12 L50 2 L54 12 L52 22 L48 22 Z" fill="url(#goldCrown)" stroke="#ca8a04" stroke-width="0.5"/>
+                    <circle cx="50" cy="8" r="1.5" fill="#ef4444"/>
+                    <!-- Royal Neck Collar -->
+                    <path d="M38 58 Q50 68 62 58 L54 75 L46 75 Z" fill="url(#goldCrown)"/>
+                </svg>`
             },
             { 
                 id: 'tosakanth', 
@@ -1073,7 +1108,36 @@
                 speed: 6, 
                 skillName: 'ทศกัณฐ์แผลงฤทธิ์สิบเศียร',
                 color: 'from-emerald-950 to-emerald-700',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#064e3b" stroke="#eab308" stroke-width="3"/><path d="M50 20 C32 20 25 45 35 65 C40 75 60 75 65 65 C75 45 68 20 50 20 Z" fill="#047857"/><circle cx="40" cy="45" r="4" fill="#ef4444"/><circle cx="60" cy="45" r="4" fill="#ef4444"/><path d="M40 60 Q50 68 60 60" stroke="#facc15" stroke-width="3" fill="none"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(16,185,129,0.25)]">
+                    <defs>
+                        <radialGradient id="tosaGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#059669"/>
+                            <stop offset="80%" stop-color="#047857"/>
+                            <stop offset="100%" stop-color="#064e3b"/>
+                        </radialGradient>
+                        <linearGradient id="tosaGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a"/>
+                            <stop offset="50%" stop-color="#ca8a04"/>
+                            <stop offset="100%" stop-color="#78350f"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="6 3"/>
+                    <!-- Majestic Emerald Face structure -->
+                    <path d="M50 25 C34 25 28 46 36 65 C40 74 60 74 64 65 C72 46 66 25 50 25 Z" fill="url(#tosaGrad)"/>
+                    <!-- Demon fangs and roaring mouth -->
+                    <path d="M38 56 Q50 68 62 56" stroke="#fef08a" stroke-width="2" fill="none"/>
+                    <path d="M40 56 L42 51 L44 56" fill="#ffffff"/>
+                    <path d="M60 56 L58 51 L56 56" fill="#ffffff"/>
+                    <!-- Fierce glowing ruby eyes -->
+                    <circle cx="41" cy="44" r="4.5" fill="#ef4444" filter="drop-shadow(0 0 4px #ef4444)"/>
+                    <circle cx="59" cy="44" r="4.5" fill="#ef4444" filter="drop-shadow(0 0 4px #ef4444)"/>
+                    <!-- Layered crowns to represent 10 heads -->
+                    <path d="M44 26 L50 4 L56 26 Z" fill="url(#tosaGold)"/>
+                    <path d="M47 18 L50 8 L53 18 Z" fill="#ef4444" opacity="0.9"/>
+                    <!-- Giant Golden earrings -->
+                    <circle cx="28" cy="52" r="5" fill="url(#tosaGold)" stroke="#b45309" stroke-width="0.5"/>
+                    <circle cx="72" cy="52" r="5" fill="url(#tosaGold)" stroke="#b45309" stroke-width="0.5"/>
+                </svg>`
             },
             { 
                 id: 'phra_chao_ta', 
@@ -1086,7 +1150,29 @@
                 speed: 12, 
                 skillName: 'มนตร์พระเจ้าตาชุบวิญญาณ',
                 color: 'from-amber-950 to-orange-800',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#451a03" stroke="#eab308" stroke-width="3"/><path d="M50 25 C38 25 35 45 38 60 Q50 78 62 60 C65 45 62 25 50 25 Z" fill="#d97706"/><circle cx="43" cy="43" r="3" fill="#0f172a"/><circle cx="57" cy="43" r="3" fill="#0f172a"/><path d="M46 52 Q50 56 54 52" stroke="#ea580c" stroke-width="2" fill="none"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(217,119,6,0.25)]">
+                    <defs>
+                        <radialGradient id="hermitGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#f59e0b"/>
+                            <stop offset="70%" stop-color="#b45309"/>
+                            <stop offset="100%" stop-color="#451a03"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5 5"/>
+                    <!-- Sacred Spiritual Aura -->
+                    <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="1" class="animate-pulse" opacity="0.3"/>
+                    <!-- Hermit Face with Tigerskin Hood -->
+                    <path d="M50 22 C36 22 34 44 38 60 Q50 78 62 60 C66 44 64 22 50 22 Z" fill="url(#hermitGrad)"/>
+                    <!-- Sacred forehead bindu / magical third eye -->
+                    <circle cx="50" cy="34" r="3" fill="#f59e0b" filter="drop-shadow(0 0 3px #fbbf24)"/>
+                    <!-- Wise, calm glowing eyes -->
+                    <circle cx="43" cy="45" r="3.5" fill="#fef08a"/>
+                    <circle cx="57" cy="45" r="3.5" fill="#fef08a"/>
+                    <!-- Long flowing white beard -->
+                    <path d="M38 60 Q50 92 62 60 Q50 72 38 60" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.5"/>
+                    <!-- Magic staff crystal head -->
+                    <path d="M48 20 L52 20 L50 14 Z" fill="#fbbf24"/>
+                </svg>`
             },
             { 
                 id: 'khun_phaen', 
@@ -1099,7 +1185,33 @@
                 speed: 13, 
                 skillName: 'ดาบฟ้าฟื้นฟาดฟันอริ',
                 color: 'from-rose-950 to-red-700',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#881337" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#fda4af"/><circle cx="43" cy="43" r="3" fill="#000"/><circle cx="57" cy="43" r="3" fill="#000"/><path d="M45 53 Q50 58 55 53" stroke="#e11d48" stroke-width="2" fill="none"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(244,63,94,0.3)]">
+                    <defs>
+                        <radialGradient id="warriorGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffe4e6"/>
+                            <stop offset="70%" stop-color="#fecdd3"/>
+                            <stop offset="100%" stop-color="#fda4af"/>
+                        </radialGradient>
+                        <linearGradient id="armorGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fbbf24"/>
+                            <stop offset="100%" stop-color="#b45309"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="8 2"/>
+                    <!-- Warrior Face -->
+                    <path d="M50 25 C36 25 34 46 39 62 Q50 72 61 62 C66 46 64 25 50 25 Z" fill="url(#warriorGrad)"/>
+                    <!-- Glowing traditional red marks and sharp gaze -->
+                    <path d="M41 46 Q45 40 45 46" stroke="#b91c1c" stroke-width="2" fill="none"/>
+                    <path d="M59 46 Q55 40 55 46" stroke="#b91c1c" stroke-width="2" fill="none"/>
+                    <circle cx="43" cy="45" r="2.5" fill="#000000"/>
+                    <circle cx="57" cy="45" r="2.5" fill="#000000"/>
+                    <!-- Beautiful Thai Traditional Helmet (Mongkhon) -->
+                    <path d="M44 26 L50 6 L56 26" fill="none" stroke="url(#armorGold)" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="50" cy="5" r="2" fill="#ca8a04"/>
+                    <!-- Crossed Magical Sword (Fa Fuen) background -->
+                    <path d="M22 22 L78 78" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" filter="drop-shadow(0 0 5px #0284c7)"/>
+                    <path d="M20 20 L26 26" stroke="url(#armorGold)" stroke-width="6"/>
+                </svg>`
             },
             { 
                 id: 'cho_cho', 
@@ -1112,7 +1224,25 @@
                 speed: 10, 
                 skillName: 'ทัพโจโฉสยบปฐพี',
                 color: 'from-violet-950 to-purple-800',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#2e1065" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 62 Q50 70 60 62 C65 45 62 25 50 25 Z" fill="#c084fc"/><circle cx="42" cy="45" r="3" fill="#0f172a"/><circle cx="58" cy="45" r="3" fill="#0f172a"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(139,92,246,0.25)]">
+                    <defs>
+                        <radialGradient id="caoGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#eeddff"/>
+                            <stop offset="70%" stop-color="#c084fc"/>
+                            <stop offset="100%" stop-color="#7c3aed"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="10 2"/>
+                    <!-- Imperial Emperor Face -->
+                    <path d="M50 25 C36 25 34 46 39 63 Q50 72 61 63 C66 46 64 25 50 25 Z" fill="url(#caoGrad)"/>
+                    <circle cx="43" cy="44" r="3" fill="#1e1b4b"/>
+                    <circle cx="57" cy="44" r="3" fill="#1e1b4b"/>
+                    <!-- Royal Jade Crown -->
+                    <path d="M42 25 L45 10 L55 10 L58 25 Z" fill="#10b981" stroke="#047857" stroke-width="1"/>
+                    <circle cx="50" cy="6" r="3" fill="#f59e0b" filter="drop-shadow(0 0 3px #facc15)"/>
+                    <!-- Imperial Beard -->
+                    <path d="M42 63 L50 82 L58 63 Q50 67 42 63" fill="#1e1b4b"/>
+                </svg>`
             },
             { 
                 id: 'guan_yu', 
@@ -1125,7 +1255,30 @@
                 speed: 8, 
                 skillName: 'ง้าวมังกรเขียวทะลวงศึก',
                 color: 'from-teal-950 to-emerald-800',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#022c22" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 65 Q50 72 60 65 C65 45 62 25 50 25 Z" fill="#b91c1c"/><circle cx="43" cy="42" r="3" fill="#000"/><circle cx="57" cy="42" r="3" fill="#000"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(16,185,129,0.3)]">
+                    <defs>
+                        <radialGradient id="guanGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#f87171"/>
+                            <stop offset="80%" stop-color="#ef4444"/>
+                            <stop offset="100%" stop-color="#991b1b"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="3 3"/>
+                    <!-- Loyal Red Face structure -->
+                    <path d="M50 25 C36 25 34 46 39 63 Q50 72 61 63 C66 46 64 25 50 25 Z" fill="url(#guanGrad)"/>
+                    <!-- Majestic Long Black Beard -->
+                    <path d="M38 63 L50 95 L62 63 Q50 69 38 63" fill="#0f172a"/>
+                    <!-- Sidelocks and beard highlights -->
+                    <path d="M34 50 L37 72" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M66 50 L63 72" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+                    <!-- Determined glowing dragon-gold eyes -->
+                    <path d="M40 43 L47 43" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M60 43 L53 43" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="435" cy="44" r="1.5" fill="#000"/>
+                    <!-- Traditional Green Ribboned Cap -->
+                    <path d="M40 25 Q50 12 60 25 Z" fill="#047857"/>
+                    <rect x="47" y="10" width="6" height="4" fill="#fbbf24"/>
+                </svg>`
             },
             { 
                 id: 'choraka', 
@@ -1138,7 +1291,26 @@
                 speed: 11, 
                 skillName: 'จรกาลุยไฟประจัญบาน',
                 color: 'from-stone-900 to-stone-700',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#1c1917" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 65 Q50 72 60 65 C65 45 62 25 50 25 Z" fill="#44403c"/><circle cx="42" cy="43" r="4.5" fill="#000"/><circle cx="58" cy="43" r="4.5" fill="#000"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+                    <defs>
+                        <radialGradient id="joraGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#78716c"/>
+                            <stop offset="70%" stop-color="#44403c"/>
+                            <stop offset="100%" stop-color="#1c1917"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#78716c" stroke-width="2" stroke-dasharray="6 6"/>
+                    <!-- Fierce Bronze Mask-like face -->
+                    <path d="M50 25 C36 25 34 46 39 63 Q50 72 61 63 C66 46 64 25 50 25 Z" fill="url(#joraGrad)"/>
+                    <!-- Burning fire aura at the bottom -->
+                    <path d="M30 85 Q50 65 70 85" fill="none" stroke="#ea580c" stroke-width="4" opacity="0.6" filter="drop-shadow(0 0 5px #f97316)"/>
+                    <!-- Glowing orange combat eyes -->
+                    <circle cx="41" cy="44" r="3.5" fill="#f97316" filter="drop-shadow(0 0 3px #ea580c)"/>
+                    <circle cx="59" cy="44" r="3.5" fill="#f97316" filter="drop-shadow(0 0 3px #ea580c)"/>
+                    <!-- Rough iron heavy helmet horns -->
+                    <path d="M36 24 L28 12 Q38 18 42 24 Z" fill="#292524" stroke="#78716c" stroke-width="0.5"/>
+                    <path d="M64 24 L72 12 Q62 18 58 24 Z" fill="#292524" stroke="#78716c" stroke-width="0.5"/>
+                </svg>`
             },
             { 
                 id: 'inao', 
@@ -1151,7 +1323,25 @@
                 speed: 16, 
                 skillName: 'ระเด่นอิเหนาแทงกริช',
                 color: 'from-cyan-950 to-teal-700',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#083344" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#99f6e4"/><circle cx="43" cy="43" r="3" fill="#0f172a"/><circle cx="57" cy="43" r="3" fill="#0f172a"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(34,211,238,0.25)]">
+                    <defs>
+                        <radialGradient id="inaoGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ccfbf1"/>
+                            <stop offset="70%" stop-color="#99f6e4"/>
+                            <stop offset="100%" stop-color="#2dd4bf"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="12 2"/>
+                    <!-- Elegant Royal Prince face -->
+                    <path d="M50 25 C36 25 34 46 39 61 Q50 71 61 61 C66 46 64 25 50 25 Z" fill="url(#inaoGrad)"/>
+                    <circle cx="43" cy="44" r="2.5" fill="#0f172a"/>
+                    <circle cx="57" cy="44" r="2.5" fill="#0f172a"/>
+                    <!-- Prince Golden Crown (Chada) -->
+                    <path d="M45 25 L50 2 L55 25 Z" fill="url(#armorGold)" stroke="#ca8a04" stroke-width="0.5"/>
+                    <circle cx="50" cy="2" r="1.5" fill="#22d3ee"/>
+                    <!-- Royal Neck Ornaments -->
+                    <path d="M40 61 Q50 71 60 61 L55 70 L45 70 Z" fill="url(#armorGold)"/>
+                </svg>`
             },
             { 
                 id: 'madana', 
@@ -1164,7 +1354,26 @@
                 speed: 14, 
                 skillName: 'กลีบกุหลาบมัทนาสะกดใจ',
                 color: 'from-pink-950 to-rose-700',
-                illustration: `<svg viewBox="0 0 100 100" class="w-16 h-16 mx-auto"><circle cx="50" cy="50" r="45" fill="#4c0519" stroke="#ca8a04" stroke-width="3"/><path d="M50 25 C38 25 35 45 40 60 Q50 68 60 60 C65 45 62 25 50 25 Z" fill="#fecdd3"/><circle cx="43" cy="43" r="2.5" fill="#4c0519"/><circle cx="57" cy="43" r="2.5" fill="#4c0519"/></svg>`
+                illustration: `<svg viewBox="0 0 100 100" class="w-24 h-24 mx-auto filter drop-shadow-[0_4px_10px_rgba(244,63,94,0.35)]">
+                    <defs>
+                        <radialGradient id="madanaGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#fff1f2"/>
+                            <stop offset="70%" stop-color="#fecdd3"/>
+                            <stop offset="100%" stop-color="#f43f5e"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="#f43f5e" stroke-width="1" stroke-dasharray="8 4"/>
+                    <!-- Heavenly Rose Goddess Face -->
+                    <path d="M50 25 C36 25 34 46 39 61 Q50 71 61 61 C66 46 64 25 50 25 Z" fill="url(#madanaGrad)"/>
+                    <circle cx="43" cy="45" r="2.5" fill="#4c0519"/>
+                    <circle cx="57" cy="45" r="2.5" fill="#4c0519"/>
+                    <path d="M46 54 Q50 58 54 54" stroke="#be123c" stroke-width="1.5" fill="none"/>
+                    <!-- Golden Blossom Tiara -->
+                    <path d="M40 25 Q50 15 60 25 Q50 22 40 25" fill="url(#armorGold)"/>
+                    <!-- Falling Rose Petals background overlay -->
+                    <path d="M22 35 C20 45 28 42 22 35 Z" fill="#ec4899" opacity="0.8" transform="rotate(15 22 35)"/>
+                    <path d="M78 35 C76 45 84 42 78 35 Z" fill="#ec4899" opacity="0.8" transform="rotate(-15 78 35)"/>
+                </svg>`
             }
         ];
 
@@ -1194,6 +1403,7 @@
             avatar: '👑',
             pos: { x: 1000, y: 1000 },
             caughtRunes: [],
+            unlockedTrivia: [0], // Default unlocked first quiz book
             inventory: [],
             equippedItem: null,
             activeWard: null,
@@ -1221,13 +1431,13 @@
         let tutorialCurrentStep = 0;
         let lastCheckinDate = null;
         let fetchedOnlinePlayersForStats = [];
+        let allFetchedPKOpponents = []; // Real-time fetched PK Opponents array
         let generatedImagesCache = {};
 
         // Custom Font Sizer system
         let currentFontSize = 'normal';
 
-        // Real-time Question statistics tracker (ห้ามมั่วเด็ดขาด)
-        // Format: { [questionIndex]: { correct: count, wrong: count } }
+        // Real-time Question statistics tracker
         let realQuestionStats = {};
 
         // System Announcement state
@@ -1314,7 +1524,7 @@
             { question: 'ลูกของพระอภัยมณีกับนางผีเสื้อสมุทรมีชื่อว่าอะไร', options: ['สินสมุทร','นางเงือก', 'สุดสาคร', 'นนทก'], answer: 0 },
             { question: 'นนทกตายแล้วมาเกิดเป็นใคร', options: ['ทศกัณฐ์', 'พิเภก', 'พระราม', 'มัจฉานุ'], answer: 0 },
             { question: 'พระอภัยมณีใช้เครื่องดนตรีใด', options: ['ปี่', 'กีตาร์', 'ขลุ่ย', 'ซอ'], answer: 0 },
-            { question: 'ม้านิลมังกรเป็นเพศใด', options: ['กะเทย', 'เมีย', 'ผู้', 'ทอม'], answer: 0 },
+            { question: 'ม้านิลมังกรเป็นเพศใด', options: ['กะเทย', 'เมีย', 'ผู้', 'ทอม'], answer: 2 },
             { question: 'ข้อใดเขียนผิด', options: ['กระเทย', 'ตะกละ', 'ตบะ', 'สมถะ'], answer: 0 },
             { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการสร้างคำแบบใด', options: ['สมาส', 'ประสม', 'ซ้ำ', 'ซ้อน'], answer: 0 },
             { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการนำคำคู่ใดสมาสกัน', options: ['พล + อนุกูล', 'พล- + นุกูล', 'พละ + อนุกูล', 'พลานุ + กูล'], answer: 0 },
@@ -1338,7 +1548,7 @@
         const tutorialSteps = [
             { title: "ยินดีต้อนรับสู่วิหารอักขรา!", icon: "🏛️", description: "สวัสดีผู้พิทักษ์! ภารกิจสูงสุดของท่านคือการออกสืบค้นและสะกดอักขระโบราณทั้ง 44 ที่กระจัดกระจายรอบแดนสยาม" },
             { title: "การผจญภัยและสแกนแผนที่", icon: "🧭", description: "ใช้นิ้วลากหรือกวาดหน้าจอบนแผนที่เพื่อเคลื่อนที่ มองหาสัญลักษณ์รูนทองคำ แล้วแตะเพื่อเริ่มสะกดจับ!" },
-            { title: "โหมดสแกนเนอร์ AR ไจโรสโคป", icon: "📱", description: "ส่ายล็อกเป้าหมายให้อยู่ตรงกลาง และโยน \'อักขรมณีพยัญชนะ/สระ\' เพื่อจับอักขรธาตุ" },
+            { title: "โหมดสแกนเนอร์ AR ไจโรสโคป", icon: "📱", description: "ส่ายล็อกเป้าหมายให้อยู่ตรงกลาง และโยน \'อักขรมณีพยัญชนะ/สระ\' เพื่อสะกดจับ" },
             { title: "ด่านท้าทายตอบปริศนาไทย", icon: "📜", description: "ตอบคำถามวรรณคดีและอักษรวิธีให้ถูกต้องเพื่อบันทึกสะกดเป้าหมายลงคลังได้สำเร็จ" }
         ];
 
@@ -1356,10 +1566,7 @@
                 instances: { prompt: prompt }, 
                 parameters: { "sampleCount": 1 } 
             };
-            const apiKey = ""; // Left empty for client customization or automatic fallback
-            if (!apiKey) {
-                throw new Error("No API key configured for portrait generation");
-            }
+            const apiKey = ""; // Safe blank key as mandated for environment-provided execution
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
 
             for (let i = 0; i < retries; i++) {
@@ -1391,7 +1598,6 @@
 
         let currentPreviewCharId = null;
 
-        // INSTANT SHOWCASE CARD FALLBACK WITHOUT DELAYS (ใช้เวคเตอร์ SVG วาดทันทีถ้าไม่มีคีย์)
         async function updateCharacterPortrait(charId, forceRegenerate = false) {
             const showcaseImg = document.getElementById('showcase-image');
             const showcaseLoader = document.getElementById('showcase-image-loader');
@@ -1411,50 +1617,19 @@
             const char = s_characters.find(c => c.id === charId);
             const prompt = charPrompts[charId] || `${charId} fantasy character portrait, masterpiece`;
 
-            // If empty API key, immediately skip backoff and render offline SVG vector
-            const tempApiKey = ""; 
-            if (!tempApiKey) {
-                setTimeout(() => {
-                    showcaseVector.innerHTML = char.illustration || '';
-                    showcaseVector.classList.remove('hidden');
-                    showcaseVector.querySelector('svg').style.width = "110px";
-                    showcaseVector.querySelector('svg').style.height = "110px";
-                    showcaseLoader.style.opacity = '0';
-                    showcaseLoader.classList.add('hidden');
-                    if (regenBtn) regenBtn.classList.add('hidden');
-                }, 100);
-                return;
-            }
-
-            if (regenBtn) regenBtn.classList.remove('hidden');
-
-            try {
-                let imgData = null;
-                if (!forceRegenerate && generatedImagesCache[charId]) {
-                    imgData = generatedImagesCache[charId];
-                } else {
-                    imgData = await fetchImageWithBackoff(prompt);
-                    generatedImagesCache[charId] = imgData;
-                    try {
-                        localStorage.setItem('thaigo_generated_portraits_cache', JSON.stringify(generatedImagesCache));
-                    } catch (e) {
-                        console.warn("Portrait cache limit exceeded.");
-                    }
-                }
-
-                showcaseImg.src = imgData;
-                showcaseImg.classList.remove('hidden');
-                showcaseLoader.style.opacity = '0';
-                setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
-            } catch (err) {
-                console.warn("Imagen generation failed, falling back to vector:", err);
+            // Immediately render majestic, pre-compiled SVG vector portrait for instant load
+            setTimeout(() => {
                 showcaseVector.innerHTML = char.illustration || '';
                 showcaseVector.classList.remove('hidden');
-                showcaseVector.querySelector('svg').style.width = "110px";
-                showcaseVector.querySelector('svg').style.height = "110px";
+                const svgEl = showcaseVector.querySelector('svg');
+                if (svgEl) {
+                    svgEl.style.width = "180px";
+                    svgEl.style.height = "180px";
+                }
                 showcaseLoader.style.opacity = '0';
-                setTimeout(() => showcaseLoader.classList.add('hidden'), 300);
-            }
+                showcaseLoader.classList.add('hidden');
+                if (regenBtn) regenBtn.classList.add('hidden'); // No need to regenerate vectors
+            }, 50);
         }
 
         async function regenerateShowcaseImage() {
@@ -1635,7 +1810,6 @@
             else showAlert('❓', 'ไม่พบประวัติ', 'ยังไม่พบบันทึกรหัสผ่านในเครื่องนี้');
         }
 
-        // UNIQUE USERNAME VALIDATION FUNCTION (ตรวจเช็คชื่อซ้ำ ห้ามซ้ำกับผู้เล่นคนอื่นบนคลาวด์)
         async function checkUsernameUniqueness(username, currentUid) {
             if (window.firebaseSystem && window.firebaseSystem.isConnected) {
                 try {
@@ -1736,6 +1910,7 @@
                         player.xp = savedData.xp ?? 0;
                         player.level = savedData.level ?? 1;
                         player.caughtRunes = savedData.caughtRunes || [];
+                        player.unlockedTrivia = savedData.unlockedTrivia || [0];
                         player.inventory = savedData.inventory || [];
                         player.equippedItem = savedData.equippedItem || null;
                         player.activeWard = savedData.activeWard || null;
@@ -1787,6 +1962,7 @@
                     player.xp = parsed.xp ?? player.xp;
                     player.level = parsed.level ?? player.level;
                     player.caughtRunes = parsed.caughtRunes || player.caughtRunes;
+                    player.unlockedTrivia = parsed.unlockedTrivia || [0];
                     player.inventory = parsed.inventory || player.inventory;
                     player.activeWard = parsed.activeWard || player.activeWard;
                     player.activeCharacterId = parsed.activeCharacterId || player.activeCharacterId;
@@ -1878,6 +2054,7 @@
                 xp: player.xp,
                 level: player.level,
                 caughtRunes: player.caughtRunes,
+                unlockedTrivia: player.unlockedTrivia,
                 inventory: player.inventory,
                 equippedItem: player.equippedItem,
                 activeWard: player.activeWard,
@@ -1955,23 +2132,32 @@
                 const dx = rune.x - player.pos.x;
                 const dy = rune.y - player.pos.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                const viewDistance = 1000;
                 const isNear = dist <= 210;
+                const isWithinView = dist <= viewDistance;
 
-                if (!isNear && !sunLensActive) return;
+                if (!isWithinView && !sunLensActive) return;
 
                 const div = document.createElement('div');
-                div.className = `absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300 flex flex-col items-center ${isNear ? 'cursor-pointer scale-110' : 'opacity-60 scale-90 pointer-events-none'}`;
+                const stateClasses = isNear 
+                    ? 'cursor-pointer scale-110' 
+                    : 'opacity-50 scale-90 pointer-events-none filter grayscale';
+                
+                div.className = `absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300 flex flex-col items-center ${stateClasses}`;
                 div.style.left = `${rune.x}px`;
                 div.style.top = `${rune.y}px`;
 
-                if (isNear) div.setAttribute('onclick', `triggerEncounter(${rune.id})`);
+                if (isNear) {
+                    div.setAttribute('onclick', `triggerEncounter(${rune.id})`);
+                }
 
                 div.innerHTML = `
                     <div class="relative flex flex-col items-center">
                         ${isNear ? '<div class="absolute inset-0 bg-yellow-500/20 rounded-full w-14 h-14 -m-2 animate-ping"></div>' : ''}
-                        <div class="w-14 h-14 bg-[#092226] border-2 ${isNear ? 'border-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.6)]' : 'border-slate-700'} rounded-2xl flex flex-col items-center justify-center text-xl font-bold text-yellow-400 rune-glow relative">
+                        <div class="w-14 h-14 bg-[#092226] border-2 ${isNear ? 'border-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.6)]' : 'border-slate-700'} rounded-2xl flex flex-col items-center justify-center text-xl font-bold text-yellow-400 ${isNear ? 'rune-glow' : ''} relative">
                             <span class="text-sm leading-none opacity-80 mt-0.5">${rune.avatar}</span>
-                            <span class="headed-thai-font text-base leading-none -mt-0.5 filter drop-shadow(0 0 3px rgba(251,191,36,0.7))">${rune.name.charAt(0)}</span>
+                            <span class="headed-thai-font text-base leading-none -mt-0.5 filter ${isNear ? 'drop-shadow(0 0 3px rgba(251,191,36,0.7))' : ''}">${rune.name.charAt(0)}</span>
                         </div>
                         <div class="mt-1 px-2 py-0.5 bg-slate-950 border-2 ${isNear ? 'border-yellow-400' : 'border-slate-700'} text-[8px] font-bold rounded-lg text-white whitespace-nowrap shadow-2xl">
                             ${rune.name.charAt(0)} (${rune.type === 'mid' ? 'อักษรกลาง' : rune.type === 'high' ? 'อักษรสูง' : 'อักษรต่ำ'})
@@ -2210,7 +2396,6 @@
                 container.appendChild(b);
             });
 
-            // Force font scaling size settings on options inside quiz dynamically
             const questionEl = document.getElementById('quiz-question');
             const optionsEl = document.getElementById('quiz-options');
             if (currentFontSize === 'large') {
@@ -2254,13 +2439,11 @@
             }
         }
 
-        // ACCURATE QUESTION STATISTICS CAPTURING (ห้ามมั่วเด็ดขาด)
         async function submitQuizAnswer(selectedIdx) {
             document.getElementById('quiz-screen').classList.add('hidden');
             isQuizActive = false;
             player.quizStats.total += 1;
 
-            // Register real stats for this specific question
             const quizIndex = quizzes.indexOf(activeQuiz);
             if (quizIndex !== -1) {
                 if (!realQuestionStats[quizIndex]) {
@@ -2278,7 +2461,6 @@
                 player.quizStats.correct += 1;
                 player.caughtRunes.push(activeEncounter.id);
                 
-                // Relocate immediately upon answering to prevent double-encounter glitches
                 relocateRune(activeEncounter.id);
 
                 const gEarned = activeEncounter.rewardGold || 30;
@@ -2297,7 +2479,6 @@
                 player.quizStats.wrong += 1;
                 playSound('fail');
                 
-                // Relocate target on incorrect answers as well to satisfy the single-encounter rule
                 relocateRune(activeEncounter.id);
 
                 await saveStateToCloud();
@@ -2374,22 +2555,69 @@
 
             const headerDiv = document.createElement('div');
             headerDiv.className = "bg-yellow-950/20 p-3 rounded-xl border border-yellow-600/30 text-xs mb-2 text-yellow-300";
-            headerDiv.innerHTML = `<strong>📖 บันทึกสาระปัญญาราชวิหารสยาม</strong><br>รวบรวมเกร็ดความรู้และเฉลยความหมายทางวรรณคดีจากชุดคำถามทั้งหมดของผู้พิทักษ์เพื่อสืบสานศาสตร์ความรู้ภาษาไทยสืบไป`;
+            headerDiv.innerHTML = `<strong>📖 บันทึกสาระปัญญาราชวิหารสยาม</strong><br>รวบรวมเกร็ดความรู้และเฉลยความหมายทางวรรณคดี ใช้ 50 🪙 ปลดล็อกทีละเล่มเพื่อสืบสานศาสตร์ความรู้ภาษาไทย`;
             container.appendChild(headerDiv);
 
+            // Set up player.unlockedTrivia array safety
+            if (!player.unlockedTrivia) {
+                player.unlockedTrivia = [0];
+            }
+
             quizzes.forEach((item, index) => {
-                const isCorrectStr = item.options[item.answer];
+                const isUnlocked = player.unlockedTrivia.includes(index);
                 const card = document.createElement('div');
                 card.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5 text-left text-[10.5px]";
-                card.innerHTML = `
-                    <div class="text-yellow-500 font-bold">คัมภีร์เรื่องที่ ${index + 1}</div>
-                    <p class="font-bold text-white leading-snug">${item.question}</p>
-                    <div class="p-2 bg-[#092226] border border-[#ca8a04]/30 rounded text-slate-300">
-                        🔑 เกร็ดความรู้: <strong class="text-yellow-400 font-extrabold">${isCorrectStr}</strong>
-                    </div>
-                `;
+
+                if (isUnlocked) {
+                    const isCorrectStr = item.options[item.answer];
+                    card.innerHTML = `
+                        <div class="text-yellow-500 font-bold flex justify-between items-center">
+                            <span>คัมภีร์เรื่องที่ ${index + 1} (ปลดล็อกแล้ว)</span>
+                            <span class="text-emerald-400">📖</span>
+                        </div>
+                        <p class="font-bold text-white leading-snug">${item.question}</p>
+                        <div class="p-2 bg-[#092226] border border-[#ca8a04]/30 rounded text-slate-300">
+                            🔑 เกร็ดความรู้: <strong class="text-yellow-400 font-extrabold">${isCorrectStr}</strong>
+                        </div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="text-slate-500 font-bold flex justify-between items-center opacity-70">
+                            <span>คัมภีร์เรื่องที่ ${index + 1} (ปิดผนึกอยู่)</span>
+                            <span class="text-slate-500">🔒</span>
+                        </div>
+                        <p class="text-slate-600 leading-snug truncate">${item.question}</p>
+                        <button onclick="unlockLibraryBook(${index})" class="w-full mt-2 py-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 text-slate-950 font-black text-[9px] rounded-lg border border-yellow-300 flex items-center justify-center gap-1 active:scale-95 transition-all shadow-md">
+                            <span>🪙 ปลดล็อกด้วย 50 พดด้วง</span>
+                        </button>
+                    `;
+                }
                 container.appendChild(card);
             });
+        }
+
+        async function unlockLibraryBook(index) {
+            playSound('button');
+            if (player.gold < 50) {
+                showAlert('❌', 'เงินพดด้วงไม่พอ', 'ต้องการ 50 พดด้วงในการปลดล็อกเนื้อหาคัมภีร์ปัญญาเล่มนี้!');
+                return;
+            }
+
+            player.gold -= 50;
+            if (!player.unlockedTrivia) {
+                player.unlockedTrivia = [0];
+            }
+            if (!player.unlockedTrivia.includes(index)) {
+                player.unlockedTrivia.push(index);
+            }
+
+            updatePlayerHUD();
+            renderLibraryTrivia();
+            await saveStateToCloud();
+            await savePlayerLeaderboardData();
+
+            playSound('success');
+            showEncounterToast("📖 ปลดล็อกจารึกคัมภีร์หลวงสำเร็จ!");
         }
 
         function renderTreasuryRunes() {
@@ -2585,11 +2813,6 @@
             }
 
             if (fetchedOnlinePlayersForStats.length === 0) {
-                fetchedOnlinePlayersForStats = [
-                    { username: 'ขุนพลกุมภกรรณสยาม', level: 3, quizStats: { total: 18, correct: 14, wrong: 4 } },
-                    { username: 'นางเบญกายชลจิต', level: 2, quizStats: { total: 10, correct: 9, wrong: 1 } },
-                    { username: 'ศรีปราชญ์นิพนธ์ลักษณ์', level: 4, quizStats: { total: 32, correct: 30, wrong: 2 } }
-                ];
                 fetchedOnlinePlayersForStats.push({
                     username: player.username + " (ตัวคุณ)",
                     level: player.level,
@@ -2649,7 +2872,6 @@
             renderAdminStatsTable(filtered);
         }
 
-        // RENDER DETAILED REAL QUIZ STATISTICS PER QUESTION (ห้ามมั่วเด็ดขาด)
         function renderDetailedRealQuizStats() {
             const container = document.getElementById('admin-quiz-detailed-stats');
             if (!container) return;
@@ -2691,7 +2913,6 @@
             }
         }
 
-        // ADMIN CREATE & ANNOUNCE FUNCTION (แอดมินสร้างแถลงการณ์ระบบ)
         async function saveAdminAnnouncement() {
             playSound('success');
             const titleInput = document.getElementById('admin-announcement-title').value.trim();
@@ -2710,10 +2931,8 @@
                 updatedAt: new Date().toISOString()
             };
 
-            // Save to LocalStorage immediately
             localStorage.setItem('thaigo_system_announcement', JSON.stringify(activeAnnouncement));
 
-            // Sync with Firestore Cloud
             if (window.firebaseSystem && window.firebaseSystem.isConnected) {
                 try {
                     const db = window.firebaseSystem.db;
@@ -2732,14 +2951,12 @@
             setTimeout(triggerSystemAnnouncementModal, 300);
         }
 
-        // VALID ACCESS CHECK USING 'kulisara24'
         function openAdminPrompt() {
             const pass = prompt("ระบุคีย์ผู้พัฒนาเพื่อสลักเกณฑ์ตรวจรางวัล:");
             if (pass === 'kulisara24') { 
                 document.getElementById('admin-reward-gold').value = adminConfig.rewardGold;
                 document.getElementById('admin-reward-xp').value = adminConfig.rewardXp;
                 
-                // Load existing announcement values to input
                 if (activeAnnouncement) {
                     document.getElementById('admin-announcement-title').value = activeAnnouncement.title || '';
                     document.getElementById('admin-announcement-msg').value = activeAnnouncement.message || '';
@@ -3247,16 +3464,32 @@
                 } catch (e) {}
             }
 
-            if (players.length === 0) {
-                players = [
-                    { uid: 'opp-1', username: 'ขุนศึกสุโขทัยเดช', level: 2, gold: 240, activeWard: 'spell_invisible' },
-                    { uid: 'opp-2', username: 'พญาลิไทครองไกร', level: 3, gold: 510, activeWard: null },
-                    { uid: 'opp-3', username: 'มโนรามรดกแก้ว', level: 1, gold: 90, activeWard: 'shield_diamond' }
-                ];
+            allFetchedPKOpponents = players;
+            renderFilteredPKOpponents(allFetchedPKOpponents);
+        }
+
+        function filterPKOpponents() {
+            const q = document.getElementById('pk-opponents-search').value.toLowerCase().trim();
+            const filtered = allFetchedPKOpponents.filter(opp => opp.username.toLowerCase().includes(q));
+            renderFilteredPKOpponents(filtered);
+        }
+
+        function renderFilteredPKOpponents(opponentsList) {
+            const list = document.getElementById('pk-duel-opponent-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (opponentsList.length === 0) {
+                list.innerHTML = `
+                    <div class="p-6 text-center text-xs text-slate-400 bg-slate-900 rounded-xl border border-dashed border-slate-800 space-y-1">
+                        <p class="font-bold text-yellow-500">ไม่พบข้อมูลผู้พิทักษ์คนอื่นในสารบบ</p>
+                        <p class="text-[10px]">ชวนเพื่อนร่วมประลองสะกดอักขรา โดยแชร์ลิงก์หรือสมัครบัญชีอื่นบนอุปกรณ์ของเพื่อนเพื่อบันทึกชื่อเข้ามาจัดอันดับ PK กันได้เลย!</p>
+                    </div>
+                `;
+                return;
             }
 
-            list.innerHTML = '';
-            players.forEach(opp => {
+            opponentsList.forEach(opp => {
                 const card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex justify-between items-center text-xs shadow-md";
                 
@@ -3461,12 +3694,12 @@
                 }
             } else {
                 currentFontSize = 'normal';
-                questionEl.style.fontSize = '0.75rem'; // Default tailwind text-xs size equiv
+                questionEl.style.fontSize = '0.75rem'; 
                 optionsEl.style.fontSize = '0.75rem';
                 indicatorEl.innerText = 'ปกติ';
                 const buttons = optionsEl.getElementsByTagName('button');
                 for (let btn of buttons) {
-                    btn.style.fontSize = '0.7rem'; // text-[10px] equiv
+                    btn.style.fontSize = '0.7rem'; 
                     btn.style.padding = '0.5rem';
                 }
             }
