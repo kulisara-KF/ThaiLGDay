@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Mitr for headings, Sarabun for body text -->
-    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght=300;400;500;600;700&family=Sarabun:ital,wght=0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Tone.js for Mystical Synthesized Sound Effects -->
@@ -183,7 +183,7 @@
                 </div>
 
                 <button onclick="handleLoginFlow()" class="w-full py-2.5 bg-gradient-to-r from-[#b45309] to-[#ca8a04] hover:from-[#d97706] hover:to-[#facc15] text-white font-bold text-xs rounded-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-fingerprint"></i> เข้าสู่วิหารสัจธรรม
+                    <i class="fa-solid fa-fingerprint"></i> เข้าสู่อักษรานคร
                 </button>
             </div>
 
@@ -1082,20 +1082,20 @@
             { id: 'lens', name: 'แว่นแก้วพระอาทิตย์', description: 'ช่วยสแกนระบุพิกัดจารึกอักขรธาตุที่ยังค้นไม่พบทั้งหมดบนแผนที่จำลองเรียลไทม์', price: 100, icon: '👓' }
         ];
 
-        // Academic Language Trivia Quiz Database
+        // Academic Language Trivia Quiz Database (Correct commas applied to resolve compile/loading error)
         const quizzes = [
-            { question: 'ระบบเสียงในภาษาไทยแบ่งออกเป็นกี่หน่วย', options: ['3', '2', '1', '4'], answer: 0 }
-            { question: 'วันภาษาไทยแห่งชาติคือ', options: ['29 กรกฎาคม', '30 เมษายน', '5 มีนาคม', '1 สิงหาคม'], answer: 0 }
-            { question: 'คำใดออกเสียงวรรณยุกต์ ตรี', options: ['ฟ้า', 'การ', 'บ้าน', 'ค่ะ'], answer: 0 }
-            { question: 'คำในข้อใดเขียนได้ถูกต้อง', options: ['เจ๊ง', 'โน๊ต', 'คุ๊กกี้', 'แว๊น'], answer: 0 }
-            { question: 'ข้อใดเป็นอักษรควบไม่แท้', options: ['ทราย', 'กราบ', 'คล้าย', 'ขวาน'], answer: 0 }
-            { question: 'ข้อใดเป็นสรรพนามบุรุษที่ 3', options: ['มัน', 'ฉัน', 'แก', 'กู'], answer: 0 }
-            { question: 'คำไวพจน์ในข้อใดไม่ใช่สัตว์', options: ['อัคคี', 'กุญชร', 'วิหค', 'กาสร'], answer: 0 }
-            { question: 'ข้อใดคือคำไวพจน์ของดวงอาทิตย์', options: ['สุริยัน', 'แข', 'ศศิ', 'เดือน'], answer: 0 }
-            { question: 'สำนวนไทยในข้อใดมีความหมายแตกต่างจากข้ออื่น', options: ['หาเหาใส่หัว', 'ไก่ได้พลอย', 'ตาบอดได้แว่น', 'หัวล้านได้หวี'], answer: 0 }
-            { question: 'ข้อใดคือคำประสม', options: ['ขวดนม', 'บุกรุก', 'บ้านเรือน', 'จิตใจ'], answer: 0 }
-            { question: 'ข้อใดคือคำซ้อน', options: ['ทิ้งขว้าง', 'ปอดแหก', 'ไส้แห้ง', 'เหยี่ยวข่าว'], answer: 0 }
-            { question: 'คำในข้อใดถูกต้อง', options: ['น้ำแข็งไส', 'ตาบลอด', 'ปิดศนา', 'ปราบปาม'], answer: 0 }
+            { question: 'ระบบเสียงในภาษาไทยแบ่งออกเป็นกี่หน่วย', options: ['3', '2', '1', '4'], answer: 0 },
+            { question: 'วันภาษาไทยแห่งชาติคือ', options: ['29 กรกฎาคม', '30 เมษายน', '5 มีนาคม', '1 สิงหาคม'], answer: 0 },
+            { question: 'คำใดออกเสียงวรรณยุกต์ ตรี', options: ['ฟ้า', 'การ', 'บ้าน', 'ค่ะ'], answer: 0 },
+            { question: 'คำในข้อใดเขียนได้ถูกต้อง', options: ['เจ๊ง', 'โน๊ต', 'คุ๊กกี้', 'แว๊น'], answer: 0 },
+            { question: 'ข้อใดเป็นอักษรควบไม่แท้', options: ['ทราย', 'กราบ', 'คล้าย', 'ขวาน'], answer: 0 },
+            { question: 'ข้อใดเป็นสรรพนามบุรุษที่ 3', options: ['มัน', 'ฉัน', 'แก', 'กู'], answer: 0 },
+            { question: 'คำไวพจน์ในข้อใดไม่ใช่สัตว์', options: ['อัคคี', 'กุญชร', 'วิหค', 'กาสร'], answer: 0 },
+            { question: 'ข้อใดคือคำไวพจน์ของดวงอาทิตย์', options: ['สุริยัน', 'แข', 'ศศิ', 'เดือน'], answer: 0 },
+            { question: 'สำนวนไทยในข้อใดมีความหมายแตกต่างจากข้ออื่น', options: ['หาเหาใส่หัว', 'ไก่ได้พลอย', 'ตาบอดได้แว่น', 'หัวล้านได้หวี'], answer: 0 },
+            { question: 'ข้อใดคือคำประสม', options: ['ขวดนม', 'บุกรุก', 'บ้านเรือน', 'จิตใจ'], answer: 0 },
+            { question: 'ข้อใดคือคำซ้อน', options: ['ทิ้งขว้าง', 'ปอดแหก', 'ไส้แห้ง', 'เหยี่ยวข่าว'], answer: 0 },
+            { question: 'คำในข้อใดถูกต้อง', options: ['น้ำแข็งไส', 'ตาบลอด', 'ปิดศนา', 'ปราบปาม'], answer: 0 },
             { question: 'ข้อใดเขียนผิด', options: ['เฟสบุ๊ค', 'ฟุตบอล', 'วอลเลย์บอล', 'ปิงปอง'], answer: 0 },
             { question: 'Facebook เขียนทับศัพท์ว่าอย่างไร', options: ['เฟซบุ๊ก', 'เฟสบุ๊ก', 'เฟสบุค', 'เฟสบุ๊ค'], answer: 0 },
             { question: 'คำใดเขียนผิด', options: ['กระทิ', 'กระทะ', 'กระทง', 'กระบวย'], answer: 0 },
@@ -2909,7 +2909,6 @@
             }
         }
 
-        // Load all player profiles with quiz correct/incorrect performance metrics
         async function loadAdminPlayerStats() {
             const container = document.getElementById('admin-players-table-container');
             if (!container) return;
@@ -3017,7 +3016,6 @@
             showAlert('⚙️💾', 'อัปเดตนโยบายแอดมินสำเร็จ', 'เกณฑ์สัตยาธิษฐานและแถบประกาศวิหารสากลได้รับการเผยแผ่เปิดใช้แล้ว');
         }
 
-        // Load announcement ticker from database
         async function loadAnnouncement() {
             if (window.firebaseSystem && window.firebaseSystem.isConnected) {
                 try {
@@ -3228,7 +3226,3 @@
     </script>
 </body>
 </html>
-```
- eof
-
-เราได้ทำการขัดเกลาขนาดฟอนต์ จัดสัดส่วน `line-height: 1.5` และแก้ไขปัญหาวรรณยุกต์และตัวสระของภาษาไทยโดนตัดขอบในกรอบ UI ทั้งหมดเรียบร้อยแล้วครับ พรีวิวยังคงแสดงผลได้เต็มประสิทธิภาพและเสถียรที่สุดดังเดิมครับ!
