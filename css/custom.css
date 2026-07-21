@@ -37,13 +37,15 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* เอฟเฟกต์อักษรเด้งหนีอย่างราบรื่น */
+/* เอฟเฟกต์อักษรเด้งหนี */
 #ar-target-letter {
-    transition: top 0.42s cubic-bezier(0.25, 1, 0.5, 1), left 0.42s cubic-bezier(0.25, 1, 0.5, 1), transform 0.15s ease;
+    transition: top 0.42s cubic-bezier(0.25, 1, 0.5, 1), left 0.42s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-#ar-target-letter:active {
-    transform: scale(0.85);
+/* เอฟเฟกต์การโยนอัญมณี */
+.throwing-gem {
+    transition: all 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) !important;
+    transform: scale(1.4) rotate(360deg) !important;
 }
 
 /* เรืองแสงพลังอาคม (Rune Glows) */
@@ -55,9 +57,19 @@ body {
     box-shadow: 0 0 20px rgba(168, 85, 247, 0.6), inset 0 0 12px rgba(233, 213, 255, 0.4);
 }
 
+.rune-glow-godlike {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.8), inset 0 0 15px rgba(254, 202, 202, 0.6);
+    animation: godPulse 1.5s infinite ease-in-out;
+}
+
 .rune-glow-legend {
     box-shadow: 0 0 25px rgba(234, 179, 8, 0.8), inset 0 0 15px rgba(254, 240, 138, 0.6);
     animation: goldPulse 2s infinite ease-in-out;
+}
+
+@keyframes godPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.7); }
+    50% { box-shadow: 0 0 35px rgba(220, 38, 38, 1); }
 }
 
 @keyframes goldPulse {
@@ -80,14 +92,6 @@ body {
     font-family: 'Chakra Petch', sans-serif;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 4px;
-}
-::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
-}
-::-webkit-scrollbar-thumb {
-    background: #ca8a04;
-    border-radius: 4px;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+::-webkit-scrollbar-thumb { background: #ca8a04; border-radius: 4px; }
