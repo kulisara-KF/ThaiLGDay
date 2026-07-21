@@ -1,10 +1,8 @@
 // ==================== PK & QUIZ ENGINE ====================
-let currentQuizIndex = 0;
-let quizTimer = null;
-let timeLeft = 10;
-let isQuizActive = false;
-let currentCatchTargetLetter = null;
-let activeQuizCallback = null;
+let pkTimer = null;
+let pkTimeLeft = 10;
+let isPKActive = false;
+let catchTargetLetter = null;
 
 function shuffleArray(array) {
     const arr = [...array];
@@ -15,158 +13,142 @@ function shuffleArray(array) {
     return arr;
 }
 
-function startPKMatchmaking() {
-    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
-    if (isQuizActive) return;
-    isQuizActive = true;
-
-    const modal = document.getElementById('pk-battle-modal');
-    const quizBox = document.getElementById('pk-quiz-box');
-    const resultBox = document.getElementById('pk-result-box');
-    const typeTitle = document.getElementById('pk-quiz-type-title');
-    
-    const playerChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedChar) || GAME_CHARACTERS[0];
-    document.getElementById('pk-player-avatar').innerText = playerChar.avatar;
-    document.getElementById('pk-player-name').innerText = playerChar.name;
-
-    if (typeTitle) typeTitle.innerText = "⚡ SPEED QUIZ PK";
-    if (modal) modal.classList.remove('hidden');
-    if (quizBox) quizBox.classList.remove('hidden');
-    if (resultBox) resultBox.classList.add('hidden');
-    
-    activeQuizCallback = handlePKQuizResult;
-    loadQuizWithShuffledOptions();
-}
-
+// ---------------- 1. CATCH QUIZ SYSTEM (แยกเฉพาะการจับอักษร) ----------------
 function startCatchQuiz(letter) {
-    if (isQuizActive) return;
-    isQuizActive = true;
-    currentCatchTargetLetter = letter;
+    catchTargetLetter = letter;
+    const modal = document.getElementById('catch-quiz-modal');
+    const qEl = document.getElementById('catch-quiz-question');
+    const optsEl = document.getElementById('catch-quiz-options');
 
-    const modal = document.getElementById('pk-battle-modal');
-    const quizBox = document.getElementById('pk-quiz-box');
-    const resultBox = document.getElementById('pk-result-box');
-    const typeTitle = document.getElementById('pk-quiz-type-title');
-
-    const playerChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedChar) || GAME_CHARACTERS[0];
-    document.getElementById('pk-player-avatar').innerText = playerChar.avatar;
-    document.getElementById('pk-player-name').innerText = playerChar.name;
-
-    if (typeTitle) typeTitle.innerText = `📜 ตอบคำถามเพื่อผนึก '${letter}'`;
-    if (modal) modal.classList.remove('hidden');
-    if (quizBox) quizBox.classList.remove('hidden');
-    if (resultBox) resultBox.classList.add('hidden');
-
-    activeQuizCallback = handleCatchQuizResult;
-    loadQuizWithShuffledOptions();
-}
-
-function loadQuizWithShuffledOptions() {
-    currentQuizIndex = Math.floor(Math.random() * QUIZ_DATABASE.length);
-    const quiz = QUIZ_DATABASE[currentQuizIndex];
-    
+    const quiz = QUIZ_DATABASE[Math.floor(Math.random() * QUIZ_DATABASE.length)];
     const originalCorrectText = quiz.options[quiz.answer];
     const shuffledOpts = shuffleArray(quiz.options);
     const newCorrectIdx = shuffledOpts.indexOf(originalCorrectText);
-    
-    window.currentCorrectAnswerIndex = newCorrectIdx;
 
-    const qEl = document.getElementById('pk-quiz-question');
-    const optsEl = document.getElementById('pk-quiz-options');
-    
     if (qEl) qEl.innerText = quiz.question;
     if (optsEl) {
         optsEl.innerHTML = shuffledOpts.map((opt, idx) => `
-            <button onclick="submitQuizAnswer(${idx})" class="btn-game w-full py-2.5 px-3 bg-slate-800/90 hover:bg-slate-700 text-yellow-300 font-semibold text-xs rounded-xl border border-slate-700 text-left">
+            <button onclick="submitCatchQuizAnswer(${idx === newCorrectIdx})" class="btn-game w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-yellow-300 font-semibold text-xs rounded-xl border border-slate-700 text-left">
                 ${idx + 1}. ${opt}
             </button>
         `).join('');
     }
-    
-    startPKTimer();
+
+    if (modal) modal.classList.remove('hidden');
 }
 
-function startPKTimer() {
-    clearInterval(quizTimer);
-    timeLeft = 10;
-    const timerEl = document.getElementById('pk-timer-display');
-    if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
-    
-    quizTimer = setInterval(() => {
-        timeLeft--;
-        if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
-        if (timeLeft <= 0) {
-            clearInterval(quizTimer);
-            submitQuizAnswer(-1);
-        }
-    }, 1000);
-}
+function submitCatchQuizAnswer(isCorrect) {
+    const modal = document.getElementById('catch-quiz-modal');
+    if (modal) modal.classList.add('hidden');
 
-function submitQuizAnswer(selectedIdx) {
-    clearInterval(quizTimer);
-    const isCorrect = selectedIdx === window.currentCorrectAnswerIndex;
-    
     if (typeof SoundEngine !== 'undefined') {
         SoundEngine.playSFX(isCorrect ? 'correct' : 'wrong');
     }
 
-    if (typeof activeQuizCallback === 'function') {
-        activeQuizCallback(isCorrect);
+    if (isCorrect) {
+        playerState.inventory.push(catchTargetLetter);
+        playerState.exp += 30;
+        playerState.gold += 15;
+        updateHUD();
+        savePlayerDataToFirebase();
+        showNotificationToast("🎉 สำเร็จ!", `ตอบถูก! ได้รับอักษร '${catchTargetLetter}' เข้าสู่สมุดสะสมแล้ว`, "✨");
+    } else {
+        showNotificationToast("❌ ผนึกล้มเหลว!", `ตอบผิด! อักษร '${catchTargetLetter}' ได้เด้งหนีไปแล้ว`, "💨");
     }
 }
 
-function handlePKQuizResult(isCorrect) {
-    if (typeof SoundEngine !== 'undefined' && isCorrect) {
-        setTimeout(() => SoundEngine.playSFX('victory'), 300);
+// ---------------- 2. SPEED QUIZ PK SYSTEM (ประลองต่อสู้) ----------------
+function startPKMatchmaking() {
+    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
+    if (isPKActive) return;
+    isPKActive = true;
+
+    const modal = document.getElementById('pk-battle-modal');
+    const quizBox = document.getElementById('pk-quiz-box');
+    const resultBox = document.getElementById('pk-result-box');
+
+    const playerChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedChar) || GAME_CHARACTERS[1];
+    document.getElementById('pk-player-avatar').innerText = playerChar.avatar || "🗡️";
+    document.getElementById('pk-player-name').innerText = playerChar.name || "ผู้พิทักษ์";
+
+    if (modal) modal.classList.remove('hidden');
+    if (quizBox) quizBox.classList.remove('hidden');
+    if (resultBox) resultBox.classList.add('hidden');
+
+    loadPKQuiz();
+}
+
+function loadPKQuiz() {
+    const quiz = QUIZ_DATABASE[Math.floor(Math.random() * QUIZ_DATABASE.length)];
+    const originalCorrectText = quiz.options[quiz.answer];
+    const shuffledOpts = shuffleArray(quiz.options);
+    window.currentPKCorrectIdx = shuffledOpts.indexOf(originalCorrectText);
+
+    const qEl = document.getElementById('pk-quiz-question');
+    const optsEl = document.getElementById('pk-quiz-options');
+
+    if (qEl) qEl.innerText = quiz.question;
+    if (optsEl) {
+        optsEl.innerHTML = shuffledOpts.map((opt, idx) => `
+            <button onclick="submitPKAnswer(${idx})" class="btn-game w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-yellow-300 font-semibold text-xs rounded-xl border border-slate-700 text-left">
+                ${idx + 1}. ${opt}
+            </button>
+        `).join('');
     }
 
-    showQuizResultUI(
-        isCorrect ? "🎉 ชนะการประลอง PK!" : "💥 พ่ายแพ้ในการประลอง!",
-        isCorrect ? "คุณตอบถูกต้อง! ได้รับ +50 Gold และ +100 EXP" : "ตอบผิดหรือหมดเวลา! พยายามใหม่อีกครั้ง"
-    );
+    startPKTimer();
+}
+
+function startPKTimer() {
+    clearInterval(pkTimer);
+    pkTimeLeft = 10;
+    const timerEl = document.getElementById('pk-timer-display');
+    if (timerEl) timerEl.innerText = `⏱️ ${pkTimeLeft}s`;
+
+    pkTimer = setInterval(() => {
+        pkTimeLeft--;
+        if (timerEl) timerEl.innerText = `⏱️ ${pkTimeLeft}s`;
+        if (pkTimeLeft <= 0) {
+            clearInterval(pkTimer);
+            submitPKAnswer(-1);
+        }
+    }, 1000);
+}
+
+function submitPKAnswer(selectedIdx) {
+    clearInterval(pkTimer);
+    const isCorrect = selectedIdx === window.currentPKCorrectIdx;
+
+    if (typeof SoundEngine !== 'undefined') {
+        SoundEngine.playSFX(isCorrect ? 'correct' : 'wrong');
+        if (isCorrect) setTimeout(() => SoundEngine.playSFX('victory'), 250);
+    }
+
+    const quizBox = document.getElementById('pk-quiz-box');
+    const resultBox = document.getElementById('pk-result-box');
+    const titleEl = document.getElementById('pk-result-title');
+    const detailEl = document.getElementById('pk-result-detail');
+
+    if (quizBox) quizBox.classList.add('hidden');
+    if (resultBox) resultBox.classList.remove('hidden');
+
     if (isCorrect) {
         playerState.gold += 50;
         playerState.exp += 100;
         updateHUD();
         savePlayerDataToFirebase();
-    }
-}
-
-function handleCatchQuizResult(isCorrect) {
-    if (isCorrect) {
-        playerState.inventory.push(currentCatchTargetLetter);
-        playerState.exp += 30;
-        playerState.gold += 15;
-        updateHUD();
-        savePlayerDataToFirebase();
-        showQuizResultUI(
-            `✨ ผนึกสำเร็จ!`,
-            `คุณตอบถูก! ได้รับอักษร '${currentCatchTargetLetter}' เข้าสู่สมุดสะสมแล้ว`
-        );
+        if (titleEl) titleEl.innerText = "🎉 ชนะการประลอง PK!";
+        if (detailEl) detailEl.innerText = "คุณทำความเสียหายรุนแรงใส่คู่ต่อสู้! ได้รับ +50 🪙 และ +100 EXP";
     } else {
-        showQuizResultUI(
-            `❌ ผนึกล้มเหลว!`,
-            `ตอบผิดทำให้พลังมนตราหลุดรอด อักษร '${currentCatchTargetLetter}' ได้เด้งหนีไปแล้ว`
-        );
+        if (titleEl) titleEl.innerText = "💥 พ่ายแพ้ในการประลอง!";
+        if (detailEl) detailEl.innerText = "ตอบผิดหรือหมดเวลา! พยายามใหม่อีกครั้งในการประลองรอบหน้า";
     }
-}
-
-function showQuizResultUI(title, detail) {
-    const quizBox = document.getElementById('pk-quiz-box');
-    const resultBox = document.getElementById('pk-result-box');
-    const titleEl = document.getElementById('pk-result-title');
-    const detailEl = document.getElementById('pk-result-detail');
-    
-    if (quizBox) quizBox.classList.add('hidden');
-    if (resultBox) resultBox.classList.remove('hidden');
-    if (titleEl) titleEl.innerText = title;
-    if (detailEl) detailEl.innerText = detail;
 }
 
 function closePKBattleModal() {
     if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
-    clearInterval(quizTimer);
-    isQuizActive = false;
+    clearInterval(pkTimer);
+    isPKActive = false;
     const modal = document.getElementById('pk-battle-modal');
     if (modal) modal.classList.add('hidden');
 }
