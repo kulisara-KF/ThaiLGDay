@@ -10,20 +10,17 @@ let playerState = {
     selectedCards: []
 };
 
-// รายการสินค้าในร้านค้า (เช็กป้องกันการประกาศซ้ำ)
-if (typeof SHOP_ITEMS === 'undefined') {
-    var SHOP_ITEMS = [
-        { id: "item_exp", name: "ยามงคล EXP", desc: "เพิ่ม EXP +50", price: 50, icon: "🧪" },
-        { id: "item_radar", name: "เนตรทิพย์อักขระ", desc: "สแกนหาตัวอักษรหายาก", price: 100, icon: "🔮" }
+// ใช้ window Object เพื่อป้องกันปัญหา SyntaxError เรื่องการประกาศตัวแปรซ้ำ
+window.SHOP_ITEMS = window.SHOP_ITEMS || [
+    { id: "item_exp", name: "ยามงคล EXP", desc: "เพิ่ม EXP +50", price: 50, icon: "🧪" },
+    { id: "item_radar", name: "เนตรทิพย์อักขระ", desc: "สแกนหาตัวอักษรหายาก", price: 100, icon: "🔮" },
     { id: 'shield_jewel', name: 'ยันต์เกราะเพชร', desc: 'ลดการสูญเสียทองเมื่อแพ้ PK ลง 80%', price: 200, icon: '🛡️' },
     { id: 'ring_power', name: 'แหวนอักขระมนตรา', desc: 'เพิ่มพลังโจมตี (ATK) +40 ในการประลอง PK', price: 350, icon: '💍' },
     { id: 'incense_lure', name: 'เครื่องหอมเรียกอักษร', desc: 'สุ่มเสกอักษรใหม่ขึ้นบนแผนที่ทันที 8 ตัว', price: 150, icon: '🔮' },
     { id: 'exp_talisman', name: 'ยันต์พุฒาจารย์ (EXP x2)', desc: 'ได้รับ EXP จากการจับอักษรเพิ่มขึ้นเป็น 2 เท่า', price: 250, icon: '📜' },
     { id: 'gold_pouch', name: 'ถุงเงินมหาลาภ', desc: 'ได้รับทองจากการจับอักษรเพิ่มขึ้น +50%', price: 300, icon: '🧧' },
     { id: 'compass_rare', name: 'เข็มทิศส่องอักษร', desc: 'ช่วยเพิ่มโอกาสเจออักษรที่ไม่เคยสะสมมาก่อน', price: 180, icon: '🧭' }
-
-    ];
-}
+];
 
 // ==================== LOGIN & INITIALIZATION ====================
 function handleLoginFlow() {
@@ -174,8 +171,8 @@ function renderSelectedCards() {
 
 function renderShop() {
     const container = document.getElementById('shop-items-list');
-    if (!container) return;
-    container.innerHTML = SHOP_ITEMS.map(item => `
+    if (!container || !window.SHOP_ITEMS) return;
+    container.innerHTML = window.SHOP_ITEMS.map(item => `
         <div class="p-2.5 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <span class="text-2xl">${item.icon}</span>
