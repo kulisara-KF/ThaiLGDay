@@ -10,10 +10,10 @@ const firebaseConfig = {
   measurementId: "G-NZLJ3X1H94"
 };
 
-if (!firebase.apps.length) {
+if (typeof firebase !== 'undefined' && firebaseConfig.apiKey !== "YOUR_API_KEY") {
     firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
 }
-const db = firebase.firestore();
 
 // ==================== GAME DATA ====================
 
@@ -97,13 +97,14 @@ const SHOP_ITEMS = [
 ];
 
 const THAI_CONSONANTS = [
-    'ก','ข','ฃ','ค','ฅ','ฆ','ง','จ','ฉ','ช','ซ','ฌ','ญ','ฎ','ฏ','ฐ','ฑ','ฒ','ณ','ด',
-    'ต','ถ','ท','ธ','น','บ','ป','ผ','ฝ','พ','ฟ','ภ','ม','ย','ร','ล','ว','ศ','ษ','ส',
-    'ห','ฬ','อ','ฮ'
+    "ก", "ข", "ฃ", "ค", "ฅ", "ฆ", "ง", "จ", "ฉ", "ช", 
+    "ซ", "ฌ", "ญ", "ฎ", "ฏ", "ฐ", "ฑ", "ฒ", "ณ", "ด", 
+    "ต", "ถ", "ท", "ธ", "น", "บ", "ป", "ผ", "ฝ", "พ", 
+    "ฟ", "ภ", "ม", "ย", "ร", "ล", "ว", "ศ", "ษ", "ส", 
+    "ห", "ฬ", "อ", "ฮ"
 ];
 
 const QUIZ_DATABASE = [
-     const quizzes = [
             { question: 'ระบบเสียงในภาษาไทยแบ่งออกเป็นกี่หน่วย', options: ['3', '2', '1', '4'], answer: 0 },
             { question: 'วันภาษาไทยแห่งชาติคือ', options: ['29 กรกฎาคม', '30 เมษายน', '5 มีนาคม', '1 สิงหาคม'], answer: 0 },
             { question: 'คำใดออกเสียงวรรณยุกต์ ตรี', options: ['ฟ้า', 'การ', 'บ้าน', 'ค่ะ'], answer: 0 },
