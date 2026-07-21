@@ -1,139 +1,172 @@
-// ==================== PK BATTLE ENGINE & SPEED QUIZ ====================
-let pkTimer = null;
+// ==================== PK & QUIZ ENGINE ====================
+let currentQuizIndex = 0;
+let quizTimer = null;
+let timeLeft = 10;
+let isQuizActive = false;
+let currentCatchTargetLetter = null;
+let activeQuizCallback = null;
 
-/**
- * เริ่มการประลอง PK ด้วย Speed Quiz
- * @param {Object} playerState - ข้อมูลสถานะของผู้เล่นปัจจุบัน
- * @param {Array} selectedCardList - รายการการ์ดพยัญชนะที่เลือกเสริมพลัง
- */
-function executePKMatch(playerState, selectedCardList) {
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function startPKMatchmaking() {
+    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
+    if (isQuizActive) return;
+    isQuizActive = true;
+
     const modal = document.getElementById('pk-battle-modal');
     const quizBox = document.getElementById('pk-quiz-box');
     const resultBox = document.getElementById('pk-result-box');
-
-    // แสดงหน้าต่างคำถาม และซ่อนหน้าต่างผลลัพธ์
-    quizBox.classList.remove('hidden');
-    resultBox.classList.add('hidden');
-    modal.classList.remove('hidden');
-
-    // สุ่มคำถามจาก QUIZ_DATABASE ใน data.js
-    const randomQuiz = QUIZ_DATABASE[Math.floor(Math.random() * QUIZ_DATABASE.length)];
-    document.getElementById('pk-quiz-question').innerText = randomQuiz.question;
+    const typeTitle = document.getElementById('pk-quiz-type-title');
     
-    const optBox = document.getElementById('pk-quiz-options');
-    optBox.innerHTML = '';
-    
-    // สร้างปุ่มตัวเลือกคำตอบ
-    randomQuiz.options.forEach((opt, idx) => {
-        const btn = document.createElement('button');
-        btn.className = "w-full py-2.5 bg-slate-950 border border-slate-700 text-white font-bold text-xs rounded-xl hover:border-yellow-400 active:scale-95 transition-all";
-        btn.innerText = opt;
-        btn.onclick = () => finishSpeedQuiz(idx === randomQuiz.answer, playerState, selectedCardList);
-        optBox.appendChild(btn);
-    });
+    const playerChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedChar) || GAME_CHARACTERS[0];
+    document.getElementById('pk-player-avatar').innerText = playerChar.avatar;
+    document.getElementById('pk-player-name').innerText = playerChar.name;
 
-    // ระบบนับถอยหลัง 10 วินาที
-    let timeLeft = 10;
-    document.getElementById('pk-timer-display').innerText = `⏱️ ${timeLeft}s`;
+    if (typeTitle) typeTitle.innerText = "⚡ SPEED QUIZ PK";
+    if (modal) modal.classList.remove('hidden');
+    if (quizBox) quizBox.classList.remove('hidden');
+    if (resultBox) resultBox.classList.add('hidden');
     
-    if (pkTimer) clearInterval(pkTimer);
-    pkTimer = setInterval(() => {
+    activeQuizCallback = handlePKQuizResult;
+    loadQuizWithShuffledOptions();
+}
+
+function startCatchQuiz(letter) {
+    if (isQuizActive) return;
+    isQuizActive = true;
+    currentCatchTargetLetter = letter;
+
+    const modal = document.getElementById('pk-battle-modal');
+    const quizBox = document.getElementById('pk-quiz-box');
+    const resultBox = document.getElementById('pk-result-box');
+    const typeTitle = document.getElementById('pk-quiz-type-title');
+
+    const playerChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedChar) || GAME_CHARACTERS[0];
+    document.getElementById('pk-player-avatar').innerText = playerChar.avatar;
+    document.getElementById('pk-player-name').innerText = playerChar.name;
+
+    if (typeTitle) typeTitle.innerText = `📜 ตอบคำถามเพื่อผนึก '${letter}'`;
+    if (modal) modal.classList.remove('hidden');
+    if (quizBox) quizBox.classList.remove('hidden');
+    if (resultBox) resultBox.classList.add('hidden');
+
+    activeQuizCallback = handleCatchQuizResult;
+    loadQuizWithShuffledOptions();
+}
+
+function loadQuizWithShuffledOptions() {
+    currentQuizIndex = Math.floor(Math.random() * QUIZ_DATABASE.length);
+    const quiz = QUIZ_DATABASE[currentQuizIndex];
+    
+    const originalCorrectText = quiz.options[quiz.answer];
+    const shuffledOpts = shuffleArray(quiz.options);
+    const newCorrectIdx = shuffledOpts.indexOf(originalCorrectText);
+    
+    window.currentCorrectAnswerIndex = newCorrectIdx;
+
+    const qEl = document.getElementById('pk-quiz-question');
+    const optsEl = document.getElementById('pk-quiz-options');
+    
+    if (qEl) qEl.innerText = quiz.question;
+    if (optsEl) {
+        optsEl.innerHTML = shuffledOpts.map((opt, idx) => `
+            <button onclick="submitQuizAnswer(${idx})" class="btn-game w-full py-2.5 px-3 bg-slate-800/90 hover:bg-slate-700 text-yellow-300 font-semibold text-xs rounded-xl border border-slate-700 text-left">
+                ${idx + 1}. ${opt}
+            </button>
+        `).join('');
+    }
+    
+    startPKTimer();
+}
+
+function startPKTimer() {
+    clearInterval(quizTimer);
+    timeLeft = 10;
+    const timerEl = document.getElementById('pk-timer-display');
+    if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
+    
+    quizTimer = setInterval(() => {
         timeLeft--;
-        document.getElementById('pk-timer-display').innerText = `⏱️ ${timeLeft}s`;
+        if (timerEl) timerEl.innerText = `⏱️ ${timeLeft}s`;
         if (timeLeft <= 0) {
-            clearInterval(pkTimer);
-            finishSpeedQuiz(false, playerState, selectedCardList); // หมดเวลาถือว่าตอบผิด
+            clearInterval(quizTimer);
+            submitQuizAnswer(-1);
         }
     }, 1000);
 }
 
-/**
- * คำนวณผลการประลองเมื่อตอบคำถามหรือหมดเวลา
- */
-function finishSpeedQuiz(isCorrect, playerState, selectedCardList) {
-    clearInterval(pkTimer);
-
-    // ดึงข้อมูลตัวละครปัจจุบัน
-    const pChar = GAME_CHARACTERS.find(c => c.id === playerState.selectedCharId) || GAME_CHARACTERS[0];
+function submitQuizAnswer(selectedIdx) {
+    clearInterval(quizTimer);
+    const isCorrect = selectedIdx === window.currentCorrectAnswerIndex;
     
-    // คำนวณพลังโจมตี
-    const cardBonus = selectedCardList.length * 25; // โบนัสจากการ์ดอักษรที่เลือก
-    const quizMultiplier = isCorrect ? 1.5 : 1.0; // ตอบถูกได้โบนัสพลัง x1.5
-    const ringBonus = playerState.items.includes('ring_power') ? 40 : 0; // โบนัสจากแหวนอักขระ
+    if (typeof SoundEngine !== 'undefined') {
+        SoundEngine.playSFX(isCorrect ? 'correct' : 'wrong');
+    }
 
-    const totalPlayerPower = Math.floor((pChar.atk + cardBonus + ringBonus) * quizMultiplier);
-    const botAtk = Math.floor(100 + Math.random() * 160); // สุ่มพลังของคู่ต่อสู้
-    const isPlayerWin = totalPlayerPower >= botAtk;
+    if (typeof activeQuizCallback === 'function') {
+        activeQuizCallback(isCorrect);
+    }
+}
 
-    // สลับการแสดงผลหน้าต่างคำถาม -> หน้าต่างสรุปผล
-    document.getElementById('pk-quiz-box').classList.add('hidden');
-    document.getElementById('pk-result-box').classList.remove('hidden');
+function handlePKQuizResult(isCorrect) {
+    if (typeof SoundEngine !== 'undefined' && isCorrect) {
+        setTimeout(() => SoundEngine.playSFX('victory'), 300);
+    }
 
-    const resultTitle = document.getElementById('pk-result-title');
-    const resultDetail = document.getElementById('pk-result-detail');
+    showQuizResultUI(
+        isCorrect ? "🎉 ชนะการประลอง PK!" : "💥 พ่ายแพ้ในการประลอง!",
+        isCorrect ? "คุณตอบถูกต้อง! ได้รับ +50 Gold และ +100 EXP" : "ตอบผิดหรือหมดเวลา! พยายามใหม่อีกครั้ง"
+    );
+    if (isCorrect) {
+        playerState.gold += 50;
+        playerState.exp += 100;
+        updateHUD();
+        savePlayerDataToFirebase();
+    }
+}
 
-    if (isPlayerWin) {
-        const stolenGold = Math.floor(60 + Math.random() * 90);
-        const gainedExp = Math.floor(40 + Math.random() * 30);
-
-        playerState.gold += stolenGold;
-        addPlayerExp(playerState, gainedExp);
-
-        resultTitle.innerText = "🏆 ชัยชนะอันทรงเกียรติ!";
-        resultTitle.className = "text-sm font-bold text-yellow-400 title-font";
-        resultDetail.innerHTML = `
-            <p class="text-emerald-400 font-bold">• พลังของคุณ: ${totalPlayerPower} (โบนัสตอบถูก x${quizMultiplier})</p>
-            <p class="text-red-400">• พลังคู่ต่อสู้: ${botAtk}</p>
-            <p class="text-yellow-300 font-bold border-t border-slate-800 pt-1 mt-1">💰 ได้รับทอง: +${stolenGold} 🪙 | ⭐ ได้รับ EXP: +${gainedExp}</p>
-        `;
+function handleCatchQuizResult(isCorrect) {
+    if (isCorrect) {
+        playerState.inventory.push(currentCatchTargetLetter);
+        playerState.exp += 30;
+        playerState.gold += 15;
+        updateHUD();
+        savePlayerDataToFirebase();
+        showQuizResultUI(
+            `✨ ผนึกสำเร็จ!`,
+            `คุณตอบถูก! ได้รับอักษร '${currentCatchTargetLetter}' เข้าสู่สมุดสะสมแล้ว`
+        );
     } else {
-        let lostGold = Math.floor(30 + Math.random() * 50);
-        // หากมีไอเทมยันต์เกราะเพชร ลดการสูญเสียทอง 80%
-        if (playerState.items.includes('shield_jewel')) {
-            lostGold = Math.floor(lostGold * 0.2);
-        }
-        
-        playerState.gold = Math.max(0, playerState.gold - lostGold);
-        addPlayerExp(playerState, 10); // ได้รับ EXP เล็กน้อยแม้จะแพ้
-
-        resultTitle.innerText = "💀 พ่ายแพ้ในการประลอง!";
-        resultTitle.className = "text-sm font-bold text-red-500 title-font";
-        resultDetail.innerHTML = `
-            <p class="text-slate-300">• พลังของคุณ: ${totalPlayerPower}</p>
-            <p class="text-red-400">• พลังคู่ต่อสู้: ${botAtk}</p>
-            <p class="text-red-400 font-bold border-t border-slate-800 pt-1 mt-1">💸 ถูกขโมยทอง: -${lostGold} 🪙 | ⭐ ได้รับ EXP: +10</p>
-        `;
-    }
-
-    // บันทึกสถานะเกมลง LocalStorage และ Firebase Cloud
-    saveGameState();
-    saveToFirebaseCloud();
-    updateHudUI();
-}
-
-/**
- * ระบบเพิ่ม EXP และคำนวณการอัปเลเวลไร้ขีดจำกัด (Infinite Leveling)
- */
-function addPlayerExp(playerState, amount) {
-    playerState.exp += amount;
-    let reqExp = getRequiredExp(playerState.level);
-
-    // เช็กอัปเลเวลแบบวนลูปกรณีได้ EXP เยอะจนข้ามหลายเลเวล
-    while (playerState.exp >= reqExp) {
-        playerState.exp -= reqExp;
-        playerState.level++;
-        reqExp = getRequiredExp(playerState.level);
-        
-        // แสดงแจ้งเตือนเลเวลอัป
-        setTimeout(() => {
-            alert(`🎉 ปาฏิหาริย์! คุณอัปเลเวลบรรลุ Level ${playerState.level} แล้ว!`);
-        }, 300);
+        showQuizResultUI(
+            `❌ ผนึกล้มเหลว!`,
+            `ตอบผิดทำให้พลังมนตราหลุดรอด อักษร '${currentCatchTargetLetter}' ได้เด้งหนีไปแล้ว`
+        );
     }
 }
 
-/**
- * ปิด Modal หน้าต่างการประลอง
- */
+function showQuizResultUI(title, detail) {
+    const quizBox = document.getElementById('pk-quiz-box');
+    const resultBox = document.getElementById('pk-result-box');
+    const titleEl = document.getElementById('pk-result-title');
+    const detailEl = document.getElementById('pk-result-detail');
+    
+    if (quizBox) quizBox.classList.add('hidden');
+    if (resultBox) resultBox.classList.remove('hidden');
+    if (titleEl) titleEl.innerText = title;
+    if (detailEl) detailEl.innerText = detail;
+}
+
 function closePKBattleModal() {
-    document.getElementById('pk-battle-modal').classList.add('hidden');
+    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
+    clearInterval(quizTimer);
+    isQuizActive = false;
+    const modal = document.getElementById('pk-battle-modal');
+    if (modal) modal.classList.add('hidden');
 }
