@@ -2,185 +2,220 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Thai-GO! - พิทักษ์อักษรเวทโบราณ</title>
-    <!-- Tailwind CSS & FontAwesome -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;600&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>THAI-GO! - ผู้พิทักษ์อักขระเวท</title>
     
-    <!-- Firebase SDK (Compat Version) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/custom.css">
+
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-200 overflow-hidden select-none flex items-center justify-center">
+<body class="bg-slate-950 text-slate-100 flex items-center justify-center min-h-screen p-0 m-0 overflow-hidden">
 
-    <!-- Game Main Wrapper (Auto-Fit Screen Container) -->
-    <div id="app" class="relative w-full max-w-md h-full bg-[#0f172a] flex flex-col justify-between shadow-2xl overflow-hidden">
-        
-        <!-- ==================== SPLASH & LOGIN SCREEN ==================== -->
-        <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col justify-between p-6 bg-gradient-to-b from-[#0b132b] via-[#1c2541] to-[#0f172a] text-center overflow-y-auto">
-            <div class="mt-4 space-y-3">
-                <div class="mx-auto w-20 h-20 bg-slate-950 rounded-full flex items-center justify-center border-2 border-[#ca8a04] rune-glow">
-                    <span class="text-3xl">👑</span>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-extrabold text-[#facc15] title-font tracking-wider">THAI-GO!</h1>
-                    <p class="text-xs text-slate-300 mt-1">ศึกพิทักษ์อักษรเวท</p>
-                </div>
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-wrapper" class="relative w-full max-w-md h-full bg-slate-900 flex flex-col justify-between overflow-hidden shadow-2xl border-x border-slate-800">
 
-                <div class="bg-gradient-to-r from-amber-950/80 via-yellow-950/90 to-amber-950/80 border border-yellow-500/50 rounded-2xl p-3 shadow-lg">
-                    <p class="text-[11px] font-bold text-yellow-300">🏫 ยินดีต้อนรับผู้เล่นจาก</p>
-                    <h2 class="text-sm font-extrabold text-white title-font mt-0.5">โรงเรียนพระพุทธบาท "พลานุกูลวิทยา"</h2>
-                </div>
-            </div>
-
-            <div class="my-4 space-y-3 max-w-xs mx-auto w-full bg-slate-950/80 p-4 rounded-2xl border border-slate-800 shadow-xl">
-                <div>
-                    <label class="block text-[11px] text-slate-400 text-left mb-1">ชื่อผู้พิทักษ์</label>
-                    <input id="login-username" type="text" placeholder="ระบุชื่อของคุณ" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs text-white" />
-                </div>
-                <button onclick="handleLoginFlow()" class="w-full py-2.5 bg-gradient-to-r from-[#b45309] to-[#ca8a04] text-white font-bold text-xs rounded-lg active:scale-95 transition-all">
-                    เข้าสู่โลกอักษรานคร 🚀
-                </button>
-            </div>
-
-            <div class="text-[10px] text-slate-500">
-                <span>เวอร์ชัน 4.5 (Auto-Fit & New Characters)</span>
-            </div>
-        </div>
-
-        <!-- ==================== HEADER (HUD) ==================== -->
-        <header id="main-header" class="hidden absolute top-0 left-0 right-0 z-30 p-2.5 bg-gradient-to-b from-[#0b132b] to-transparent flex justify-between items-center">
-            <div class="flex items-center space-x-2 bg-slate-950/95 border border-[#ca8a04]/40 p-1.5 pr-3 rounded-full shadow-md">
-                <div id="hud-char-avatar" class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-yellow-300/40 text-sm">🗡️</div>
+        <!-- ==================== MAIN HEADER (HUD) ==================== -->
+        <header id="main-header" class="hidden relative z-40 bg-slate-950/90 border-b border-yellow-500/30 p-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div id="hud-char-avatar" class="w-9 h-9 rounded-full bg-slate-900 border border-yellow-400 flex items-center justify-center text-xl shadow">🗡️</div>
                 <div>
                     <div class="flex items-center gap-1.5">
-                        <span id="hud-username" class="text-[11px] text-slate-200 font-bold truncate max-w-[70px]">นักอักษรา</span>
-                        <span id="hud-level-badge" class="bg-yellow-500 text-slate-950 font-extrabold text-[9px] px-1.5 rounded-full">Lv.1</span>
+                        <span id="hud-username" class="text-xs font-bold text-yellow-300 title-font">ผู้พิทักษ์</span>
+                        <span id="hud-level-badge" class="px-1.5 py-0.2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 text-[9px] font-bold rounded-full">Lv.1</span>
                     </div>
-                    <div class="w-20 bg-slate-800 h-1.5 rounded-full mt-0.5 overflow-hidden border border-slate-700">
-                        <div id="hud-exp-bar" class="bg-gradient-to-r from-green-500 to-emerald-300 h-full w-0 transition-all duration-300"></div>
+                    <!-- แถบ EXP -->
+                    <div class="w-24 h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden border border-slate-700">
+                        <div id="hud-exp-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 w-0 transition-all duration-300"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="flex items-center space-x-1">
-                <div class="flex items-center space-x-0.5 bg-slate-950/90 border border-[#ca8a04]/40 px-2.5 py-1 rounded-full text-[11px] font-bold text-yellow-400">
-                    <span>🪙</span> <span id="player-gold">0</span>
-                </div>
+            
+            <div class="flex items-center gap-1 bg-slate-900 px-2.5 py-1 rounded-full border border-yellow-500/30">
+                <span class="text-xs">🪙</span>
+                <span id="player-gold" class="text-xs font-bold text-yellow-400">300</span>
             </div>
         </header>
 
-        <!-- ==================== MAIN MAP SCREEN ==================== -->
-        <div id="map-screen" class="hidden relative w-full h-full bg-[#0b132b]">
-            <div id="virtual-map" class="absolute w-[3000px] h-[3000px] transition-all duration-75" style="top: -1200px; left: -1200px;">
-                <div class="w-full h-full bg-[#0b132b] relative" style="background-image: radial-gradient(#1e293b 2px, transparent 2px); background-size: 40px 40px;"></div>
+        <!-- ==================== 1. SPLASH / LOGIN SCREEN ==================== -->
+        <div id="splash-screen" class="relative z-50 w-full h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-between p-6 text-center">
+            <div class="mt-8 flex flex-col items-center">
+                <div class="w-20 h-20 rounded-3xl bg-amber-500/10 border-2 border-yellow-400 flex items-center justify-center text-5xl mb-3 shadow-2xl rune-glow">📜</div>
+                <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 title-font tracking-wider">THAI-GO!</h1>
+                <p class="text-xs text-amber-200/80 mt-1">ยินดีต้องรับ ผู้พิทักษ์จากพลานุกูล!</p>
             </div>
 
-            <div class="absolute bottom-3 inset-x-4 z-30 flex justify-around bg-slate-950/95 border border-[#ca8a04]/50 p-2 rounded-2xl backdrop-blur-md shadow-2xl">
-                <button onclick="switchTab('map')" class="flex-1 py-1 text-center text-xs font-bold text-yellow-400 flex flex-col items-center"><span class="text-base">🗺️</span> สำรวจ</button>
-                <button onclick="switchTab('treasury')" class="flex-1 py-1 text-center text-xs font-bold text-slate-400 flex flex-col items-center"><span class="text-base">🎒</span> เมนูหลัก</button>
+            <div class="w-full space-y-3 mb-6 bg-slate-900/80 p-4 rounded-2xl border border-yellow-500/20">
+                <input type="text" id="login-username" placeholder="ระบุนามผู้พิทักษ์..." maxlength="12" class="w-full px-4 py-3 bg-slate-950 border border-slate-700 rounded-xl text-center text-sm font-bold text-yellow-300 placeholder-slate-500 focus:outline-none focus:border-yellow-400">
+                <button onclick="handleLoginFlow()" class="w-full py-3 bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 text-slate-950 font-extrabold text-sm rounded-xl shadow-lg active:scale-95 transition-all">
+                    เข้าร่วม🚀
+                </button>
             </div>
         </div>
 
-        <!-- ==================== TREASURY & LEADERBOARD TAB ==================== -->
-        <div id="treasury-screen" class="hidden absolute inset-0 z-40 bg-[#0b132b] flex flex-col justify-between overflow-hidden">
-            <div class="p-3 border-b border-[#ca8a04]/40 bg-slate-950 flex justify-between items-center">
-                <button onclick="switchTab('map')" class="px-2.5 py-1.5 bg-amber-600 text-slate-950 font-bold text-[10px] rounded-lg">🏠 กลับแผนที่</button>
-                <h3 class="font-bold text-xs text-[#facc15] title-font">ศูนย์การจัดการอักษรา</h3>
-                <div class="w-10"></div>
+        <!-- ==================== 2. MAIN MAP SCREEN (DRAGGABLE) ==================== -->
+        <div id="map-screen" class="hidden relative w-full h-full bg-[#0b132b] flex flex-col justify-between overflow-hidden touch-none select-none">
+            
+            <!-- พื้นที่แผนที่ขนาดใหญ่ที่สามารถใช้นิ้วลากเลื่อนได้ -->
+            <div id="map-viewport" class="relative w-full flex-1 overflow-hidden cursor-grab active:cursor-grabbing bg-[#0f172a]">
+                <div id="world-map" class="absolute w-[2000px] h-[2000px] bg-[#090d16] transition-transform duration-75" style="transform: translate(-750px, -750px);">
+                    <!-- ตารางกริดแผนที่ -->
+                    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#ca8a04 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+                    
+                    <!-- จุดเกิดอักษรบนแผนที่ -->
+                    <div id="map-letters-container" class="absolute inset-0 z-10"></div>
+                </div>
+
+                <!-- ตัวละครผู้เล่นประจำตำแหน่งกลางจอภาพ -->
+                <div class="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
+                    <div class="flex flex-col items-center">
+                        <div id="map-player-avatar" class="w-16 h-16 rounded-full bg-slate-900/90 border-2 border-yellow-400 flex items-center justify-center text-3xl shadow-2xl rune-glow animate-pulse">🗡️</div>
+                        <span id="map-player-name" class="mt-1 px-2.5 py-0.5 bg-slate-950/90 border border-yellow-500/50 text-yellow-300 font-bold text-[10px] rounded-full shadow-md">ผู้พิทักษ์</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex bg-slate-950 border-b border-slate-800 text-[10px] font-bold">
-                <button onclick="switchSubTab('chars')" id="ttab-chars" class="flex-1 py-2 text-center text-[#facc15] border-b-2 border-[#ca8a04]">🥷 ตัวละคร</button>
-                <button onclick="switchSubTab('inventory')" id="ttab-inventory" class="flex-1 py-2 text-center text-slate-400">🎒 คลังอักษร</button>
-                <button onclick="switchSubTab('leaderboard')" id="ttab-leaderboard" class="flex-1 py-2 text-center text-slate-400">🏆 อันดับ</button>
-                <button onclick="switchSubTab('shop')" id="ttab-shop" class="flex-1 py-2 text-center text-slate-400">🛍️ ร้านค้า</button>
-                <button onclick="switchSubTab('pk')" id="ttab-pk" class="flex-1 py-2 text-center text-slate-400">⚔️ PK</button>
+            <!-- แถบควบคุมเมนูหลักด้านล่าง -->
+            <div class="relative z-30 p-3 bg-slate-950/95 border-t border-[#ca8a04]/50 flex flex-col gap-2">
+                <div class="text-center text-[10px] text-yellow-400 font-semibold">👉 ใช้นิ้วลากบนหน้าจอเพื่อเลื่อนสำรวจแผนที่</div>
+                <div class="flex justify-around bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                    <button onclick="switchTab('map')" class="flex-1 py-1 text-center text-xs font-bold text-yellow-400 flex flex-col items-center"><span class="text-base">🗺️</span> แผนที่</button>
+                    <button onclick="switchTab('treasury')" class="flex-1 py-1 text-center text-xs font-bold text-slate-400 flex flex-col items-center"><span class="text-base">🎒</span> เมนูหลัก</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 3. TREASURY / MENU SCREEN ==================== -->
+        <div id="treasury-screen" class="hidden relative w-full h-full bg-slate-950 flex flex-col justify-between overflow-hidden">
+            
+            <!-- แท็บเมนูย่อยด้านบน -->
+            <div class="flex bg-slate-900 border-b border-slate-800 text-xs font-bold">
+                <button id="ttab-chars" onclick="switchSubTab('chars')" class="flex-1 py-2.5 text-center text-[#facc15] border-b-2 border-[#ca8a04]">ตัวละคร</button>
+                <button id="ttab-inventory" onclick="switchSubTab('inventory')" class="flex-1 py-2.5 text-center text-slate-400">สมุดสะสมอักษร</button>
+                <button id="ttab-shop" onclick="switchSubTab('shop')" class="flex-1 py-2.5 text-center text-slate-400">ร้านค้า</button>
+                <button id="ttab-pk" onclick="switchSubTab('pk')" class="flex-1 py-2.5 text-center text-slate-400">ประลอง PK</button>
+                <button id="ttab-leaderboard" onclick="switchSubTab('leaderboard')" class="flex-1 py-2.5 text-center text-slate-400">อันดับ</button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                
-                <!-- 1. Characters Screen -->
-                <div id="tcontent-chars" class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-bold text-yellow-400 title-font">เลือกตัวละคร (7 ตัว)</h4>
-                        <span id="unique-letter-count" class="text-[10px] bg-slate-900 border border-yellow-500/40 text-yellow-300 px-2 py-0.5 rounded-full">อักษรครบ: 0/44 ตัว</span>
-                    </div>
-                    <div id="character-list-grid" class="grid grid-cols-1 gap-3"></div>
+            <!-- เนื้อหาภายในแต่ละแท็บ -->
+            <div class="flex-1 p-3 overflow-y-auto">
+                <!-- 1. ผู้พิทักษ์ -->
+                <div id="tcontent-chars" class="space-y-2">
+                    <h4 class="text-xs font-bold text-yellow-400 mb-2 title-font">อัญเชิญผู้พิทักษ์</h4>
+                    <div id="character-list-grid" class="space-y-2"></div>
                 </div>
 
-                <!-- 2. Inventory -->
-                <div id="tcontent-inventory" class="hidden space-y-3">
-                    <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 text-center">
-                        <p class="text-[11px] text-yellow-400 font-bold">สะสมพยัญชนะไม่ซ้ำครบ 44 ตัว เพื่อเปิดผนึก "ท้าวเวสสุวรรณ"</p>
-                        <p class="text-[9px] text-slate-400">สะสมการ์ดซ้ำได้ไม่จำกัดเพื่อใช้เพิ่มพลังในการประลอง PK</p>
+                <!-- 2. สมุดสะสม -->
+                <div id="tcontent-inventory" class="hidden space-y-2">
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xs font-bold text-yellow-400 title-font">คลังพยัญชนะไทย</h4>
+                        <span id="unique-letter-count" class="text-[10px] text-amber-300 font-bold bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-500/30">อักษรครบ: 0/44 ตัว</span>
                     </div>
-                    <div id="consonant-grid" class="grid grid-cols-5 gap-2"></div>
+                    <div id="consonant-grid" class="grid grid-cols-6 gap-1.5 max-h-[360px] overflow-y-auto p-1 bg-slate-900 rounded-xl border border-slate-800"></div>
                 </div>
 
-                <!-- 3. Leaderboard Screen -->
-                <div id="tcontent-leaderboard" class="hidden space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-bold text-yellow-400 title-font">🏆 ตารางจัดอันดับผู้เล่น (Cloud Sync)</h4>
-                        <button onclick="fetchLeaderboardFromFirebase()" class="text-[10px] bg-slate-900 border border-slate-700 text-slate-300 px-2 py-1 rounded">🔄 รีเฟรช</button>
-                    </div>
-                    <div id="leaderboard-list" class="space-y-2"></div>
-                </div>
-
-                <!-- 4. Shop -->
-                <div id="tcontent-shop" class="hidden space-y-3">
-                    <h4 class="text-xs font-bold text-yellow-400 title-font">เทวภัณฑ์เสริมพลัง</h4>
+                <!-- 3. ร้านค้าเทวภัณฑ์ -->
+                <div id="tcontent-shop" class="hidden space-y-2">
+                    <h4 class="text-xs font-bold text-yellow-400 mb-2 title-font">เทวภัณฑ์มนตรา</h4>
                     <div id="shop-items-list" class="space-y-2"></div>
                 </div>
 
-                <!-- 5. PK Arena -->
+                <!-- 4. โหมดประลอง PK -->
                 <div id="tcontent-pk" class="hidden space-y-3">
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-red-500/40 text-center space-y-3">
-                        <div class="text-3xl">⚔️</div>
-                        <h4 class="text-sm font-bold text-red-400 title-font">สมรภูมิ PK ชิงทรัพย์ & EXP</h4>
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-left">
-                            <div class="text-[10px] text-yellow-400 font-bold mb-1">เลือกการ์ดอักษรไทยเสริมพลัง (สูงสุด 3 ใบ):</div>
-                            <div id="selected-cards-bar" class="flex gap-1.5 min-h-[32px] items-center">
-                                <span class="text-[10px] text-slate-500 italic">เลือกการ์ดจากคลังอักษร</span>
-                            </div>
-                        </div>
-                        <button onclick="startPKMatchmaking()" class="w-full py-3 bg-gradient-to-r from-red-600 to-amber-600 text-white font-extrabold text-xs rounded-xl shadow-lg">
-                            🚀 เริ่มประลอง PK
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 text-center">
+                        <h4 class="text-xs font-bold text-yellow-400 title-font mb-1">⚔️ ลานประลอง Speed Quiz PK</h4>
+                        <p class="text-[10px] text-slate-400 mb-2">เลือกการ์ดพยัญชนะจากสมุดสะสมอักษรสูงสุด 3 ใบ เพื่อเสริมพลังโจมตีในการประลอง</p>
+                        <div id="selected-cards-bar" class="flex justify-center gap-1.5 min-h-[28px] mb-3"></div>
+                        <button onclick="startPKMatchmaking()" class="w-full py-2.5 bg-gradient-to-r from-red-600 via-amber-600 to-red-600 text-white font-extrabold text-xs rounded-xl shadow-lg active:scale-95 transition-all">
+                            เริ่มการประลอง! 🔥
                         </button>
                     </div>
                 </div>
 
+                <!-- 5. ตารางอันดับ -->
+                <div id="tcontent-leaderboard" class="hidden space-y-2">
+                    <h4 class="text-xs font-bold text-yellow-400 mb-2 title-font">🏆 จัดอันดับผู้พิทักษ์สูงสุด</h4>
+                    <div id="leaderboard-list" class="space-y-1.5"></div>
+                </div>
+            </div>
+
+            <!-- เมนูล่างสลับกลับไปแผนที่ -->
+            <div class="p-3 bg-slate-950 border-t border-slate-800">
+                <button onclick="switchTab('map')" class="w-full py-2.5 bg-slate-900 border border-yellow-500/40 text-yellow-400 font-bold text-xs rounded-xl flex items-center justify-center gap-2">
+                    <span>🗺️</span> กลับสู่หน้าจอแผนที่
+                </button>
             </div>
         </div>
 
-        <!-- ==================== PK BATTLE & SPEED QUIZ MODAL ==================== -->
-        <div id="pk-battle-modal" class="hidden absolute inset-0 z-50 bg-slate-950/98 flex flex-col justify-between p-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span class="text-xs font-bold text-red-400">⚔️ SPEED QUIZ PK ARENA</span>
-                <span id="pk-timer-display" class="text-xs font-extrabold text-yellow-400 bg-red-950 px-2 py-0.5 rounded-full border border-red-500">⏱️ 10s</span>
+        <!-- ==================== 4. AR CAMERA CATCH MODAL ==================== -->
+        <div id="ar-catch-modal" class="hidden fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden">
+            <!-- กล้องถ่ายภาพจริงจากมือถือ -->
+            <video id="ar-video-feed" autoplay playsinline class="absolute inset-0 w-full h-full object-cover"></video>
+            
+            <!-- พื้นหลังจำลองกรณีอุปกรณ์เปิดกล้องไม่ได้ -->
+            <div id="ar-fallback-bg" class="hidden absolute inset-0 bg-gradient-to-b from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center opacity-90"></div>
+
+            <!-- แถบแจ้งเตือนด้านบน -->
+            <div class="relative z-10 p-4 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center">
+                <span class="text-xs font-bold text-yellow-300 bg-slate-950/80 px-3 py-1 rounded-full border border-yellow-500/40">📸 โหมดจับอักษรเวท (AR)</span>
+                <button onclick="closeARCatchModal()" class="px-3 py-1 bg-red-600/80 text-white text-xs font-bold rounded-full">ยกเลิก</button>
             </div>
 
-            <div id="pk-quiz-box" class="my-auto space-y-3 bg-slate-900 p-4 rounded-2xl border border-yellow-500/40">
-                <span class="text-[10px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded font-bold">ตอบคำถามเร่งพลังโจมตี</span>
-                <h3 id="pk-quiz-question" class="text-xs font-bold text-white min-h-[40px] flex items-center">โจทย์คำถาม...</h3>
-                <div id="pk-quiz-options" class="grid grid-cols-1 gap-2"></div>
+            <!-- เป้าหมายตัวอักษรไทยที่ลอยอยู่กลางจอ -->
+            <div class="relative z-10 flex-1 flex items-center justify-center">
+                <div id="ar-target-letter" class="w-28 h-28 rounded-3xl bg-slate-900/80 border-4 border-yellow-400 text-yellow-300 font-extrabold text-6xl flex items-center justify-center shadow-2xl animate-bounce rune-glow cursor-pointer">
+                    ก
+                </div>
             </div>
 
-            <div id="pk-result-box" class="hidden my-auto space-y-3 bg-slate-900 p-4 rounded-2xl border border-yellow-500/40 text-center">
-                <div id="pk-winner-icon" class="text-4xl">🏆</div>
-                <h3 id="pk-result-title" class="text-sm font-bold text-yellow-400">ผลการประลอง</h3>
-                <div id="pk-result-detail" class="text-xs text-slate-300 space-y-1 bg-slate-950 p-3 rounded-xl border border-slate-800 text-left"></div>
-                <button onclick="closePKBattleModal()" class="w-full py-2 bg-[#ca8a04] text-slate-950 font-bold text-xs rounded-xl">รับรางวัล & ปิด</button>
+            <!-- ปุ่มกดปาผลึกเวทจับอักษรด้านล่าง -->
+            <div class="relative z-10 p-6 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col items-center gap-3">
+                <p class="text-xs text-slate-200 font-semibold">เล็งกล้องไปที่ตัวอักษรแล้วกดปุ่มจับ!</p>
+                <button onclick="executeCatchInAR()" class="w-full py-3.5 bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 font-extrabold text-sm rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <span>🎯</span> ผลึกเวท!
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== 5. PK BATTLE MODAL ==================== -->
+        <div id="pk-battle-modal" class="hidden fixed inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-4">
+            <div class="w-full max-w-xs bg-slate-900 border border-yellow-500/40 p-4 rounded-2xl shadow-2xl space-y-3 text-center">
+                
+                <!-- หน้าต่างคำถาม Speed Quiz -->
+                <div id="pk-quiz-box" class="space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <span class="text-xs font-bold text-yellow-400 title-font">⚡ SPEED QUIZ PK</span>
+                        <span id="pk-timer-display" class="text-xs font-bold text-red-400 animate-pulse">⏱️ 10s</span>
+                    </div>
+                    <p id="pk-quiz-question" class="text-xs font-semibold text-slate-200 py-2">คำถามทดสอบความรู้...</p>
+                    <div id="pk-quiz-options" class="space-y-2"></div>
+                </div>
+
+                <!-- หน้าต่างแสดงผลลัพธ์ -->
+                <div id="pk-result-box" class="hidden space-y-3">
+                    <h3 id="pk-result-title" class="text-sm font-bold text-yellow-400 title-font">สรุปผลการประลอง</h3>
+                    <div id="pk-result-detail" class="text-xs text-slate-300 space-y-1"></div>
+                    <button onclick="closePKBattleModal()" class="w-full py-2 bg-yellow-500 text-slate-950 font-bold text-xs rounded-xl mt-2">
+                        ตกลง
+                    </button>
+                </div>
+
             </div>
         </div>
 
     </div>
 
-    <!-- Scripts Splitting -->
+    <!-- ==================== GAME SCRIPTS ==================== -->
     <script src="js/data.js"></script>
     <script src="js/pk-engine.js"></script>
     <script src="js/app.js"></script>
