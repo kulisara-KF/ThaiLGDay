@@ -61,6 +61,20 @@ const SoundEngine = (() => {
                 osc.stop(now + 0.08);
                 break;
             }
+            case 'throw': {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+                break;
+            }
             case 'correct': {
                 const notes = [523.25, 659.25, 783.99, 1046.50];
                 notes.forEach((freq, idx) => {
@@ -89,20 +103,6 @@ const SoundEngine = (() => {
                 gain.connect(audioCtx.destination);
                 osc.start(now);
                 osc.stop(now + 0.22);
-                break;
-            }
-            case 'catch_seal': {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(350, now);
-                osc.frequency.exponentialRampToValueAtTime(1500, now + 0.3);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.3);
                 break;
             }
             case 'buy': {
