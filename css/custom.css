@@ -1,0 +1,53 @@
+:root {
+    --app-height: 100vh;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #030712;
+    font-family: 'Sarabun', sans-serif;
+}
+
+/* Auto-Fit Container Logic */
+#app {
+    height: var(--app-height);
+    max-height: 100dvh;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+/* เมื่อเล่นบนหน้าจอคอมพิวเตอร์หรือแท็บเล็ต จะทำการสร้างกรอบจำลองมือถือให้อัตโนมัติ */
+@media (min-width: 640px) {
+    #app {
+        height: min(calc(100vh - 30px), 900px);
+        border-radius: 24px;
+        border: 2px solid rgba(202, 138, 4, 0.4);
+    }
+}
+
+.title-font { font-family: 'Mitr', sans-serif; }
+
+@keyframes rune-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.6)) scale(1); }
+    50% { filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.95)) scale(1.05); }
+}
+.rune-glow { animation: rune-glow 3s infinite ease-in-out; }
+
+.legendary-card {
+    background: linear-gradient(135deg, #451a03 0%, #78350f 50%, #b45309 100%);
+    border: 2px solid #facc15;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+}
+
+.epic-card {
+    background: linear-gradient(135deg, #311042 0%, #581c87 100%);
+    border: 1.5px solid #c084fc;
+}
+
+.rare-card {
+    background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
+    border: 1.5px solid #38bdf8;
+}
