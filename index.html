@@ -3,112 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Thai-GO! - พิทักษ์อักษราเวทโบราณ</title>
+    <title>Thai-GO! - พิทักษ์อักษรเวทโบราณ (Full Edition + Firebase)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Mitr for headings, Sarabun for body text -->
+    <!-- Google Fonts: Mitr & Sarabun -->
     <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tone.js for Synthesized Sound Effects -->
+    <!-- Tone.js for Mystical Audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 
-    <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background-color: #0b132b;
-        }
-        .title-font {
-            font-family: 'Mitr', sans-serif;
-        }
-        
-        p, span, h1, h2, h3, h4, h5, h6, button, div, table, th, td {
-            line-height: 1.5 !important;
-        }
+    <!-- FIREBASE SDK (v10 Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-        /* Runic Glow Effect */
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #0b132b; }
+        .title-font { font-family: 'Mitr', sans-serif; }
+        p, span, h1, h2, h3, h4, h5, h6, button, div, table, th, td { line-height: 1.5 !important; }
+
         @keyframes rune-glow {
             0%, 100% { filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.6)) scale(1); }
             50% { filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.95)) scale(1.08); }
         }
-        .rune-glow {
-            animation: rune-glow 3s infinite ease-in-out;
-        }
-
-        /* Ambient floating */
-        @keyframes mystic-float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        .mystic-float {
-            animation: mystic-float 3.5s ease-in-out infinite;
-        }
-
-        #camera-video {
-            object-fit: cover;
-            width: 100%;
-            height: 100%;
-            transform: scaleX(-1);
-        }
+        .rune-glow { animation: rune-glow 3s infinite ease-in-out; }
 
         @keyframes gold-pulse {
             0%, 100% { opacity: 0.4; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.15); }
         }
-        .gold-pulse {
-            animation: gold-pulse 1.2s infinite;
-        }
-        
-        #virtual-map {
-            cursor: grab;
-        }
-        #virtual-map:active {
-            cursor: grabbing;
-        }
+        .gold-pulse { animation: gold-pulse 1.2s infinite; }
 
-        .footer-active-tab {
-            color: #facc15 !important;
-            border-top: 2px solid #facc15;
-            background-color: rgba(250, 204, 21, 0.05);
+        #camera-video { object-fit: cover; width: 100%; height: 100%; transform: scaleX(-1); }
+        #virtual-map { cursor: grab; }
+        #virtual-map:active { cursor: grabbing; }
+
+        .pk-celestial-bg { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #030712 100%); }
+
+        @keyframes pk-shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-3px, -3px) rotate(-1.5deg); }
+            20% { transform: translate(4px, 2px) rotate(1.5deg); }
+            30% { transform: translate(-2px, 3px) rotate(0deg); }
+            50% { transform: translate(-3px, 2px) rotate(-1.5deg); }
+            70% { transform: translate(-2px, -2px) rotate(1.5deg); }
         }
+        .pk-shaking { animation: pk-shake 0.4s ease-in-out; }
     </style>
 </head>
 <body class="text-slate-200 overflow-hidden select-none">
 
     <div id="app" class="relative max-w-md mx-auto h-screen h-[100dvh] bg-[#0f172a] flex flex-col justify-between shadow-2xl border-x-4 border-[#ca8a04]/40 overflow-hidden">
         
-        <!-- ==================== HTTPS SECURE-CONTEXT WARNING ==================== -->
-        <div id="https-warning" class="hidden absolute inset-x-4 top-20 z-50 bg-red-950/95 border-2 border-red-500 rounded-2xl p-4 text-center space-y-3 shadow-2xl">
-            <div class="text-3xl text-red-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <!-- ==================== HTTPS WARNING ==================== -->
+        <div id="https-warning" class="hidden absolute inset-x-4 top-16 z-50 bg-red-950/95 border-2 border-red-500 rounded-2xl p-4 text-center space-y-2 shadow-2xl">
+            <div class="text-2xl text-red-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h4 class="text-xs font-bold text-white title-font">ตรวจพบการเชื่อมต่อที่ไม่ปลอดภัย (HTTP)</h4>
-            <p class="text-[11px] text-slate-300 leading-relaxed">
-                แนะนำให้เข้าเล่นผ่านลิงก์รักษาความปลอดภัย HTTPS เพื่อเปิดใช้งานกล้อง AR และไจโรสโคป
-            </p>
+            <p class="text-[10px] text-slate-300">เบราว์เซอร์จะไม่ยอมรับสิทธิ์กล้อง/ไจโรสโคป แนะนำให้เข้าผ่าน HTTPS</p>
         </div>
 
-        <!-- ==================== TUTORIAL GUIDE OVERLAY ==================== -->
+        <!-- ==================== TUTORIAL OVERLAY ==================== -->
         <div id="tutorial-overlay" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-6">
             <div class="w-full max-w-xs bg-slate-900 border border-[#ca8a04] rounded-3xl p-5 text-center space-y-4 shadow-2xl relative flex flex-col justify-between min-h-[380px]">
-                <button onclick="skipTutorial()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-xs font-bold bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">
-                    ข้าม <i class="fa-solid fa-angles-right"></i>
-                </button>
-
+                <button onclick="skipTutorial()" class="absolute top-3 right-3 text-slate-400 hover:text-white text-xs font-bold bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700">ข้าม</button>
                 <div class="space-y-3 pt-4 flex-1 flex flex-col justify-center">
-                    <div id="tutorial-icon" class="w-20 h-20 bg-gradient-to-tr from-[#ca8a04] to-[#facc15] rounded-full flex items-center justify-center text-4xl border-2 border-white/20 shadow-lg mx-auto rune-glow">
-                        🧭
-                    </div>
-
+                    <div id="tutorial-icon" class="w-20 h-20 bg-gradient-to-tr from-[#ca8a04] to-[#facc15] rounded-full flex items-center justify-center text-4xl border-2 border-white/20 shadow-lg mx-auto rune-glow">🧭</div>
                     <div class="space-y-1.5">
-                        <h3 id="tutorial-title" class="text-sm font-bold text-white title-font">คู่มือผู้พิทักษ์</h3>
-                        <p id="tutorial-description" class="text-xs text-slate-300 leading-relaxed min-h-[75px] flex items-center justify-center">ยินดีต้อนรับสู่ Thai-GO! ออกสำรวจแผนที่เพื่อค้นหาพยัญชนะไทยทั้ง ๔๔ ตัว</p>
+                        <h3 id="tutorial-title" class="text-sm font-bold text-white title-font"></h3>
+                        <p id="tutorial-description" class="text-xs text-slate-300 leading-relaxed min-h-[75px] flex items-center justify-center"></p>
                     </div>
                 </div>
-
                 <div class="space-y-3">
+                    <div class="flex justify-center space-x-1.5" id="tutorial-dots"></div>
                     <div class="flex justify-between items-center gap-2 pt-2">
-                        <button onclick="skipTutorial()" class="w-full py-2 bg-[#ca8a04] text-slate-950 text-xs font-bold rounded-lg border border-yellow-200 shadow active:scale-95 transition">
-                            เข้าสู่เกม
-                        </button>
+                        <button id="tutorial-prev-btn" onclick="prevTutorialStep()" class="flex-1 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-lg border border-slate-700">ย้อนกลับ</button>
+                        <button id="tutorial-next-btn" onclick="nextTutorialStep()" class="flex-1 py-2 bg-[#ca8a04] text-slate-950 text-xs font-bold rounded-lg border border-yellow-200">ถัดไป</button>
                     </div>
                 </div>
             </div>
@@ -116,472 +85,827 @@
 
         <!-- ==================== LOGIN & SPLASH SCREEN ==================== -->
         <div id="splash-screen" class="absolute inset-0 z-50 flex flex-col justify-between p-6 bg-gradient-to-b from-[#0b132b] via-[#1c2541] to-[#0f172a] text-center transition-all duration-500 overflow-y-auto">
-            <div class="mt-8 space-y-5 relative z-10">
+            <div class="mt-8 space-y-4 relative z-10">
                 <div class="mx-auto w-28 h-28 bg-slate-950 rounded-full flex items-center justify-center shadow-2xl border-2 border-[#ca8a04] rune-glow p-2">
                     <span class="text-5xl">👑</span>
                 </div>
                 <div>
                     <h1 class="text-3xl font-extrabold text-[#facc15] title-font tracking-wider">THAI-GO!</h1>
-                    <p class="text-xs text-slate-300 mt-1 tracking-wide">พิทักษ์อักษราเวทโบราณ</p>
+                    <p class="text-xs text-slate-300 mt-1">สืบค้นจารึกมหาอักษร & PK Real-time Cloud</p>
                 </div>
-                
-                <div class="bg-slate-900/90 border border-[#ca8a04]/40 rounded-2xl p-4 text-xs text-slate-300 max-w-xs mx-auto shadow-inner text-left space-y-2">
-                    <p class="font-bold text-[#facc15] text-center text-xs border-b border-[#ca8a04]/30 pb-1.5">📜 ผู้พิทักษ์แห่งอักษร</p>
-                    <p class="leading-relaxed text-[11px]">สแกนหาพยัญชนะ สะสมอักษร ตอบปริศนาภาษาไทย และประลองยุทธ์ท้า PK ชิงความเป็นหนึ่ง!</p>
+                <div class="bg-slate-900/90 border border-[#ca8a04]/40 rounded-2xl p-3 text-xs text-slate-300 max-w-xs mx-auto shadow-inner text-left space-y-1.5">
+                    <p class="font-bold text-[#facc15] text-center text-xs border-b border-[#ca8a04]/30 pb-1">📜 ผู้พิทักษ์แห่งอักษร</p>
+                    <p class="leading-relaxed text-[11px]">มองหาพยัญชนะ สังเวยพยัญชนะที่สะสมเพื่อปลดล็อก "ท้าวเวสสุวรรณ" และลงประลอง PK หาผู้แข็งแกร่ง!</p>
                 </div>
             </div>
 
-            <!-- Login Area -->
-            <div class="my-6 space-y-4 max-w-xs mx-auto w-full relative z-10 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 shadow-xl">
+            <!-- Login Inputs -->
+            <div class="my-4 space-y-3 max-w-xs mx-auto w-full relative z-10 bg-slate-950/80 p-4 rounded-2xl border border-slate-800 shadow-xl">
                 <div>
                     <label class="block text-[11px] text-slate-400 text-left mb-1">ระบุชื่อผู้พิทักษ์</label>
-                    <input id="login-username" type="text" placeholder="ชื่อผู้พิทักษ์อักขรา" value="นักอักษรา" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-[#ca8a04] transition text-white" />
+                    <input id="login-username" type="text" placeholder="ชื่อผู้พิทักษ์อักขรา" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-[#ca8a04] text-white" />
                 </div>
-
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-[11px] text-slate-400 text-left">รหัสกู้คืน Cloud (UID)</label>
+                        <span class="text-[10px] text-[#facc15] cursor-pointer hover:underline" onclick="showLocalUidHint()">ดู UID ในเครื่อง</span>
+                    </div>
+                    <input id="login-uid" type="text" placeholder="ระบุ UID เดิมเพื่อสืบทอดเซฟ" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 px-3 text-xs focus:outline-none focus:border-[#ca8a04] text-slate-300" />
+                </div>
                 <button onclick="handleLoginFlow()" class="w-full py-2.5 bg-gradient-to-r from-[#b45309] to-[#ca8a04] hover:from-[#d97706] hover:to-[#facc15] text-white font-bold text-xs rounded-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-fingerprint"></i> เข้าสู่อักษรานคร
+                    <i class="fa-solid fa-cloud-arrow-up"></i> เข้าสู่อักษรานคร (Firebase Sync)
                 </button>
             </div>
 
-            <div class="flex justify-center items-center px-4 mb-2 text-[10px] text-slate-500">
-                <span>เวอร์ชัน 2.0.0 (ฉบับสมบูรณ์)</span>
+            <div class="flex justify-between items-center px-4 mb-2 text-[10px] text-slate-500">
+                <span>เวอร์ชัน 2.5.0 (Firebase Cloud Ready)</span>
+                <button onclick="openAdminPrompt()" class="text-[#ca8a04] hover:underline font-bold"><i class="fa-solid fa-user-shield"></i> ผู้ดูแล</button>
             </div>
         </div>
 
-        <!-- ==================== HEADER (HUD STYLES) ==================== -->
+        <!-- ==================== HEADER (HUD) ==================== -->
         <header id="main-header" class="hidden absolute top-0 left-0 right-0 z-30 p-2.5 bg-gradient-to-b from-[#0b132b] via-[#0b132b]/95 to-transparent flex justify-between items-center">
             <div class="flex items-center space-x-1.5 bg-slate-950/95 border border-[#ca8a04]/40 p-1 pr-2.5 rounded-full shadow-md">
-                <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-yellow-300/40 text-sm shadow-inner" id="hud-avatar">
-                    👑
-                </div>
+                <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center border border-yellow-300/40 text-sm">👑</div>
                 <div>
-                    <div id="hud-username" class="text-[11px] text-slate-300 font-bold leading-normal truncate max-w-[90px]">นักอักษรา</div>
-                    <div id="hud-level" class="text-[9px] font-semibold text-[#facc15] leading-normal">Lv.1 ผู้เริ่มจารึก</div>
+                    <div id="hud-username" class="text-[11px] text-slate-300 font-bold truncate max-w-[90px]">นักอักษรา</div>
+                    <div id="hud-level" class="text-[9px] font-semibold text-[#facc15]">Lv.1 ผู้เริ่มจารึก</div>
                 </div>
             </div>
 
             <div class="flex items-center space-x-1">
-                <!-- Gold -->
+                <button onclick="openCheckInModal()" class="bg-slate-900 border border-emerald-500/40 px-2 py-1 rounded-full text-[10px] font-bold text-emerald-400 hover:scale-105 transition">📅 สัจสัตยา</button>
                 <div class="flex items-center space-x-0.5 bg-slate-950/90 border border-[#ca8a04]/40 px-2 py-1 rounded-full text-[11px] font-bold text-yellow-400">
-                    <span>🪙</span>
-                    <span id="player-gold">100</span>
+                    <span>🪙</span> <span id="player-gold">0</span>
                 </div>
-
-                <!-- Runes Found Count -->
                 <div class="flex items-center space-x-0.5 bg-slate-950/90 border border-purple-500/40 px-2 py-1 rounded-full text-[11px] font-bold text-purple-400">
-                    <span>🎒</span>
-                    <span id="collected-count">0 / 44</span>
+                    <span>🎒</span> <span id="collected-count">0 / 44</span>
                 </div>
+                <button onclick="startTutorial(true)" class="w-7 h-7 bg-slate-900 text-slate-400 border border-slate-700 rounded-full flex items-center justify-center"><i class="fa-solid fa-circle-question text-[10px]"></i></button>
             </div>
         </header>
 
         <!-- ==================== MAP SCREEN ==================== -->
         <div id="map-screen" class="hidden relative w-full h-full bg-[#0b132b]">
-            <div id="virtual-map" class="absolute w-[2000px] h-[2000px] transition-all duration-75 ease-out" style="top: -750px; left: -750px;">
-                <div class="w-full h-full bg-[#0b132b] relative overflow-hidden" style="background-image: radial-gradient(#1e293b 2px, transparent 2px); background-size: 40px 40px;">
-                    
-                    <div class="absolute top-[400px] left-[400px] text-center p-3 bg-slate-900/95 border border-[#ca8a04]/40 rounded-2xl shadow-lg pointer-events-none w-48">
-                        <span class="text-2xl block mb-0.5">⛰️</span>
-                        <h4 class="text-[#facc15] font-bold text-xs title-font">หุบเขากนกมนตรา</h4>
-                    </div>
+            <div id="announcement-banner" class="hidden absolute top-14 left-3 right-3 z-20 bg-gradient-to-r from-amber-950/95 via-slate-950/95 to-amber-950/95 border border-yellow-500/50 px-3 py-1.5 rounded-xl shadow-lg flex items-center justify-between gap-1.5">
+                <div class="flex items-center gap-1 overflow-hidden flex-1">
+                    <span class="text-[11px]">📢</span>
+                    <marquee id="announcement-text" class="text-[10px] text-yellow-300 font-bold">ยินดีต้อนรับสู่ THAI-GO! ระบบ PK Real-time เชื่อมต่อ Cloud แล้ว</marquee>
+                </div>
+                <button onclick="dismissAnnouncement()" class="text-slate-400 text-[11px]"><i class="fa-solid fa-circle-xmark"></i></button>
+            </div>
 
-                    <div class="absolute top-[1000px] left-[1100px] text-center p-3 bg-slate-900/95 border border-[#ca8a04]/40 rounded-2xl shadow-lg pointer-events-none w-48">
-                        <span class="text-2xl block mb-0.5">🏛️</span>
-                        <h4 class="text-[#facc15] font-bold text-xs title-font">หอราชบัณฑิตสัจกรรม</h4>
-                    </div>
-
-                    <!-- Spawner grid -->
+            <div id="virtual-map" class="absolute w-[3000px] h-[3000px] transition-all duration-75 ease-out" style="top: -1200px; left: -1200px;">
+                <div class="w-full h-full bg-[#0b132b] relative" style="background-image: radial-gradient(#1e293b 2px, transparent 2px); background-size: 40px 40px;">
                     <div id="rune-spawner" class="absolute inset-0"></div>
                 </div>
             </div>
 
-            <!-- Fixed Player Pointer -->
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 flex flex-col items-center">
-                <div class="relative w-12 h-12 bg-slate-950 rounded-full flex items-center justify-center border-2 border-[#ca8a04] shadow-2xl">
-                    <span id="player-avatar-map" class="text-xl">🧭</span>
+                <div class="w-12 h-12 bg-slate-950 rounded-full flex items-center justify-center border-2 border-[#ca8a04] shadow-2xl">
+                    <span class="text-xl">🧭</span>
                 </div>
                 <div class="mt-3 bg-slate-950/80 border border-slate-800 px-3 py-1 rounded text-[10px] font-bold text-[#facc15]">
-                    ลากนิ้วบนหน้าจอเพื่อออกสำรวจ
+                    <i class="fa-solid fa-arrows-up-down-left-right animate-pulse"></i> ใช้นิ้วปัดเลื่อนเพื่อเดินสำรวจ
                 </div>
+            </div>
+
+            <div class="absolute top-16 right-4 z-20">
+                <button onclick="openMainUpgradePanel()" class="flex items-center gap-1 bg-gradient-to-r from-amber-600 to-yellow-400 text-slate-950 px-3 py-2 rounded-xl text-xs font-black shadow-lg border border-yellow-200">
+                    ⚡ แท่นอัปเกรดเทวฤทธิ์
+                </button>
+            </div>
+
+            <div class="absolute bottom-16 left-4 z-20">
+                <div class="bg-slate-950/95 border border-[#ca8a04]/40 p-2 rounded-xl text-[10px]">
+                    <p class="text-[#facc15] font-bold"><i class="fa-solid fa-shield-halved"></i> เทวภัณฑ์:</p>
+                    <div id="equipped-indicator" class="text-slate-400 italic">ไม่มีการสวมใส่</div>
+                </div>
+            </div>
+
+            <div class="absolute bottom-3 inset-x-4 z-30 flex justify-around bg-slate-950/95 border border-[#ca8a04]/50 p-2 rounded-2xl shadow-2xl backdrop-blur-md">
+                <button onclick="switchTab('map')" class="flex-1 py-1.5 text-center text-xs font-bold text-yellow-400 flex flex-col items-center gap-0.5"><span class="text-base">🗺️</span> แผนที่</button>
+                <button onclick="switchTab('treasury')" class="flex-1 py-1.5 text-center text-xs font-bold text-slate-400 hover:text-yellow-300 flex flex-col items-center gap-0.5"><span class="text-base">🎒</span> คลัง & PK Cloud</button>
             </div>
         </div>
 
-        <!-- ==================== ENCOUNTER / AR CAPTURE SCREEN ==================== -->
+        <!-- ==================== AR ENCOUNTER SCREEN ==================== -->
         <div id="encounter-screen" class="hidden absolute inset-0 z-40 bg-slate-950 flex flex-col justify-between overflow-hidden">
+            <div class="absolute inset-0 z-0 bg-slate-950">
+                <video id="camera-video" autoplay playsinline class="hidden"></video>
+                <div id="camera-fallback" class="absolute inset-0 bg-cover bg-center" style="background-image: radial-gradient(#1e293b 1px, transparent 1px); background-size: 24px 24px;"></div>
+            </div>
+
             <div class="relative z-10 p-3.5 flex justify-between items-center bg-gradient-to-b from-slate-950 to-transparent">
-                <button onclick="escapeEncounter()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-[#facc15] text-[11px] font-semibold rounded-lg border border-[#ca8a04]/40 flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-left"></i> หนี
-                </button>
-                <div class="text-center bg-slate-900/90 px-3.5 py-1 rounded-xl border border-[#ca8a04]/30">
-                    <div id="catch-char-name" class="font-bold text-xs text-white">พบพยัญชนะโบราณ</div>
+                <button onclick="escapeEncounter()" class="px-3 py-1.5 bg-slate-900 text-[#facc15] text-[11px] font-semibold rounded-lg border border-[#ca8a04]/40"><i class="fa-solid fa-arrow-left"></i> หนี</button>
+                <div class="text-center bg-slate-900/90 px-3 py-1 rounded-xl border border-[#ca8a04]/30">
+                    <div class="text-[8px] text-[#ca8a04] uppercase font-bold">พิกัดสะกดอักษร AR</div>
+                    <div id="catch-char-name" class="font-bold text-xs text-white">อักขรธาตุ</div>
                 </div>
-                <div></div>
+                <div class="w-8"></div>
             </div>
 
             <div class="relative z-10 flex-1 flex flex-col items-center justify-center">
-                <div id="encounter-char-container" class="relative flex flex-col items-center">
-                    <div class="w-28 h-28 rounded-full border-2 border-[#ca8a04] flex items-center justify-center bg-slate-950/90 shadow-2xl rune-glow">
-                        <div id="encounter-avatar-inner" class="text-4xl font-extrabold text-[#facc15] title-font">ก</div>
-                    </div>
+                <div id="encounter-char-graphic" class="w-24 h-24 rounded-full border-2 border-[#ca8a04] flex items-center justify-center bg-slate-950/90 shadow-2xl rune-glow">
+                    <div id="encounter-avatar-inner" class="text-3xl font-extrabold text-[#facc15] title-font">ก</div>
+                </div>
+                <div class="mt-3 bg-slate-950/90 border border-slate-800 px-3 py-1 rounded text-[10px] text-slate-300">
+                    <span id="char-difficulty" class="font-semibold text-slate-400">ระดับอักษร: กลาง</span>
                 </div>
             </div>
 
-            <div class="relative z-10 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-6 flex flex-col items-center space-y-3">
-                <button onclick="tryThrowOrb()" class="w-full py-3 bg-gradient-to-r from-[#ca8a04] to-[#facc15] text-slate-950 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-all">
-                    🔮 สาดมณีสะกดอักษร
+            <div class="relative z-10 bg-gradient-to-t from-slate-950 via-slate-950/95 to-transparent p-4 flex flex-col items-center space-y-2">
+                <button onclick="tryThrowOrb()" class="w-14 h-14 bg-gradient-to-tr from-[#854d0e] via-[#ca8a04] to-[#fef08a] rounded-full flex items-center justify-center shadow-lg border-2 border-white/80 active:scale-95 transition-all">
+                    <span class="text-slate-950 font-bold text-xs title-font">ปล่อยมณี</span>
                 </button>
             </div>
         </div>
 
-        <!-- ==================== ACADEMIC LANGUAGE QUIZ BOARD ==================== -->
+        <!-- ==================== ACADEMIC QUIZ SCREEN ==================== -->
         <div id="quiz-screen" class="hidden absolute inset-0 z-50 bg-slate-950/95 flex flex-col justify-center p-6">
-            <div class="w-full bg-slate-900 border border-[#ca8a04]/60 rounded-3xl p-5 text-center space-y-4 shadow-2xl relative">
-                <div class="space-y-1">
-                    <span class="text-[10px] bg-slate-800 text-[#facc15] px-2.5 py-1 rounded border border-slate-700 font-bold">บททดสอบอักขระ</span>
-                    <h3 class="text-xs font-bold text-white title-font mt-2">ตอบคำถามเพื่อสะกดอักษร</h3>
+            <div class="w-full bg-slate-900 border border-[#ca8a04]/60 rounded-3xl p-5 text-center space-y-3 shadow-2xl relative">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 bg-[#ca8a04] rounded-full flex items-center justify-center text-2xl border-2 border-white shadow-lg">📜</div>
+                <div class="space-y-1 pt-6">
+                    <span class="text-[10px] bg-slate-800 text-[#facc15] px-2.5 py-1 rounded border border-slate-700 font-bold">บททดสอบผู้พิทักษ์</span>
+                    <h3 class="text-xs font-bold text-white title-font">ไขปริศนา</h3>
                 </div>
 
-                <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800 text-left shadow-inner">
-                    <p id="quiz-question" class="text-xs text-slate-300 leading-relaxed font-semibold">ข้อใดเป็นพยัญชนะอักษรกลาง?</p>
+                <div class="flex items-stretch justify-between bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 text-left shadow-inner gap-2 min-h-[90px]">
+                    <div class="flex-1 flex flex-col justify-center">
+                        <p id="quiz-question" class="text-xs text-slate-300 leading-relaxed font-semibold transition-all"></p>
+                        <p id="quiz-hint-text" class="hidden text-[10px] text-yellow-400 mt-2 bg-yellow-950/40 p-2 rounded-lg border border-yellow-600/30"></p>
+                    </div>
+                    <div class="flex flex-col gap-1.5 pl-2 border-l border-slate-800 flex-shrink-0 justify-center">
+                        <button onclick="changeQuizFontSize('up')" class="w-7 h-7 bg-slate-900 text-[#facc15] text-xs font-black rounded border border-[#ca8a04]/30">A+</button>
+                        <button onclick="changeQuizFontSize('down')" class="w-7 h-7 bg-slate-900 text-[#facc15] text-xs font-black rounded border border-[#ca8a04]/30">A-</button>
+                    </div>
                 </div>
 
-                <div id="quiz-options" class="grid grid-cols-1 gap-2"></div>
+                <div class="flex justify-end pr-1">
+                    <button onclick="useQuizHint()" class="px-2.5 py-1 bg-slate-950 text-[#facc15] text-[10px] font-bold rounded-lg border border-[#ca8a04]/40">💡 ขอคำใบ้ (30 🪙)</button>
+                </div>
+
+                <div id="quiz-options" class="grid grid-cols-1 gap-1.5"></div>
             </div>
         </div>
 
-        <!-- ==================== TREASURY / STORE & UPGRADE TABS ==================== -->
+        <!-- ==================== TREASURY & REAL-TIME PK TABS ==================== -->
         <div id="treasury-screen" class="hidden absolute inset-0 z-40 bg-[#0b132b] flex flex-col justify-between overflow-hidden">
             <div class="p-3 border-b border-[#ca8a04]/40 bg-slate-950 flex justify-between items-center">
-                <h3 class="font-bold text-xs text-[#facc15] title-font tracking-wide"><i class="fa-solid fa-vault mr-1"></i> คลังวิทยา</h3>
+                <button onclick="switchTab('map')" class="px-2.5 py-1.5 bg-gradient-to-r from-amber-600 to-[#ca8a04] text-slate-950 font-bold text-[10px] rounded-lg">🏠 กลับแผนที่</button>
+                <h3 class="font-bold text-xs text-[#facc15] title-font">🎒 คลังวิทยา Cloud</h3>
+                <div class="w-12"></div>
             </div>
 
-            <div class="flex border-b border-slate-800 bg-slate-950 text-xs text-center font-bold">
-                <button onclick="switchTreasuryTab('library')" id="tab-sub-library" class="flex-1 py-2.5 border-b-2 border-[#ca8a04] text-[#facc15]">หอสมุดหลวง</button>
-                <button onclick="switchTreasuryTab('runes')" id="tab-sub-runes" class="flex-1 py-2.5 border-b-2 border-transparent text-slate-400">คลังพยัญชนะ</button>
+            <!-- Sub Navigation Tabs -->
+            <div class="flex bg-slate-950 border-b border-slate-800 text-[11px] font-bold">
+                <button onclick="switchTreasuryTab('inventory')" id="ttab-inventory" class="flex-1 py-2.5 text-center text-[#facc15] border-b-2 border-[#ca8a04]">🎒 คลังอักษร</button>
+                <button onclick="switchTreasuryTab('sacrifice')" id="ttab-sacrifice" class="flex-1 py-2.5 text-center text-slate-400 border-b-2 border-transparent">⛩️ บูชาเวท</button>
+                <button onclick="switchTreasuryTab('shop')" id="ttab-shop" class="flex-1 py-2.5 text-center text-slate-400 border-b-2 border-transparent">🛍️ ตลาด</button>
+                <button onclick="switchTreasuryTab('pk')" id="ttab-pk" class="flex-1 py-2.5 text-center text-slate-400 border-b-2 border-transparent">⚔️ PK Realtime</button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 bg-[#0f172a] space-y-4">
-                <div id="treasury-library-list" class="space-y-3">
-                    <div class="bg-slate-900 border border-[#ca8a04]/30 rounded-xl p-3 text-xs">
-                        <h4 class="font-bold text-[#facc15] mb-1">📖 ไตรยางศ์ (อักษร ๓ หมู่)</h4>
-                        <p class="text-[11px] text-slate-300">อักษรกลาง (๙ ตัว): ก จ ด ต บ ป อ ฎ ฏ<br>อักษรสูง (๑๑ ตัว): ข ขุ ฉ ถ ผ ฝ ส ห ศ ษ ถ<br>อักษรต่ำ (๒๔ ตัว): ค ง ช ซ ญ ย ณ น พ ฟ ภ ม ร ล ว ฬ ฮ ฯลฯ</p>
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                
+                <!-- 1. Inventory -->
+                <div id="tcontent-inventory" class="space-y-3">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-300">
+                        <span>พยัญชนะไทย 44 ตัว (3 หมู่)</span>
+                    </div>
+                    <div id="consonant-grid" class="grid grid-cols-6 gap-2"></div>
+                </div>
+
+                <!-- 2. Sacrifice -->
+                <div id="tcontent-sacrifice" class="hidden space-y-4">
+                    <div class="bg-slate-900 border border-[#ca8a04]/50 rounded-2xl p-4 text-center space-y-3">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-purple-900 to-amber-600 flex items-center justify-center text-3xl rune-glow border-2 border-yellow-300">👹</div>
+                        <h4 class="text-xs font-bold text-[#facc15] title-font">พิธีสังเวยเปิดผนึก "ท้าวเวสสุวรรณ"</h4>
+                        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-left space-y-2">
+                            <div class="flex justify-between text-[11px]">
+                                <span class="text-slate-400">บารมี:</span>
+                                <span id="sacrifice-progress-text" class="text-yellow-400 font-bold">0 / 100</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                                <div id="sacrifice-progress-bar" class="bg-gradient-to-r from-amber-600 to-yellow-400 h-full transition-all" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <button onclick="performSacrifice()" class="w-full py-2.5 bg-gradient-to-r from-purple-700 to-amber-600 text-white font-bold text-xs rounded-xl shadow-lg">🔥 ถวายสังเวยอักษรซ้ำ (+15 บารมี & 50 🪙)</button>
                     </div>
                 </div>
 
-                <div id="treasury-runes-grid" class="hidden grid grid-cols-4 gap-2"></div>
-            </div>
-        </div>
-
-        <!-- ==================== LEADERBOARD SCREEN ==================== -->
-        <div id="leaderboard-screen" class="hidden absolute inset-0 z-40 bg-[#0b132b] flex flex-col justify-between overflow-hidden">
-            <div class="p-3 border-b border-[#ca8a04]/40 bg-slate-950 text-center">
-                <h3 class="font-bold text-xs text-[#facc15] title-font"><i class="fa-solid fa-trophy mr-1"></i> ทำเนียบปราชญ์</h3>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-2" id="leaderboard-list">
-                <!-- Dynamic Ranks -->
-            </div>
-        </div>
-
-        <!-- ==================== PK BATTLE SCREEN ==================== -->
-        <div id="pk-setup-screen" class="hidden absolute inset-0 z-40 bg-[#0b132b] flex flex-col justify-between overflow-hidden">
-            <div class="p-3 border-b border-[#ca8a04]/40 bg-slate-950 text-center">
-                <h3 class="font-bold text-xs text-[#facc15] title-font"><i class="fa-solid fa-swords mr-1"></i> ลานยุทธ์ท้าประลอง</h3>
-            </div>
-            <div class="flex-1 p-4 flex flex-col items-center justify-center space-y-4 text-center">
-                <div class="w-24 h-24 bg-red-950/80 border-2 border-red-500 rounded-full flex items-center justify-center text-4xl rune-glow">
-                    ⚔️
+                <!-- 3. Shop -->
+                <div id="tcontent-shop" class="hidden space-y-3">
+                    <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl">🔮</div>
+                            <div>
+                                <h5 class="text-xs font-bold text-white">พยัญชนะมณี</h5>
+                                <p class="text-[10px] text-slate-400">เพิ่มโอกาสจับพยัญชนะ</p>
+                            </div>
+                        </div>
+                        <button onclick="buyShopItem('orb', 50)" class="px-3 py-1.5 bg-[#ca8a04] text-slate-950 font-black text-xs rounded-lg">50 🪙</button>
+                    </div>
                 </div>
-                <h4 class="font-bold text-white text-sm">ค้นหาคู่ต่อสู้ในลานยุทธ์</h4>
-                <button onclick="startPKBattle()" class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 text-white font-bold text-xs rounded-xl shadow-lg active:scale-95 transition">
-                    เข้าสู่สมรภูมิประลอง
-                </button>
+
+                <!-- 4. REAL-TIME PK MATCHMAKING (FIREBASE) -->
+                <div id="tcontent-pk" class="hidden space-y-3">
+                    <div class="pk-celestial-bg p-4 rounded-2xl border border-purple-500/40 text-center space-y-3 shadow-2xl">
+                        <div class="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-purple-900 to-red-600 flex items-center justify-center text-2xl rune-glow border-2 border-yellow-300">⚔️</div>
+                        <h4 class="text-xs font-bold text-yellow-300 title-font">สมรภูมิ</h4>
+                        <div id="pk-status-card" class="bg-slate-950/90 p-3 rounded-xl border border-slate-800 space-y-1">
+                            <h5 id="pk-status-title" class="text-xs font-bold text-yellow-400">พร้อมจับคู่</h5>
+                            <p id="pk-status-desc" class="text-[10px] text-slate-400">เข้าต่อสู้กับผู้พิทักษ์ทั่วปฐพี</p>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs flex justify-between">
+                            <span class="text-slate-400">พลังเวท:</span>
+                            <strong id="player-power-pk-num" class="text-yellow-400">150</strong>
+                        </div>
+                        <button id="pk-action-btn" onclick="startFirebasePKMatchmaking()" class="w-full py-3 bg-gradient-to-r from-red-600 via-amber-600 to-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg border border-yellow-200">
+                            🔥 ค้นหาผู้ต่อสู้บน Cloud (Real-time)
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- ==================== FOOTER NAVIGATION BAR ==================== -->
-        <footer id="main-footer" class="relative z-30 bg-slate-950 border-t border-[#ca8a04]/40 flex justify-between items-center text-[10px] text-slate-400 font-bold h-14">
-            <button onclick="switchTab('map')" id="tab-map" class="flex flex-col items-center justify-center flex-1 h-full footer-active-tab">
-                <i class="fa-solid fa-map text-sm mb-0.5"></i>
-                <span>แผนที่</span>
-            </button>
-            <button onclick="switchTab('leaderboard')" id="tab-leaderboard" class="flex flex-col items-center justify-center flex-1 h-full">
-                <i class="fa-solid fa-trophy text-sm mb-0.5"></i>
-                <span>ทำเนียบ</span>
-            </button>
-            <button onclick="switchTab('pk')" id="tab-pk" class="flex flex-col items-center justify-center flex-1 h-full">
-                <i class="fa-solid fa-swords text-sm mb-0.5"></i>
-                <span>ลานยุทธ์</span>
-            </button>
-            <button onclick="switchTab('treasury')" id="tab-treasury" class="flex flex-col items-center justify-center flex-1 h-full">
-                <i class="fa-solid fa-vault text-sm mb-0.5"></i>
-                <span>คลัง</span>
-            </button>
-        </footer>
+        <!-- ==================== MODALS ==================== -->
+        <!-- Daily Check-In -->
+        <div id="checkin-modal" class="hidden absolute inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-6">
+            <div class="w-full max-w-xs bg-slate-900 border border-[#ca8a04] rounded-3xl p-5 text-center space-y-3 shadow-2xl">
+                <div class="text-3xl">📅</div>
+                <h3 class="text-xs font-bold text-white title-font">ของขวัญประจำวัน</h3>
+                <div id="checkin-status-msg" class="text-xs font-bold text-emerald-400"></div>
+                <button onclick="claimDailyCheckIn()" id="checkin-claim-btn" class="w-full py-2 bg-[#ca8a04] text-slate-950 font-bold text-xs rounded-xl">รับพรประจำวัน (+100 🪙)</button>
+                <button onclick="closeCheckInModal()" class="block mx-auto text-slate-400 text-xs">ปิด</button>
+            </div>
+        </div>
+
+        <!-- Upgrade Stat -->
+        <div id="upgrade-modal" class="hidden absolute inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-6">
+            <div class="w-full max-w-xs bg-slate-900 border border-[#ca8a04] rounded-3xl p-5 text-center space-y-3 shadow-2xl">
+                <div class="text-3xl">⚡</div>
+                <h3 class="text-xs font-bold text-white title-font">แท่นอัปเกรดเทวฤทธิ์</h3>
+                <button onclick="upgradeStat('atk')" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl flex justify-between text-xs">
+                    <span>⚔️ เพิ่มพลังประลอง PK (+15)</span>
+                    <span class="text-yellow-400 font-bold">100 🪙</span>
+                </button>
+                <button onclick="closeUpgradeModal()" class="block mx-auto text-slate-400 text-xs">ปิด</button>
+            </div>
+        </div>
+
+        <!-- Consonant Detail Modal -->
+        <div id="consonant-modal" class="hidden absolute inset-0 z-50 bg-slate-950/90 flex items-center justify-center p-6">
+            <div class="w-full max-w-xs bg-slate-900 border border-[#ca8a04] rounded-3xl p-5 text-center space-y-3 shadow-2xl relative">
+                <button onclick="closeConsonantModal()" class="absolute top-3 right-3 text-slate-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                <div id="cmodal-symbol" class="text-5xl font-extrabold text-[#facc15] title-font py-1">ก</div>
+                <h4 id="cmodal-name" class="text-sm font-bold text-white">ก ไก่</h4>
+                <div id="cmodal-class" class="inline-block text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">อักษรกลาง</div>
+                <p id="cmodal-desc" class="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800"></p>
+            </div>
+        </div>
 
     </div>
 
-    <!-- ==================== JASVASCRIPT GAME ENGINE ==================== -->
+    <!-- ==================== GAME SCRIPT ENGINE ==================== -->
     <script>
-        // Game State Management
-        let gameState = {
-            username: 'นักอักษรา',
-            gold: 100,
-            collectedRunes: [],
-            currentEncounter: null
-        };
+        // ------------------- 1. FIREBASE CONFIG -------------------
+        // TODO: นำค่า Config จาก Firebase Console ของคุณมาใส่ตรงนี้ได้เลยครับ!
+const firebaseConfig = {
+  apiKey: "AIzaSyArjT5xq3VIZfdQFaiWIggCJnBqCz6I3wk",
+  authDomain: "thai-go-game.firebaseapp.com",
+  databaseURL: "https://thai-go-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "thai-go-game",
+  storageBucket: "thai-go-game.firebasestorage.app",
+  messagingSenderId: "204988303831",
+  appId: "1:204988303831:web:686a889c675a3c4bf56392",
+  measurementId: "G-NZLJ3X1H94"
+};
 
-        const thaiConsonants = [
-            { char: 'ก', name: 'ก ไก่', category: 'กลาง' },
-            { char: 'ข', name: 'ข ไข่', category: 'สูง' },
-            { char: 'ค', name: 'ค ควาย', category: 'ต่ำ' },
-            { char: 'ง', name: 'ง งู', category: 'ต่ำ' },
-            { char: 'จ', name: 'จ จาน', category: 'กลาง' },
-            { char: 'ฉ', name: 'ฉ ฉิ่ง', category: 'สูง' },
-            { char: 'ช', name: 'ช ช้าง', category: 'ต่ำ' },
-            { char: 'ด', name: 'ด เด็ก', category: 'กลาง' },
-            { char: 'ต', name: 'ต เต่า', category: 'กลาง' },
-            { char: 'ถ', name: 'ถ ถุง', category: 'สูง' },
-            { char: 'ท', name: 'ท ทหาร', category: 'ต่ำ' },
-            { char: 'น', name: 'น หนู', category: 'ต่ำ' },
-            { char: 'บ', name: 'บ ใบไม้', category: 'กลาง' },
-            { char: 'ป', name: 'ป ปลา', category: 'กลาง' },
-            { char: 'ผ', name: 'ผ ผึ้ง', category: 'สูง' },
-            { char: 'ฝ', name: 'ฝ ฝา', category: 'สูง' },
-            { char: 'พ', name: 'พ พาน', category: 'ต่ำ' },
-            { char: 'ม', name: 'ม ม้า', category: 'ต่ำ' },
-            { char: 'ย', name: 'ย ยักษ์', category: 'ต่ำ' },
-            { char: 'ร', name: 'ร เรือ', category: 'ต่ำ' },
-            { char: 'ล', name: 'ล ลิง', category: 'ต่ำ' },
-            { char: 'ว', name: 'ว แหวน', category: 'ต่ำ' },
-            { char: 'ส', name: 'ส เสือ', category: 'สูง' },
-            { char: 'ห', name: 'ห หีบ', category: 'สูง' },
-            { char: 'อ', name: 'อ อ่าง', category: 'กลาง' },
-            { char: 'ฮ', name: 'ฮ นกฮูก', category: 'ต่ำ' }
+        let db = null;
+        try {
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                console.log("🔥 Firebase Cloud Connected!");
+            }
+        } catch(e) { console.error("Firebase init error:", e); }
+
+        // ------------------- 2. THAI CONSONANTS & QUIZ DATA -------------------
+        const THAI_CONSONANTS = [
+            { char: 'ก', name: 'ก ไก่', class: 'กลาง', desc: 'อักษรกลาง เสียงสามัญ ท่องจำง่าย' },
+            { char: 'ข', name: 'ข ไข่', class: 'สูง', desc: 'อักษรสูง ผันวรรณยุกต์ได้ 3 เสียง' },
+            { char: 'ฃ', name: 'ฃ ขวด', class: 'สูง', desc: 'อักษรสูง ปัจจุบันเลิกใช้แล้ว' },
+            { char: 'ค', name: 'ค ฅน', class: 'ต่ำ', desc: 'อักษรต่ำคู่ พายุกระหน่ำ' },
+            { char: 'ฅ', name: 'ฅ คน', class: 'ต่ำ', desc: 'อักษรต่ำ ปัจจุบันเลิกใช้แล้ว' },
+            { char: 'ฆ', name: 'ฆ ระฆัง', class: 'ต่ำ', desc: 'อักษรต่ำคู่ เสียงกังวาน' },
+            { char: 'ง', name: 'ง งู', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว พยัญชนะท้ายแม่กง' },
+            { char: 'จ', name: 'จ จาน', class: 'กลาง', desc: 'อักษรกลาง ผันได้ครบ 5 เสียง' },
+            { char: 'ฉ', name: 'ฉ ฉิ่ง', class: 'สูง', desc: 'อักษรสูง เสียงสั้นกังวาน' },
+            { char: 'ช', name: 'ช ช้าง', class: 'ต่ำ', desc: 'อักษรต่ำคู่ มีพลังอำนาจ' },
+            { char: 'ซ', name: 'ซ โซ่', class: 'ต่ำ', desc: 'อักษรต่ำคู่ พันธนาการ' },
+            { char: 'ฌ', name: 'ฌ เฌอ', class: 'ต่ำ', desc: 'อักษรต่ำคู่ สัญลักษณ์ต้นไม้' },
+            { char: 'ญ', name: 'ญ หญิง', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว สิริมงคล' },
+            { char: 'ฎ', name: 'ฎ ชฎา', class: 'กลาง', desc: 'อักษรกลาง เครื่องสวมศีรษะ' },
+            { char: 'ฏ', name: 'ฏ ปฏัก', class: 'กลาง', desc: 'อักษรกลาง อาวุธโบราณ' },
+            { char: 'ฐ', name: 'ฐ ฐาน', class: 'สูง', desc: 'อักษรสูง รองรับความมั่นคง' },
+            { char: 'ฑ', name: 'ฑ มณโฑ', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ตัวละครวรรณคดี' },
+            { char: 'ฒ', name: 'ฒ ผู้เฒ่า', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ผู้ทรงภูมิปัญญา' },
+            { char: 'ณ', name: 'ณ เณร', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว ผู้ศึกษาธรรม' },
+            { char: 'ด', name: 'ด เด็ก', class: 'กลาง', desc: 'อักษรกลาง ผันได้ 5 เสียง' },
+            { char: 'ต', name: 'ต เต่า', class: 'กลาง', desc: 'อักษรกลาง ความอดทนสูง' },
+            { char: 'ถ', name: 'ถ ถุง', class: 'สูง', desc: 'อักษรสูง คลังเก็บสมบัติ' },
+            { char: 'ท', name: 'ท ทหาร', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ผู้ปกป้องผืนดิน' },
+            { char: 'ธ', name: 'ธ ธง', class: 'ต่ำ', desc: 'อักษรต่ำคู่ สัญลักษณ์ชาติ' },
+            { char: 'น', name: 'น หนู', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว แม่กน' },
+            { char: 'บ', name: 'บ ใบไม้', class: 'กลาง', desc: 'อักษรกลาง ความสดชื่น' },
+            { char: 'ป', name: 'ป ปลา', class: 'กลาง', desc: 'อักษรกลาง แหวกว่ายในสายน้ำ' },
+            { char: 'ผ', name: 'ผ ผึ้ง', class: 'สูง', desc: 'อักษรสูง ความขยันสามัคคี' },
+            { char: 'ฝ', name: 'ฝ ฝา', class: 'สูง', desc: 'อักษรสูง ป้องปิดภัยมืด' },
+            { char: 'พ', name: 'พ พาน', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ภาชนะสักการะ' },
+            { char: 'ฟ', name: 'ฟ ฟัน', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ความแข็งแกร่ง' },
+            { char: 'ภ', name: 'ภ สำเภา', class: 'ต่ำ', desc: 'อักษรต่ำคู่ การเดินทางข้ามมหาสมุทร' },
+            { char: 'ม', name: 'ม ม้า', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว ว่องไวปราดเปรียว' },
+            { char: 'ย', name: 'ย ยักษ์', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว ผู้เฝ้าประตูศักดิ์สิทธิ์' },
+            { char: 'ร', name: 'ร เรือ', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว สถิตในวรรณศิลป์' },
+            { char: 'ล', name: 'ล ลิง', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว ซุกซนว่องไว' },
+            { char: 'ว', name: 'ว แหวน', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว เครื่องประดับอันล้ำค่า' },
+            { char: 'ศ', name: 'ศ ศาลา', class: 'สูง', desc: 'อักษรสูง ที่พักพิงผู้เดินทาง' },
+            { char: 'ษ', name: 'ษ ฤาษี', class: 'สูง', desc: 'อักษรสูง ผู้บำเพ็ญพรต' },
+            { char: 'ส', name: 'ส เสือ', class: 'สูง', desc: 'อักษรสูง เจ้าแห่งพนาสันต์' },
+            { char: 'ห', name: 'ห หีบ', class: 'สูง', desc: 'อักษรสูง เก็บซ่อนความลับ' },
+            { char: 'ฬ', name: 'ฬ จุฬา', class: 'ต่ำ', desc: 'อักษรต่ำเดี่ยว ว่าวไทยโบราณ' },
+            { char: 'อ', name: 'อ อ่าง', class: 'กลาง', desc: 'อักษรกลาง พยัญชนะคู่สระ' },
+            { char: 'ฮ', name: 'ฮ นกฮูก', class: 'ต่ำ', desc: 'อักษรต่ำคู่ ตาไวในยามค่ำคืน' }
         ];
 
-        function handleLoginFlow() {
-            const input = document.getElementById('login-username').value.trim();
-            if (input) gameState.username = input;
-            
-            document.getElementById('hud-username').innerText = gameState.username;
+ const quizzes = [
+            { question: 'ระบบเสียงในภาษาไทยแบ่งออกเป็นกี่หน่วย', options: ['3', '2', '1', '4'], answer: 0 },
+            { question: 'วันภาษาไทยแห่งชาติคือ', options: ['29 กรกฎาคม', '30 เมษายน', '5 มีนาคม', '1 สิงหาคม'], answer: 0 },
+            { question: 'คำใดออกเสียงวรรณยุกต์ ตรี', options: ['ฟ้า', 'การ', 'บ้าน', 'ค่ะ'], answer: 0 },
+            { question: 'คำในข้อใดเขียนได้ถูกต้อง', options: ['เจ๊ง', 'โน๊ต', 'คุ๊กกี้', 'แว๊น'], answer: 0 },
+            { question: 'ข้อใดเป็นอักษรควบไม่แท้', options: ['ทราย', 'กราบ', 'คล้าย', 'ขวาน'], answer: 0 },
+            { question: 'ข้อใดเป็นสรรพนามบุรุษที่ 3', options: ['มัน', 'ฉัน', 'แก', 'กู'], answer: 0 },
+            { question: 'คำไวพจน์ในข้อใดไม่ใช่สัตว์', options: ['อัคคี', 'กุญชร', 'วิหค', 'กาสร'], answer: 0 },
+            { question: 'ข้อใดคือคำไวพจน์ของดวงอาทิตย์', options: ['สุริยัน', 'แข', 'ศศิ', 'เดือน'], answer: 0 },
+            { question: 'สำนวนไทยในข้อใดมีความหมายแตกต่างจากข้ออื่น', options: ['หาเหาใส่หัว', 'ไก่ได้พลอย', 'ตาบอดได้แว่น', 'หัวล้านได้หวี'], answer: 0 },
+            { question: 'ข้อใดคือคำประสม', options: ['ขวดนม', 'บุกรุก', 'บ้านเรือน', 'จิตใจ'], answer: 0 },
+            { question: 'ข้อใดคือคำซ้อน', options: ['ทิ้งขว้าง', 'ปอดแหก', 'ไส้แห้ง', 'เหยี่ยวข่าว'], answer: 0 },
+            { question: 'คำในข้อใดถูกต้อง', options: ['น้ำแข็งไส', 'ตาบลอด', 'ปิดศนา', 'ปราบปาม'], answer: 0 },
+            { question: 'ข้อใดเขียนผิด', options: ['เฟสบุ๊ค', 'ฟุตบอล', 'วอลเลย์บอล', 'ปิงปอง'], answer: 0 },
+            { question: 'Facebook เขียนทับศัพท์ว่าอย่างไร', options: ['เฟซบุ๊ก', 'เฟสบุ๊ก', 'เฟสบุค', 'เฟสบุ๊ค'], answer: 0 },
+            { question: 'คำใดเขียนผิด', options: ['กระทิ', 'กระทะ', 'กระทง', 'กระบวย'], answer: 0 },
+            { question: 'คำใดเขียนผิด', options: ['เพิ่มพูล', 'พรรคพวก', 'พอเพียง', 'พลัดพราก'], answer: 0 },
+            { question: 'มณฑป อ่านว่าอย่างไร', options: ['มน-ดบ', 'มะ-นะ-ทบ', 'มน-นะ-ทบ', 'มัน-ดบ'], answer: 0 },
+            { question: 'อะไรเอ่ย ตอนเด็กสีขาว สาว ๆ สีเขียว ตอนแก่สีแดง', options: ['พริก', 'ลำไย', 'ทุเรียน', 'กะเพรา'], answer: 0 },
+            { question: 'อะไรเอ่ยเกิดมาเป็นคู่อยู่ใกล้ ๆ แต่ไม่เคยเห็นกัน', options: ['หู', 'มือ', 'เท้า', 'ปาก'], answer: 0 },
+            { question: 'อะไรเอ่ยไม่ใหญ่ไม่กว้างแต่บังโลกมิดติดอยู่กับตัวคน', options: ['เปลือกตา', 'เท้า', 'เสื้อ', 'รองเท้า'], answer: 0 },
+            { question: 'อะไรเอ่ยทุกคนต้องมีทุกคนต้องลืม', options: ['ตา', 'ปาก', 'คอ', 'จมูก'], answer: 0 },
+            { question: 'คำใดเขียนผิด', options: ['กระเพรา', 'กระเพาะ', 'ไพเราะ', 'เพราะอะไร'], answer: 0 },
+            { question: '“จะหักอื่นขืนหักก็จักได้ หักอาลัยนี้ไม่หลุดสุดจะหัก สารพัดตัดขาดประหลาดนัก แต่ตัดรักนี้ไม่ขาดประหลาดใจ” จากกลอนข้างต้น สุนทรภู่กล่าวว่าสิ่งใดเป็นสิ่งที่ตัดไม่ขาด', options: ['เขา', 'รัก', 'เรียน', 'อดีต'], answer: 1 },
+            { question: 'ลูกของพระอภัยมณีกับนางผีเสื้อสมุทรมีชื่อว่าอะไร', options: ['สินสมุทร','นางเงือก', 'สุดสาคร', 'นนทก'], answer: 0 },
+            { question: 'นนทกตายแล้วมาเกิดเป็นใคร', options: ['ทศกัณฐ์', 'พิเภก', 'พระราม', 'มัจฉานุ'], answer: 0 },
+            { question: 'พระอภัยมณีใช้เครื่องดนตรีใด', options: ['ปี่', 'กีตาร์', 'ขลุ่ย', 'ซอ'], answer: 0 },
+            { question: 'ม้านิลมังกรเป็นเพศใด', options: ['กะเทย', 'เมีย', 'ผู้', 'ทอม'], answer: 0 },
+            { question: 'ข้อใดเขียนผิด', options: ['กระเทย', 'ตะกละ', 'ตบะ', 'สมถะ'], answer: 0 },
+            { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการสร้างคำแบบใด', options: ['สมาส', 'ประสม', 'ซ้ำ', 'ซ้อน'], answer: 0 },
+            { question: 'คำว่า "พลานุกูล" ในชื่อโรงเรียนพระพุทธบาท "พลานุกูลวิทยา" เกิดจากการนำคำคู่ใดสมาสกัน', options: ['พล + อนุกูล', 'พล- + นุกูล', 'พละ + อนุกูล', 'พลานุ + กูล'], answer: 0 },
+            { question: 'สุนทรภู่เสียชีวิตในสมัยรัชกาลใด', options: ['รัชกาลที่ ๔', 'รัชกาลที่ ๒', 'รัชกาลที่ ๓', 'รัชกาลที่ ๕'], answer: 0 },
+            { question: 'นิราศพระบาทเป็นผลงานของใคร', options: ['สุนทรภู่', 'กุลิสรา', 'พุทธชาติ', 'พระบาทสมเด็จพระพุทธเลิศหล้านภาลัย'], answer: 0 },
+            { question: 'อำเภอพระพุทธบาทอยู่ในจังหวัดใด', options: ['สระบุรี', 'อยุธยา', 'ลพบุรี', 'บ้านหมอ'], answer: 0 },
+            { question: 'พระรามจากเรื่องรามเกียรติ์คือเทพองค์ใดอวตาร', options: ['พระนารายณ์', 'พระอินทร์', 'พระศิวะ', 'พระอิศวร'], answer: 0 },
+            { question: 'ข้อใดไม่มีคำผิด', options: ['ครูครับ สวัสดีครับ', 'คูครับ สวัดดีครับ', 'ครูค่ะ สวัสดีคะ', 'คูค่ะ สวัสดีค่ะ'], answer: 0 },
+            { question: 'ไตรยางศ์คืออะไร?', options: ['อักษรสามหมู่ อักษรสูง อักษรกลาง อักษรต่ำ', 'อักษรสี่หมู่ อักษรสูง อักษรกลาง อักษรต่ำเดี่ยว อักษรต่ำคู่', 'อักษรสองหมู่ อักษรสูง อักษรกลาง', 'อักษรห้าหมู่ อักษรสูง อักษรกลาง อักษรต่ำเดี่ยว อักษรต่ำคู่ อักษรสามัญ'], answer: 0 },
+            { question: 'วันภาษาไทยแห่งชาติตรงกับวันที่ ๒๙ กรกฎาคม เนื่องจากเหตุการณ์สำคัญอันยิ่งใหญ่ใดในปี พ.ศ. ๒๕๐๕?', options: ['พระบาทสมเด็จพระเจ้าอยู่หัว รัชกาลที่ ๙ เสด็จฯ ร่วมอภิปรายเรื่องปัญหาการใช้คำไทย ณ จุฬาลงกรณ์มหาวิทยาลัย', 'มีการจัดพิมพ์ตำราอักษรศาสตร์ไทยเล่มแรกของชาติอย่างเป็นทางการ', 'การประกาศใช้จารึกพยัญชนะไทยแบบสุโขทัยอย่างเป็นแบบแผน', 'การลงนามสัญญานานาชาติว่าด้วยการศึกษาร่วมอักษรตะวันออก'], answer: 0 },
+            { question: 'คำว่า ทักษ์ ใน "พิทักษ์" สะกดตามมาตราตัวสะกดในข้อใดจึงถูกต้องตามทฤษฎีอักษรศาสตร์โบราณ?', options: ['มาตรา แม่ กก', 'มาตรา แม่ กด', 'มาตรา แม่ กบ', 'มาตรา แม่ กน'], answer: 0 },
+            { question: 'พยัญชนะไทยชุดใดต่อไปนี้ จัดอยู่ในหมวดหมู่อักษรสามหมู่กลุ่ม "อักษรสูง" ทั้งสิ้น?', options: ['ข, ฉ, ถ, ผ, ศ, ห', 'ก, จ, ด, ต, บ, ป', 'ค, ง, ช, ซ, ท, น', 'ร, ล, ว, ม, ย, ณ'], answer: 0 },
+            { question: 'พยัญชนะภาษาไทยลำดับที่ ๔๔ ตัวสุดท้ายคือข้อใด และเป็นอักษรหมู่ใดในไตรยางศ์?', options: ['ฮ. นกฮูก (อักษรต่ำเดี่ยว)', 'อ. อ่าง (อักษรกลาง)', 'ฬ. จุฬา (อักษรสูง)', 'ฑ. มณโฑ (อักษรต่ำคู่)'], answer: 0 }
+        ];
+
+
+        // ------------------- 3. STATE MANAGEMENT -------------------
+        let gameState = {
+            username: "ผู้พิทักษ์",
+            uid: "THAI-" + Math.floor(1000 + Math.random() * 9000),
+            gold: 150,
+            level: 1,
+            xp: 0,
+            collected: {},
+            sacrificeProgress: 0,
+            hasVessavana: false,
+            power: 150,
+            lastCheckIn: null,
+            equippedItem: null
+        };
+
+        let currentEncounterChar = null;
+        let currentQuizIndex = 0;
+        let currentQuizFontSize = 12;
+        let currentRoomUnsubscribe = null;
+        let synth = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGameState();
+            renderConsonantGrid();
+            updateHudUI();
+        });
+
+        function playSound(freq = "C5", type = "8n") {
+            try {
+                if (!synth && window.Tone) { Tone.start(); synth = new Tone.Synth().toDestination(); }
+                if (synth) synth.triggerAttackRelease(freq, type);
+            } catch(e) {}
+        }
+
+        async function handleLoginFlow() {
+            playSound("E5");
+            const nameInput = document.getElementById('login-username').value.trim();
+            const uidInput = document.getElementById('login-uid').value.trim();
+
+            if (nameInput) gameState.username = nameInput;
+            if (uidInput) gameState.uid = uidInput;
+
+            await saveGameState();
+
             document.getElementById('splash-screen').classList.add('hidden');
             document.getElementById('main-header').classList.remove('hidden');
-            
-            switchTab('map');
-            initSpawner();
-            renderRunesGrid();
-            loadLeaderboard();
+            document.getElementById('map-screen').classList.remove('hidden');
+            spawnMapRunes();
+            document.getElementById('announcement-banner').classList.remove('hidden');
         }
 
+        function showLocalUidHint() { alert("UID ของคุณในเครื่องนี้คือ: " + gameState.uid); }
+
+        async function saveGameState() {
+            localStorage.setItem('thai_go_full_save', JSON.stringify(gameState));
+            if (db) {
+                try {
+                    await db.collection('users').doc(gameState.uid).set({
+                        username: gameState.username,
+                        level: gameState.level,
+                        power: gameState.power,
+                        gold: gameState.gold,
+                        collectedCount: Object.keys(gameState.collected).length,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch(e) {}
+            }
+        }
+
+        function loadGameState() {
+            const saved = localStorage.getItem('thai_go_full_save');
+            if (saved) {
+                try { gameState = { ...gameState, ...JSON.parse(saved) }; } catch(e) {}
+            }
+            document.getElementById('login-username').value = gameState.username;
+            document.getElementById('login-uid').value = gameState.uid;
+        }
+
+        // ------------------- 4. UI TABS & MAP -------------------
         function switchTab(tab) {
-            // Hide all screens
+            playSound("G4");
             document.getElementById('map-screen').classList.add('hidden');
-            document.getElementById('leaderboard-screen').classList.add('hidden');
-            document.getElementById('pk-setup-screen').classList.add('hidden');
             document.getElementById('treasury-screen').classList.add('hidden');
 
-            // Reset tab styles
-            document.getElementById('tab-map').className = "flex flex-col items-center justify-center flex-1 h-full";
-            document.getElementById('tab-leaderboard').className = "flex flex-col items-center justify-center flex-1 h-full";
-            document.getElementById('tab-pk').className = "flex flex-col items-center justify-center flex-1 h-full";
-            document.getElementById('tab-treasury').className = "flex flex-col items-center justify-center flex-1 h-full";
-
-            if (tab === 'map') {
-                document.getElementById('tab-map').className += " footer-active-tab";
-                document.getElementById('map-screen').classList.remove('hidden');
-            } else if (tab === 'leaderboard') {
-                document.getElementById('tab-leaderboard').className += " footer-active-tab";
-                document.getElementById('leaderboard-screen').classList.remove('hidden');
-            } else if (tab === 'pk') {
-                document.getElementById('tab-pk').className += " footer-active-tab";
-                document.getElementById('pk-setup-screen').classList.remove('hidden');
-            } else if (tab === 'treasury') {
-                document.getElementById('tab-treasury').className += " footer-active-tab";
+            if (tab === 'map') document.getElementById('map-screen').classList.remove('hidden');
+            else if (tab === 'treasury') {
                 document.getElementById('treasury-screen').classList.remove('hidden');
+                renderConsonantGrid();
             }
         }
 
-        function switchTreasuryTab(sub) {
-            const libList = document.getElementById('treasury-library-list');
-            const runesGrid = document.getElementById('treasury-runes-grid');
-            const btnLib = document.getElementById('tab-sub-library');
-            const btnRunes = document.getElementById('tab-sub-runes');
-
-            if (sub === 'library') {
-                libList.classList.remove('hidden');
-                runesGrid.classList.add('hidden');
-                btnLib.className = "flex-1 py-2.5 border-b-2 border-[#ca8a04] text-[#facc15]";
-                btnRunes.className = "flex-1 py-2.5 border-b-2 border-transparent text-slate-400";
-            } else {
-                libList.classList.add('hidden');
-                runesGrid.classList.remove('hidden');
-                btnRunes.className = "flex-1 py-2.5 border-b-2 border-[#ca8a04] text-[#facc15]";
-                btnLib.className = "flex-1 py-2.5 border-b-2 border-transparent text-slate-400";
-            }
+        function switchTreasuryTab(subTab) {
+            playSound("F4");
+            ['inventory', 'sacrifice', 'shop', 'pk'].forEach(t => {
+                document.getElementById(`tcontent-${t}`).classList.add('hidden');
+                document.getElementById(`ttab-${t}`).className = "flex-1 py-2.5 text-center text-slate-400 border-b-2 border-transparent";
+            });
+            document.getElementById(`tcontent-${subTab}`).classList.remove('hidden');
+            document.getElementById(`ttab-${subTab}`).className = "flex-1 py-2.5 text-center text-[#facc15] border-b-2 border-[#ca8a04]";
         }
 
-        function initSpawner() {
+        function dismissAnnouncement() { document.getElementById('announcement-banner').classList.add('hidden'); }
+
+        function spawnMapRunes() {
             const spawner = document.getElementById('rune-spawner');
             spawner.innerHTML = '';
-            
-            for (let i = 0; i < 12; i++) {
-                const item = thaiConsonants[Math.floor(Math.random() * thaiConsonants.length)];
-                const top = Math.floor(Math.random() * 1600) + 200;
-                const left = Math.floor(Math.random() * 1600) + 200;
-
+            for (let i = 0; i < 15; i++) {
+                const randomCharObj = THAI_CONSONANTS[Math.floor(Math.random() * THAI_CONSONANTS.length)];
                 const node = document.createElement('div');
-                node.className = "absolute w-12 h-12 bg-slate-900 border-2 border-[#ca8a04] rounded-full flex items-center justify-center font-bold text-[#facc15] shadow-lg cursor-pointer rune-glow";
-                node.style.top = top + 'px';
-                node.style.left = left + 'px';
-                node.innerText = item.char;
-                node.onclick = () => triggerEncounter(item);
-
+                node.className = "absolute w-11 h-11 bg-slate-900 border-2 border-[#ca8a04] rounded-full flex items-center justify-center text-yellow-400 font-bold text-base shadow-lg cursor-pointer rune-glow";
+                node.style.top = `${200 + Math.random() * 2500}px`;
+                node.style.left = `${200 + Math.random() * 2500}px`;
+                node.innerText = randomCharObj.char;
+                node.onclick = () => triggerEncounter(randomCharObj);
                 spawner.appendChild(node);
             }
         }
 
-        function triggerEncounter(item) {
-            gameState.currentEncounter = item;
-            document.getElementById('catch-char-name').innerText = "พบพยัญชนะ: " + item.name;
-            document.getElementById('encounter-avatar-inner').innerText = item.char;
+        function triggerEncounter(charObj) {
+            playSound("C6");
+            currentEncounterChar = charObj;
             document.getElementById('encounter-screen').classList.remove('hidden');
+            document.getElementById('catch-char-name').innerText = charObj.name;
+            document.getElementById('encounter-avatar-inner').innerText = charObj.char;
+            document.getElementById('char-difficulty').innerText = `ระดับอักษร: ${charObj.class}`;
         }
 
-        function escapeEncounter() {
-            document.getElementById('encounter-screen').classList.add('hidden');
-        }
-
+        function escapeEncounter() { document.getElementById('encounter-screen').classList.add('hidden'); }
         function tryThrowOrb() {
+            playSound("G5");
             document.getElementById('encounter-screen').classList.add('hidden');
-            openQuiz();
+            openQuizModal();
         }
 
-        function openQuiz() {
-            const item = gameState.currentEncounter || thaiConsonants[0];
-            document.getElementById('quiz-question').innerText = `พยัญชนะ "${item.char}" (${item.name}) จัดอยู่ในอักษรหมู่ใด?`;
-            
-            const optionsDiv = document.getElementById('quiz-options');
-            optionsDiv.innerHTML = '';
-
-            const choices = ['กลาง', 'สูง', 'ต่ำ'];
-            choices.forEach(choice => {
-                const btn = document.createElement('button');
-                btn.className = "w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-700 active:scale-95 transition";
-                btn.innerText = "อักษร" + choice;
-                btn.onclick = () => answerQuiz(choice === item.category);
-                optionsDiv.appendChild(btn);
-            });
-
+        // ------------------- 5. QUIZ ENGINE -------------------
+        function openQuizModal() {
+            currentQuizIndex = Math.floor(Math.random() * QUIZ_DATABASE.length);
+            const qData = QUIZ_DATABASE[currentQuizIndex];
             document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('quiz-question').innerText = qData.q;
+            document.getElementById('quiz-hint-text').classList.add('hidden');
+
+            const optContainer = document.getElementById('quiz-options');
+            optContainer.innerHTML = '';
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full py-2 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl font-medium";
+                btn.innerText = `${idx + 1}. ${opt}`;
+                btn.onclick = () => answerQuiz(idx);
+                optContainer.appendChild(btn);
+            });
         }
 
-        function answerQuiz(isCorrect) {
+        function changeQuizFontSize(dir) {
+            currentQuizFontSize = dir === 'up' ? Math.min(18, currentQuizFontSize + 2) : Math.max(10, currentQuizFontSize - 2);
+            document.getElementById('quiz-question').style.fontSize = `${currentQuizFontSize}px`;
+        }
+
+        function useQuizHint() {
+            if (gameState.gold < 30) { alert("เหรียญทองไม่เพียงพอ!"); return; }
+            gameState.gold -= 30;
+            updateHudUI();
+            const hintElem = document.getElementById('quiz-hint-text');
+            hintElem.innerText = "💡 " + QUIZ_DATABASE[currentQuizIndex].hint;
+            hintElem.classList.remove('hidden');
+        }
+
+        function answerQuiz(selectedIdx) {
             document.getElementById('quiz-screen').classList.add('hidden');
-            if (isCorrect) {
-                alert("🎉 ถูกต้อง! คุณสะกดอักษรสำเร็จ ได้รับ 50 🪙");
-                gameState.gold += 50;
-                if (!gameState.collectedRunes.includes(gameState.currentEncounter.char)) {
-                    gameState.collectedRunes.push(gameState.currentEncounter.char);
-                }
+            if (selectedIdx === QUIZ_DATABASE[currentQuizIndex].answer) {
+                playSound("C5");
+                const ch = currentEncounterChar.char;
+                gameState.collected[ch] = (gameState.collected[ch] || 0) + 1;
+                gameState.gold += 25;
+                saveGameState();
+                updateHudUI();
+                alert(`✨ ถูกต้อง! ได้รับอักขระ "${ch}" และ 25 🪙`);
             } else {
-                alert("❌ คำตอบไม่ถูกต้อง อักษรหลุดรอดไปได้!");
+                playSound("A2");
+                alert("❌ คำตอบคลาดเคลื่อน!");
             }
-            
-            updateHUD();
-            renderRunesGrid();
-            initSpawner();
         }
 
-        function updateHUD() {
-            document.getElementById('player-gold').innerText = gameState.gold;
-            document.getElementById('collected-count').innerText = `${gameState.collectedRunes.length} / 44`;
-        }
-
-        function renderRunesGrid() {
-            const grid = document.getElementById('treasury-runes-grid');
+        // ------------------- 6. INVENTORY & SACRIFICE -------------------
+        function renderConsonantGrid() {
+            const grid = document.getElementById('consonant-grid');
+            if (!grid) return;
             grid.innerHTML = '';
-
-            thaiConsonants.forEach(c => {
-                const isFound = gameState.collectedRunes.includes(c.char);
+            THAI_CONSONANTS.forEach(c => {
+                const count = gameState.collected[c.char] || 0;
                 const card = document.createElement('div');
-                card.className = `p-2 rounded-xl border text-center font-bold text-xs ${isFound ? 'bg-slate-800 border-[#ca8a04] text-[#facc15]' : 'bg-slate-950 border-slate-800 text-slate-600'}`;
-                card.innerText = c.char;
+                let bgClass = count > 0 ? "bg-emerald-950/80 border-emerald-500 text-emerald-300" : "bg-slate-950 border-slate-800 text-slate-600";
+                card.className = `p-2 border rounded-xl flex flex-col items-center justify-center cursor-pointer ${bgClass}`;
+                card.innerHTML = `<span class="text-base font-bold title-font">${c.char}</span><span class="text-[9px]">${count > 0 ? count : 'ล็อก'}</span>`;
+                card.onclick = () => {
+                    document.getElementById('cmodal-symbol').innerText = c.char;
+                    document.getElementById('cmodal-name').innerText = c.name;
+                    document.getElementById('cmodal-class').innerText = `อักษร${c.class}`;
+                    document.getElementById('cmodal-desc').innerText = c.desc;
+                    document.getElementById('consonant-modal').classList.remove('hidden');
+                };
                 grid.appendChild(card);
             });
         }
 
-        function loadLeaderboard() {
-            const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '';
+        function closeConsonantModal() { document.getElementById('consonant-modal').classList.add('hidden'); }
 
-            const mockRanks = [
-                { name: gameState.username, score: gameState.collectedRunes.length * 100 + gameState.gold, isUser: true },
-                { name: 'พระมหาราชครู', score: 2500, isUser: false },
-                { name: 'ขุนศรีอักษร', score: 1800, isUser: false },
-                { name: 'พิทักษ์นที', score: 1200, isUser: false }
-            ];
-
-            mockRanks.sort((a,b) => b.score - a.score);
-
-            mockRanks.forEach((r, idx) => {
-                const row = document.createElement('div');
-                row.className = `p-3 rounded-xl border flex justify-between items-center text-xs font-bold ${r.isUser ? 'bg-amber-950/60 border-[#ca8a04] text-yellow-300' : 'bg-slate-900 border-slate-800 text-slate-300'}`;
-                row.innerHTML = `<span>อันดับ ${idx + 1}. ${r.name}</span> <span class="text-[#facc15]">${r.score} แต้ม</span>`;
-                list.appendChild(row);
-            });
-        }
-
-        function startPKBattle() {
-            alert("⚔️ การประลองยุทธ์สำเร็จ! คุณได้รับเกียรติยศและ 30 🪙");
-            gameState.gold += 30;
-            updateHUD();
-            loadLeaderboard();
-        }
-
-        // Map Drag functionality
-        let isDragging = false;
-        let startX, startY, initialLeft, initialTop;
-
-        const mapEl = document.getElementById('virtual-map');
-
-        mapEl.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            initialLeft = mapEl.offsetLeft;
-            initialTop = mapEl.offsetTop;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            mapEl.style.left = (initialLeft + dx) + 'px';
-            mapEl.style.top = (initialTop + dy) + 'px';
-        });
-
-        window.addEventListener('mouseup', () => { isDragging = false; });
-
-        // Touch events for Mobile
-        mapEl.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                initialLeft = mapEl.offsetLeft;
-                initialTop = mapEl.offsetTop;
+        function performSacrifice() {
+            let hasDup = false;
+            for (let k in gameState.collected) {
+                if (gameState.collected[k] > 1) { gameState.collected[k]--; hasDup = true; break; }
             }
-        });
+            if (!hasDup) { alert("คุณไม่มีพยัญชนะซ้ำสำหรับนำมาสังเวย!"); return; }
 
+            playSound("F5");
+            gameState.sacrificeProgress = Math.min(100, gameState.sacrificeProgress + 15);
+            gameState.gold += 50;
+
+            if (gameState.sacrificeProgress >= 100 && !gameState.hasVessavana) {
+                gameState.hasVessavana = true;
+                gameState.power += 300;
+                alert("🔱 ปลดล็อกยอดขุนพล 'ท้าวเวสสุวรรณ' ร่วมทัพแล้ว!");
+            } else {
+                alert("🔥 สังเวยสำเร็จ! ได้รับ +15 บารมี และ 50 🪙");
+            }
+            saveGameState();
+            updateHudUI();
+        }
+
+        function buyShopItem(item, cost) {
+            if (gameState.gold < cost) { alert("เหรียญทองไม่เพียงพอ!"); return; }
+            gameState.gold -= cost;
+            gameState.equippedItem = "มณีวิเศษ";
+            saveGameState();
+            updateHudUI();
+            alert("🛒 บูชาสำเร็จ!");
+        }
+
+        // ------------------- 7. FIREBASE REAL-TIME PK MATCHMAKING -------------------
+        async function startFirebasePKMatchmaking() {
+            const btn = document.getElementById('pk-action-btn');
+            const title = document.getElementById('pk-status-title');
+            const desc = document.getElementById('pk-status-desc');
+
+            if (!db) { alert("⚠️ กรุณาใส่ Firebase Config ในโค้ดก่อนเริ่มใช้งาน Real-time PK ครับ!"); return; }
+
+            btn.disabled = true;
+            btn.className = "w-full py-3 bg-slate-800 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed";
+            title.innerText = "⏳ กำลังค้นหาคู่ต่อสู้บน Cloud...";
+            desc.innerText = "กำลังตรวจสอบห้องว่างหรือสร้างห้องรอผู้เล่นคนอื่น...";
+
+            try {
+                const snapshot = await db.collection('pk_rooms').where('status', '==', 'waiting').limit(1).get();
+
+                if (!snapshot.empty) {
+                    const roomDoc = snapshot.docs[0];
+                    const roomId = roomDoc.id;
+                    const roomData = roomDoc.data();
+
+                    if (roomData.player1.uid === gameState.uid) {
+                        await db.collection('pk_rooms').doc(roomId).delete();
+                        startFirebasePKMatchmaking();
+                        return;
+                    }
+
+                    const p1Power = roomData.player1.power;
+                    const p2Power = gameState.power;
+                    let winnerUid = p1Power > p2Power ? roomData.player1.uid : (p2Power > p1Power ? gameState.uid : "DRAW");
+
+                    await db.collection('pk_rooms').doc(roomId).update({
+                        player2: { uid: gameState.uid, username: gameState.username, power: gameState.power },
+                        status: 'finished',
+                        winnerUid: winnerUid
+                    });
+
+                    resolvePKResult(winnerUid, roomData.player1.username);
+                } else {
+                    const newRoomRef = await db.collection('pk_rooms').add({
+                        player1: { uid: gameState.uid, username: gameState.username, power: gameState.power },
+                        status: 'waiting',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    title.innerText = "⚔️ สร้างห้องประลองสำเร็จ!";
+                    desc.innerText = "กำลังรอคู่ต่อสู้เข้ามาร่วมสู้บน Cloud...";
+
+                    currentRoomUnsubscribe = newRoomRef.onSnapshot((docSnapshot) => {
+                        const data = docSnapshot.data();
+                        if (data && data.status === 'finished') {
+                            if (currentRoomUnsubscribe) currentRoomUnsubscribe();
+                            resolvePKResult(data.winnerUid, data.player2.username);
+                        }
+                    });
+                }
+            } catch(e) {
+                console.error("Matchmaking error:", e);
+                resetPKUI();
+            }
+        }
+
+        function resolvePKResult(winnerUid, opponentName) {
+            document.getElementById('app').classList.add('pk-shaking');
+            setTimeout(() => {
+                document.getElementById('app').classList.remove('pk-shaking');
+                if (winnerUid === gameState.uid) {
+                    gameState.gold += 150;
+                    alert(`🏆 ชัยชนะ Real-time!\nคุณเอาชนะผู้พิทักษ์ "${opponentName}" บน Cloud รับ 150 🪙`);
+                } else if (winnerUid === "DRAW") {
+                    gameState.gold += 50;
+                    alert(`🤝 เสมอกัน!\nพลังทัดเทียมกับ "${opponentName}" รับ 50 🪙`);
+                } else {
+                    alert(`💀 พ่ายแพ้!\nผู้พิทักษ์ "${opponentName}" มีพลังสูงกว่า`);
+                }
+                saveGameState();
+                updateHudUI();
+                resetPKUI();
+            }, 400);
+        }
+
+        function resetPKUI() {
+            const btn = document.getElementById('pk-action-btn');
+            btn.disabled = false;
+            btn.className = "w-full py-3 bg-gradient-to-r from-red-600 via-amber-600 to-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg border border-yellow-200";
+            document.getElementById('pk-status-title').innerText = "พร้อมจับคู่กับผู้เล่นจริง";
+            document.getElementById('pk-status-desc').innerText = "เชื่อมต่อ Firestore Cloud Matchmaking เพื่อต่อสู้กับผู้พิทักษ์ทั่วปฐพี";
+        }
+
+        // ------------------- 8. HUD & CHECKIN -------------------
+        function updateHudUI() {
+            document.getElementById('hud-username').innerText = gameState.username;
+            document.getElementById('hud-level').innerText = `Lv.${gameState.level}`;
+            document.getElementById('player-gold').innerText = gameState.gold;
+            document.getElementById('collected-count').innerText = `${Object.keys(gameState.collected).length} / 44`;
+            document.getElementById('sacrifice-progress-text').innerText = `${gameState.sacrificeProgress} / 100`;
+            document.getElementById('sacrifice-progress-bar').style.width = `${gameState.sacrificeProgress}%`;
+            document.getElementById('player-power-pk-num').innerText = gameState.power;
+            if (gameState.equippedItem) document.getElementById('equipped-indicator').innerText = gameState.equippedItem;
+        }
+
+        function openCheckInModal() {
+            const today = new Date().toDateString();
+            const claimBtn = document.getElementById('checkin-claim-btn');
+            if (gameState.lastCheckIn === today) {
+                document.getElementById('checkin-status-msg').innerText = "✅ รับพรประจำวันนี้แล้ว";
+                claimBtn.classList.add('hidden');
+            } else {
+                document.getElementById('checkin-status-msg').innerText = "✨ มีพรประทานรอการรับ";
+                claimBtn.classList.remove('hidden');
+            }
+            document.getElementById('checkin-modal').classList.remove('hidden');
+        }
+
+        function closeCheckInModal() { document.getElementById('checkin-modal').classList.add('hidden'); }
+        function claimDailyCheckIn() {
+            gameState.lastCheckIn = new Date().toDateString();
+            gameState.gold += 100;
+            saveGameState();
+            updateHudUI();
+            closeCheckInModal();
+            alert("🎁 รับพรสำเร็จ +100 🪙!");
+        }
+
+        function openMainUpgradePanel() { document.getElementById('upgrade-modal').classList.remove('hidden'); }
+        function closeUpgradeModal() { document.getElementById('upgrade-modal').classList.add('hidden'); }
+        function upgradeStat() {
+            if (gameState.gold < 100) { alert("เหรียญไม่พอ!"); return; }
+            gameState.gold -= 100;
+            gameState.power += 15;
+            saveGameState();
+            updateHudUI();
+            alert("⚡ อัปเกรดสำเร็จ!");
+        }
+
+        function openAdminPrompt() {
+            if (prompt("รหัสผ่านผู้ดูแล:") === "admin123") {
+                gameState.gold += 1000;
+                saveGameState();
+                updateHudUI();
+                alert("👑 เสก +1000 🪙");
+            }
+        }
+
+        // ------------------- TUTORIAL STEPS -------------------
+        let currentTutorialStep = 0;
+        const TUTORIAL_STEPS = [
+            { icon: "🧭", title: "ยินดีต้อนรับสู่ THAI-GO!", desc: "เกม AR สำรวจสืบค้นจารึกมหาอักษรไทย 44 ตัว" },
+            { icon: "🔮", title: "สะกดจับอักขรธาตุ", desc: "ตอบปริศนาภาษาไทยเพื่อสะสมอักษรเข้าคลัง" },
+            { icon: "⚔️", title: "Real-time PK Cloud", desc: "นำท้าวเวสสุวรรณประลองกับผู้เล่นจริงบน Firebase Cloud!" }
+        ];
+
+        function startTutorial() { currentTutorialStep = 0; renderTutorialStep(); document.getElementById('tutorial-overlay').classList.remove('hidden'); }
+        function skipTutorial() { document.getElementById('tutorial-overlay').classList.add('hidden'); }
+        function renderTutorialStep() {
+            const step = TUTORIAL_STEPS[currentTutorialStep];
+            document.getElementById('tutorial-icon').innerText = step.icon;
+            document.getElementById('tutorial-title').innerText = step.title;
+            document.getElementById('tutorial-description').innerText = step.desc;
+        }
+        function nextTutorialStep() { if (currentTutorialStep < TUTORIAL_STEPS.length - 1) { currentTutorialStep++; renderTutorialStep(); } else skipTutorial(); }
+        function prevTutorialStep() { if (currentTutorialStep > 0) { currentTutorialStep--; renderTutorialStep(); } }
+
+        // ------------------- TOUCH DRAGGING -------------------
+        let isDraggingMap = false, startX, startY, currentMapX = -1200, currentMapY = -1200;
+        const virtualMap = document.getElementById('virtual-map');
+
+        virtualMap.addEventListener('mousedown', (e) => { isDraggingMap = true; startX = e.clientX - currentMapX; startY = e.clientY - currentMapY; });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDraggingMap) return;
+            currentMapX = e.clientX - startX; currentMapY = e.clientY - startY;
+            virtualMap.style.left = `${currentMapX}px`; virtualMap.style.top = `${currentMapY}px`;
+        });
+        window.addEventListener('mouseup', () => isDraggingMap = false);
+
+        virtualMap.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) { isDraggingMap = true; startX = e.touches[0].clientX - currentMapX; startY = e.touches[0].clientY - currentMapY; }
+        });
         window.addEventListener('touchmove', (e) => {
-            if (!isDragging || e.touches.length !== 1) return;
-            const dx = e.touches[0].clientX - startX;
-            const dy = e.touches[0].clientY - startY;
-            mapEl.style.left = (initialLeft + dx) + 'px';
-            mapEl.style.top = (initialTop + dy) + 'px';
+            if (!isDraggingMap || e.touches.length !== 1) return;
+            currentMapX = e.touches[0].clientX - startX; currentMapY = e.touches[0].clientY - startY;
+            virtualMap.style.left = `${currentMapX}px`; virtualMap.style.top = `${currentMapY}px`;
         });
-
-        window.addEventListener('touchend', () => { isDragging = false; });
+        window.addEventListener('touchend', () => isDraggingMap = false);
     </script>
 </body>
 </html>
