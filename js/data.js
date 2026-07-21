@@ -1,11 +1,13 @@
 // ==================== FIREBASE INITIALIZATION ====================
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "thai-go-game.firebaseapp.com",
-    projectId: "thai-go-game",
-    storageBucket: "thai-go-game.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abcdef123456"
+  apiKey: "AIzaSyArjT5xq3VIZfdQFaiWIggCJnBqCz6I3wk",
+  authDomain: "thai-go-game.firebaseapp.com",
+  databaseURL: "https://thai-go-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "thai-go-game",
+  storageBucket: "thai-go-game.firebasestorage.app",
+  messagingSenderId: "204988303831",
+  appId: "1:204988303831:web:686a889c675a3c4bf56392",
+  measurementId: "G-NZLJ3X1H94"
 };
 
 if (!firebase.apps.length) {
