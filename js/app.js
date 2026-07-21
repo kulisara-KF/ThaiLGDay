@@ -1,4 +1,4 @@
-// ==================== APP STATE & GLOBALS ====================
+// ==================== MAIN GAME CONTROLLER ====================
 let playerState = {
     username: "นักอักษรา",
     level: 1,
@@ -6,7 +6,15 @@ let playerState = {
     gold: 300,
     selectedChar: "inao",
     inventory: ["ก", "ข"],
-    selectedCards: []
+    selectedCards: [],
+    charLevels: {
+        inao: 1,
+        aphai: 1,
+        khunphaen: 1,
+        sudsakorn: 1,
+        wessuwan: 1
+    },
+    currentRank: 99
 };
 
 const GAME_SHOP_CATALOG = [
@@ -21,17 +29,31 @@ const GAME_SHOP_CATALOG = [
 
 let selectedCharForModal = null;
 let arBounceInterval = null;
+let currentTargetLetter = 'ก';
+let targetLetterElement = null;
 
-// ==================== FIREBASE SYNC FUNCTIONS ====================
+// ==================== FIREBASE REALTIME SYNC & LEADERBOARD ====================
 function savePlayerDataToFirebase() {
     if (typeof db !== 'undefined' && playerState.username) {
+        const uniqueCollected = new Set(playerState.inventory).size;
+        const totalPower = calculateTotalPower();
+
         db.ref('players/' + playerState.username).set({
             level: playerState.level,
             exp: playerState.exp,
             gold: playerState.gold,
             selectedChar: playerState.selectedChar,
             inventory: playerState.inventory,
+            charLevels: playerState.charLevels,
+            collectedCount: uniqueCollected,
+            totalPower: totalPower,
             lastLogin: new Date().toISOString()
+        });
+
+        // อัปเดตตารางอันดับ
+        db.ref('leaderboard/' + playerState.username).set({
+            username: playerState.username,
+            score: totalPower + (playerState.level * 100) + (uniqueCollected * 50)
         });
     }
 }
@@ -46,7 +68,9 @@ function loadPlayerDataFromFirebase(username, callback) {
                 playerState.gold = data.gold || 300;
                 playerState.selectedChar = data.selectedChar || "inao";
                 playerState.inventory = data.inventory || ["ก", "ข"];
+                playerState.charLevels = data.charLevels || playerState.charLevels;
             }
+            setupLeaderboardListener();
             if (callback) callback();
         });
     } else {
@@ -54,15 +78,60 @@ function loadPlayerDataFromFirebase(username, callback) {
     }
 }
 
-// ==================== AUDIO TOGGLE ====================
-function toggleAudioState() {
-    if (typeof SoundEngine === 'undefined') return;
-    const isMuted = SoundEngine.toggleMute();
-    const btn = document.getElementById('btn-audio-toggle');
-    if (btn) btn.innerText = isMuted ? '🔇' : '🔊';
+function setupLeaderboardListener() {
+    if (typeof db === 'undefined') return;
+
+    db.ref('leaderboard').on('value', (snapshot) => {
+        if (!snapshot.exists()) return;
+        
+        const leaderboardData = [];
+        snapshot.forEach((child) => {
+            leaderboardData.push(child.val());
+        });
+
+        // จัดอันดับจากคะแนนมากไปน้อย
+        leaderboardData.sort((a, b) => b.score - a.score);
+
+        const myIndex = leaderboardData.findIndex(item => item.username === playerState.username);
+        const newRank = myIndex !== -1 ? myIndex + 1 : leaderboardData.length;
+
+        if (playerState.currentRank !== 99 && newRank > playerState.currentRank) {
+            showNotificationToast("⚠️ ตกอันดับ!", `คุณถูกผู้เล่นอื่นแซงอันดับแล้ว! (อันดับปัจจุบัน #${newRank})`, "📉");
+        }
+
+        playerState.currentRank = newRank;
+        const rankDisplay = document.getElementById('hud-rank-display');
+        if (rankDisplay) rankDisplay.innerText = `อันดับ #${newRank}`;
+    });
 }
 
-// ==================== LOGIN & INITIALIZATION ====================
+function calculateTotalPower() {
+    let power = 0;
+    GAME_CHARACTERS.forEach(char => {
+        const lvl = playerState.charLevels[char.id] || 1;
+        power += (char.baseAtk + char.baseDef + char.baseSpeed) * lvl;
+    });
+    return power;
+}
+
+// ==================== TOAST NOTIFICATION ====================
+function showNotificationToast(title, message, icon = "⚠️") {
+    const toast = document.getElementById('game-notification-toast');
+    const msgEl = document.getElementById('toast-message');
+    const iconEl = document.getElementById('toast-icon');
+
+    if (toast && msgEl) {
+        if (iconEl) iconEl.innerText = icon;
+        msgEl.innerText = `${title} ${message}`;
+        toast.classList.remove('hidden');
+
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 4000);
+    }
+}
+
+// ==================== LOGIN & HUD ====================
 function handleLoginFlow() {
     if (typeof SoundEngine !== 'undefined') {
         SoundEngine.playSFX('click');
@@ -91,11 +160,11 @@ function handleLoginFlow() {
 }
 
 function updateHUD() {
-    // คำนวณ Level Up
     const reqExp = typeof getRequiredExp === 'function' ? getRequiredExp(playerState.level) : playerState.level * 100;
     if (playerState.exp >= reqExp) {
         playerState.level += 1;
         playerState.exp -= reqExp;
+        showNotificationToast("LEVEL UP!", `ยินดีด้วย! คุณเลเวลอัปเป็น Lv.${playerState.level}`, "🎊");
     }
 
     document.getElementById('hud-username').innerText = playerState.username;
@@ -104,9 +173,27 @@ function updateHUD() {
     
     const expPercent = Math.min(100, (playerState.exp / reqExp) * 100);
     document.getElementById('hud-exp-bar').style.width = `${expPercent}%`;
+
+    checkThaoWessuwanUnlock();
 }
 
-// ==================== TAB SWITCHING ====================
+function checkThaoWessuwanUnlock() {
+    const uniqueCollected = new Set(playerState.inventory).size;
+    const wessuwan = GAME_CHARACTERS.find(c => c.id === 'wessuwan');
+    if (wessuwan && uniqueCollected >= 44 && wessuwan.isLocked) {
+        wessuwan.isLocked = false;
+        showNotificationToast("ปลดล็อกจอมเทพ!", "คุณสะสมอักษรครบ 44 ตัว! ปลดล็อก ท้าวเวสสุวรรณ แล้ว!", "👹");
+    }
+}
+
+function toggleAudioState() {
+    if (typeof SoundEngine === 'undefined') return;
+    const isMuted = SoundEngine.toggleMute();
+    const btn = document.getElementById('btn-audio-toggle');
+    if (btn) btn.innerText = isMuted ? '🔇' : '🔊';
+}
+
+// ==================== NAVIGATION ====================
 function switchTab(tabName) {
     if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
     document.getElementById('map-screen').classList.add('hidden');
@@ -138,7 +225,7 @@ function switchSubTab(subTabName) {
     });
 }
 
-// ==================== RENDERERS & CHARACTER MODAL ====================
+// ==================== CHARACTER & UPGRADE SYSTEM (FIX UNDEFINED) ====================
 function renderAllUI() {
     renderCharacters();
     renderInventory();
@@ -146,25 +233,57 @@ function renderAllUI() {
     renderSelectedCards();
 }
 
+function getCharCurrentStats(char) {
+    const lvl = playerState.charLevels[char.id] || 1;
+    const multiplier = 1 + ((lvl - 1) * 0.1);
+
+    let atk = Math.floor(char.baseAtk * multiplier);
+    let def = Math.floor(char.baseDef * multiplier);
+    let spd = Math.floor(char.baseSpeed * multiplier);
+
+    // ควบคุมไม่ให้ตัวละครอื่นมีค่าพลังเกินท้าวเวสสุวรรณ
+    if (char.maxStatCap) {
+        atk = Math.min(atk, char.maxStatCap);
+        def = Math.min(def, char.maxStatCap);
+        spd = Math.min(spd, char.maxStatCap);
+    }
+
+    return { atk, def, spd, level: lvl };
+}
+
 function renderCharacters() {
     const container = document.getElementById('character-list-grid');
     if (!container || typeof GAME_CHARACTERS === 'undefined') return;
+
+    const uniqueCollected = new Set(playerState.inventory).size;
     
     container.innerHTML = GAME_CHARACTERS.map(char => {
         const isSelected = playerState.selectedChar === char.id;
-        const glowClass = char.rarity === 'Legendary' ? 'rune-glow-legend border-amber-400' : (char.rarity === 'Epic' ? 'rune-glow-epic border-purple-400' : 'rune-glow border-yellow-400');
-        
+        const isLocked = char.id === 'wessuwan' && uniqueCollected < 44;
+        const stats = getCharCurrentStats(char);
+
+        let glowClass = 'border-slate-800';
+        if (isSelected) {
+            glowClass = char.rarity === 'Godlike' ? 'rune-glow-godlike border-red-500' : 'rune-glow border-yellow-400';
+        }
+
         return `
-            <div onclick="openCharDetailModal('${char.id}')" class="p-3 bg-slate-900/90 border ${isSelected ? glowClass : 'border-slate-800'} rounded-2xl flex items-center justify-between cursor-pointer hover:border-amber-400 transition-all">
+            <div onclick="openCharDetailModal('${char.id}')" class="p-3 bg-slate-900/90 border ${glowClass} rounded-2xl flex items-center justify-between cursor-pointer hover:border-amber-400 transition-all">
                 <div class="flex items-center gap-3">
-                    <span class="text-3xl">${char.avatar}</span>
+                    <span class="text-3xl">${char.avatar || '🗡️'}</span>
                     <div>
-                        <div class="text-xs font-bold text-yellow-300 title-font">${char.name} <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400">(${char.rarity})</span></div>
-                        <div class="text-[10px] text-slate-400">${char.title}</div>
+                        <div class="text-xs font-bold text-yellow-300 title-font flex items-center gap-1.5">
+                            ${char.name || 'ตัวละคร'}
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400">Lv.${stats.level}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">${char.title || ''}</div>
                     </div>
                 </div>
                 <div>
-                    ${isSelected ? '<span class="text-[9px] text-yellow-300 font-bold bg-yellow-500/20 px-2 py-0.5 rounded-full border border-yellow-500/40">ใช้งานอยู่</span>' : '<span class="text-[10px] text-slate-400">ดูข้อมูล 🔍</span>'}
+                    ${isLocked 
+                        ? `<span class="text-[9px] text-red-400 font-bold bg-red-950/80 px-2 py-1 rounded-md border border-red-800">🔒 ล็อก (ต้องมี ${uniqueCollected}/44)</span>`
+                        : (isSelected ? '<span class="text-[9px] text-yellow-300 font-bold bg-yellow-500/20 px-2 py-0.5 rounded-full border border-yellow-500/40">ใช้งานอยู่</span>' : '<span class="text-[10px] text-slate-400">รายละเอียด 🔍</span>')
+                    }
                 </div>
             </div>
         `;
@@ -177,26 +296,72 @@ function openCharDetailModal(charId) {
     const char = GAME_CHARACTERS.find(c => c.id === charId);
     if (!char) return;
 
-    document.getElementById('cdet-avatar').innerText = char.avatar;
-    document.getElementById('cdet-name').innerText = char.name;
-    document.getElementById('cdet-title').innerText = char.title;
-    document.getElementById('cdet-desc').innerText = char.desc;
-    document.getElementById('cdet-atk').innerText = char.atk;
-    document.getElementById('cdet-def').innerText = char.def;
-    document.getElementById('cdet-spd').innerText = char.speed;
+    const uniqueCollected = new Set(playerState.inventory).size;
+    const isLocked = char.id === 'wessuwan' && uniqueCollected < 44;
+    const stats = getCharCurrentStats(char);
+
+    document.getElementById('cdet-avatar').innerText = char.avatar || '🗡️';
+    document.getElementById('cdet-name').innerText = char.name || 'ตัวละคร';
+    document.getElementById('cdet-title').innerText = char.title || '';
+    document.getElementById('cdet-desc').innerText = char.desc || 'ไม่มีข้อมูล';
+    document.getElementById('cdet-rarity-badge').innerText = char.rarity || 'Common';
+    document.getElementById('cdet-level-badge').innerText = `Lv.${stats.level}`;
+
+    document.getElementById('cdet-atk').innerText = stats.atk;
+    document.getElementById('cdet-def').innerText = stats.def;
+    document.getElementById('cdet-spd').innerText = stats.spd;
+
+    const upgradeCost = stats.level * 100;
+    document.getElementById('cdet-upgrade-text').innerText = `อัปเกรด (+10% Stats) (${upgradeCost} 🪙)`;
 
     const selectBtn = document.getElementById('cdet-select-btn');
-    if (playerState.selectedChar === charId) {
-        selectBtn.innerText = "ใช้งานอยู่ ✓";
+    const upgradeBtn = document.getElementById('cdet-upgrade-btn');
+
+    if (isLocked) {
+        selectBtn.innerText = "🔒 ยังไม่ปลดล็อก";
         selectBtn.disabled = true;
-        selectBtn.className = "btn-game flex-1 py-2 bg-slate-700 text-slate-400 font-bold text-xs rounded-xl";
+        selectBtn.className = "btn-game flex-1 py-2 bg-slate-800 text-red-400 font-bold text-xs rounded-xl";
+        upgradeBtn.disabled = true;
+        upgradeBtn.classList.add('opacity-50');
     } else {
-        selectBtn.innerText = "เลือกรบ ⚔️";
-        selectBtn.disabled = false;
-        selectBtn.className = "btn-game flex-1 py-2 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl";
+        upgradeBtn.disabled = false;
+        upgradeBtn.classList.remove('opacity-50');
+        if (playerState.selectedChar === charId) {
+            selectBtn.innerText = "ใช้งานอยู่ ✓";
+            selectBtn.disabled = true;
+            selectBtn.className = "btn-game flex-1 py-2 bg-slate-700 text-slate-400 font-bold text-xs rounded-xl";
+        } else {
+            selectBtn.innerText = "เลือกรบ ⚔️";
+            selectBtn.disabled = false;
+            selectBtn.className = "btn-game flex-1 py-2 bg-yellow-500 text-slate-950 font-extrabold text-xs rounded-xl";
+        }
     }
 
     document.getElementById('char-detail-modal').classList.remove('hidden');
+}
+
+function upgradeCurrentChar() {
+    if (!selectedCharForModal) return;
+    const char = GAME_CHARACTERS.find(c => c.id === selectedCharForModal);
+    if (!char) return;
+
+    const currentLvl = playerState.charLevels[char.id] || 1;
+    const upgradeCost = currentLvl * 100;
+
+    if (playerState.gold >= upgradeCost) {
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('buy');
+        playerState.gold -= upgradeCost;
+        playerState.charLevels[char.id] = currentLvl + 1;
+        
+        updateHUD();
+        openCharDetailModal(char.id);
+        renderCharacters();
+        savePlayerDataToFirebase();
+        showNotificationToast("อัปเกรดสำเร็จ!", `${char.name} เลเวลอัปเป็น Lv.${currentLvl + 1}`, "⬆️");
+    } else {
+        if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('wrong');
+        alert("เหรียญทองไม่เพียงพอสำหรับการอัปเกรด!");
+    }
 }
 
 function closeCharDetailModal() {
@@ -210,8 +375,8 @@ function confirmSelectChar() {
         playerState.selectedChar = selectedCharForModal;
         const charData = GAME_CHARACTERS.find(c => c.id === selectedCharForModal);
         if (charData) {
-            document.getElementById('hud-char-avatar').innerText = charData.avatar;
-            document.getElementById('map-player-avatar').innerText = charData.avatar;
+            document.getElementById('hud-char-avatar').innerText = charData.avatar || '🗡️';
+            document.getElementById('map-player-avatar').innerText = charData.avatar || '🗡️';
         }
         renderCharacters();
         closeCharDetailModal();
@@ -219,6 +384,7 @@ function confirmSelectChar() {
     }
 }
 
+// ==================== INVENTORY & SHOP ====================
 function renderInventory() {
     const container = document.getElementById('consonant-grid');
     if (!container || typeof THAI_CONSONANTS === 'undefined') return;
@@ -248,10 +414,8 @@ function toggleSelectCard(char) {
     const idx = playerState.selectedCards.indexOf(char);
     if (idx > -1) {
         playerState.selectedCards.splice(idx, 1);
-    } else {
-        if (playerState.selectedCards.length < 3) {
-            playerState.selectedCards.push(char);
-        }
+    } else if (playerState.selectedCards.length < 3) {
+        playerState.selectedCards.push(char);
     }
     renderSelectedCards();
 }
@@ -297,11 +461,11 @@ function buyShopItem(itemId, price) {
         alert("ซื้อไอเทมสำเร็จ!");
     } else {
         if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('wrong');
-        alert("เหรียญทองไม่พอ!");
+        alert("เหรียญทองไม่เพียงพอ!");
     }
 }
 
-// ==================== MAP & DRAG SYSTEM ====================
+// ==================== MAP SYSTEM ====================
 let isDragging = false;
 let startX, startY, currentX = -750, currentY = -750;
 
@@ -363,10 +527,7 @@ function spawnLettersOnMap() {
     }
 }
 
-// ==================== AR CAMERA & BOUNCING TARGET ====================
-let targetLetterElement = null;
-let currentTargetLetter = 'ก';
-
+// ==================== AR CATCH & THROW GEM SYSTEM ====================
 function openARCatchModal(letter, element) {
     if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('click');
     currentTargetLetter = letter;
@@ -401,17 +562,49 @@ function startARLetterMovement() {
     const target = document.getElementById('ar-target-letter');
     if (!target) return;
     
-    target.style.top = '40%';
+    target.style.top = '30%';
     target.style.left = '40%';
 
     arBounceInterval = setInterval(() => {
-        const randomTop = Math.floor(Math.random() * 65) + 15;
-        const randomLeft = Math.floor(Math.random() * 65) + 15;
+        const randomTop = Math.floor(Math.random() * 50) + 15;
+        const randomLeft = Math.floor(Math.random() * 60) + 15;
         target.style.top = `${randomTop}%`;
         target.style.left = `${randomLeft}%`;
 
         if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('bounce');
-    }, 500);
+    }, 450);
+}
+
+function throwGemSealAtTarget() {
+    const gem = document.getElementById('ar-gem-seal');
+    const target = document.getElementById('ar-target-letter');
+    if (!gem || !target) return;
+
+    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('throw');
+
+    // รับพิกัดเป้าหมาย
+    const targetRect = target.getBoundingClientRect();
+    const gemRect = gem.getBoundingClientRect();
+
+    const deltaX = targetRect.left - gemRect.left;
+    const deltaY = targetRect.top - gemRect.top;
+
+    gem.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.5) rotate(720deg)`;
+
+    setTimeout(() => {
+        clearInterval(arBounceInterval);
+        gem.style.transform = 'none';
+        
+        if (targetLetterElement) {
+            targetLetterElement.remove();
+        }
+
+        closeARCatchModal();
+
+        if (typeof startCatchQuiz === 'function') {
+            startCatchQuiz(currentTargetLetter);
+        }
+    }, 400);
 }
 
 function closeARCatchModal() {
@@ -423,23 +616,4 @@ function closeARCatchModal() {
         video.srcObject.getTracks().forEach(track => track.stop());
     }
     if (modal) modal.classList.add('hidden');
-}
-
-function executeCatchInAR() {
-    if (typeof isQuizActive !== 'undefined' && isQuizActive) return;
-
-    if (typeof SoundEngine !== 'undefined') SoundEngine.playSFX('catch_seal');
-
-    clearInterval(arBounceInterval);
-    const caughtLetter = currentTargetLetter;
-    
-    if (targetLetterElement) {
-        targetLetterElement.remove();
-    }
-    
-    closeARCatchModal();
-    
-    if (typeof startCatchQuiz === 'function') {
-        startCatchQuiz(caughtLetter);
-    }
 }
