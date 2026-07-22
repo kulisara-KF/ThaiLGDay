@@ -95,3 +95,166 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
 ::-webkit-scrollbar-thumb { background: #ca8a04; border-radius: 4px; }
+/* ==================== BATTLE LAYOUT ==================== */
+.arena-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.character-box {
+    width: 25%;
+    text-align: center;
+    position: relative; /* สำหรับแอนิเมชันดาเมจลอย */
+}
+
+.quiz-box {
+    width: 45%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* ==================== BARS (หลอดเลือด & มานา) ==================== */
+.bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: #444;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 5px 0;
+    border: 2px solid #fff;
+}
+
+.health-bar {
+    height: 100%;
+    background-color: #e74c3c;
+    width: 100%; /* จะเปลี่ยนด้วย JS */
+    transition: width 0.3s ease-in-out;
+}
+
+.mana-bar {
+    height: 100%;
+    background-color: #3498db;
+    width: 0%; /* เริ่มต้นที่ 0 */
+    transition: width 0.3s ease-in-out;
+}
+
+.hp-text {
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* ==================== CHOICES GRID ==================== */
+.choices-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.choice-btn {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #f1c40f;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: transform 0.1s;
+}
+
+.choice-btn:active {
+    transform: scale(0.95);
+}
+
+/* ==================== CARDS STACK ==================== */
+.card-stack-container {
+    background-color: #34495e;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+}
+
+.card-hand {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.power-card {
+    background: linear-gradient(135deg, #8e44ad, #2980b9);
+    width: 100px;
+    height: 140px;
+    border-radius: 8px;
+    border: 2px solid gold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+    padding: 5px;
+}
+
+.power-card:hover {
+    transform: translateY(-10px);
+}
+
+.card-cost {
+    background-color: #3498db;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+    line-height: 25px;
+    font-weight: bold;
+    position: absolute;
+    top: -10px;
+    right: -10px;
+}
+
+/* ==================== BATTLE ANIMATIONS ==================== */
+/* แอนิเมชันตัวสั่นเมื่อโดนโจมตี */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px) rotate(-2deg); }
+    50% { transform: translateX(5px) rotate(2deg); }
+    75% { transform: translateX(-5px) rotate(-2deg); }
+    100% { transform: translateX(0); }
+}
+
+.damage-shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* แอนิเมชันตัวเลขดาเมจลอยขึ้น */
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+}
+
+.floating-damage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    font-weight: bold;
+    color: #ff3333;
+    text-shadow: 2px 2px 0 #000;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.show-damage {
+    animation: floatUp 1s ease-out forwards;
+}
