@@ -1,0 +1,102 @@
+const GAME_CHARACTERS = [
+   const GAME_CHARACTERS = [
+    {
+        id: "khunphaen",
+        name: "ขุนแผน",
+        title: "จอมเวทเจ้าเสน่ห์",
+        rarity: "Epic",
+        baseAtk: 90,
+        baseDef: 65,
+        baseSpeed: 85,
+        desc: "เปี่ยมด้วยเวทมนตร์คาถา สามารถกำราบศัตรูด้วยพลังอาคม",
+        maxStatCap: 195
+    },
+    {
+        id: 'hanuman',
+        name: 'หนุมานชาญสมร',
+        title: 'วานรเหินหาว',
+        rarity: 'Legendary',
+        baseAtk: 100,
+        baseDef: 70,
+        baseSpeed: 120,
+        desc: "เปี่ยมด้วยเวทมนตร์คาถา สามารถกำราบศัตรูด้วยพลังอาคม",
+        maxStatCap: 200
+    },
+    {
+        id: 'inao',
+        name: 'อิเหนา',
+        title: 'รูปหล่อพ่อรวย',
+        rarity: 'Rare',
+        baseAtk: 85,
+        baseDef:85,
+        baseSpeed: 85,
+        desc: 'เกราะป้องกันและพลังโจมตีกริชสมดุลรอบด้าน',
+        maxStatCap: 170
+    },
+    {
+        id: "aphai",
+        name: "พระอภัยมณี",
+        title: "จอมเวทเสียงพิณ",
+        avatar: "🪈",
+        rarity: "Epic",
+        baseAtk: 85,
+        baseDef: 60,
+        baseSpeed: 80,
+        desc: "ใช้เสียงปี่บรรเลงสะกดศัตรูให้ตกอยู่ในภวังค์และสร้างจังหวะได้ดีเยี่ยม",
+        maxStatCap: 190
+    },
+    {
+        id: 'sudsakorn',
+        name: 'สุดสาครกับม้านิลมังกร',
+        title: 'อัศวินน้อยกับพาหนะวิเศษ',
+        rarity: 'Rare',
+         rarity: "Rare",
+        baseAtk: 75,
+        baseDef: 75,
+        baseSpeed: 95,
+        desc: "ผู้คล่องแคล่วว่องไว เดินทางข้ามมหาสมุทรด้วยไม้วิเศษและพาหนะคู่ใจ",
+        maxStatCap: 180
+     },
+    {
+        id: 'sugriva',
+        name: 'สุครีพพญาวานร',
+        title: 'สุริยบุตรผู้เกรียงไกร',
+        rarity: "Rare",
+        baseAtk: 80,
+        baseDef: 75,
+        baseSpeed: 90,
+        desc: "สมดุลทั้งการโจมตีและการป้องกัน",
+        maxStatCap: 180
+     },
+    {
+        id: 'phi_suea',
+        name: 'นางผีเสื้อสมุทร',
+        title: 'อสูรกายแห่งท้องทะเล',
+        rarity: 'Epic',
+        baseAtk: 100,
+        baseDef: 75,
+        baseSpeed: 65,
+        desc: "พลังโจมตีรุนแรงมหาศาล",
+        maxStatCap: 185
+    },
+      {
+        id: "wessuwan",
+        name: "ท้าวเวสสุวรรณ",
+        title: "อธิบดีแห่งอสูร",
+        rarity: "Godlike",
+        baseAtk: 250,
+        baseDef: 250,
+        baseSpeed: 200,
+        desc: "ผู้สยบภูตผี มีพลังเกรียงไกรที่สุดในแดนดิน จะปลดล็อกเมื่อสะสมพยัญชนะไทยครบ 44 ตัวเท่านั้น!",
+        isLocked: true,
+        unlockRequirement: 44
+    }
+    ];
+
+const POWER_CARDS = [
+    { id: "card_attack", name: "ดาบทะลวง", type: "offensive", manaCost: 2 },
+    { id: "card_shield", name: "โล่เพชร", type: "defensive", manaCost: 1 }
+];
+
+window.GAME_CHARACTERS = GAME_CHARACTERS;
+window.POWER_CARDS = POWER_CARDS;
