@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      // ห้าม Client แก้ไขฟิลด์สำคัญด้วยตัวเองเด็ดขาด
+      allow update: if request.auth != null 
+                    && request.auth.uid == userId
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['gold', 'exp', 'fragments', 'collectedConsonants', 'pityCounter']);
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false; 
+    }
+
+    match /quiz_database/{document=**} {
+      // ซ่อนฐานข้อมูลคำถามจากฝั่ง Client 100%
+      allow read, write: if false;
+    }
+  }
+}
