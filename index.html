@@ -284,6 +284,55 @@
         </div>
 
     </div>
+    <!-- ==================== BATTLE ARENA ==================== -->
+<div id="battle-arena" class="arena-container">
+    
+    <!-- ฝั่งศัตรู (บอส) -->
+    <div class="character-box enemy-side">
+        <h3 id="enemy-name">จ้าวแห่งไวยากรณ์</h3>
+        <div class="bar-container">
+            <div id="enemy-hp-bar" class="health-bar"></div>
+        </div>
+        <p class="hp-text">HP: <span id="enemy-hp-text">1000/1000</span></p>
+        <!-- พื้นที่แสดงตัวเลขดาเมจลอยขึ้นมา -->
+        <div id="enemy-damage-float" class="floating-damage"></div>
+    </div>
+
+    <!-- ส่วนแสดงคำถาม (ตรงกลาง) -->
+    <div class="quiz-box">
+        <h2 id="question-text">คำถามจะปรากฏที่นี่...</h2>
+        <div id="choices-container" class="choices-grid">
+            <button class="choice-btn">ก. ตัวเลือกที่ 1</button>
+            <button class="choice-btn">ข. ตัวเลือกที่ 2</button>
+            <button class="choice-btn">ค. ตัวเลือกที่ 3</button>
+            <button class="choice-btn">ง. ตัวเลือกที่ 4</button>
+        </div>
+    </div>
+
+    <!-- ฝั่งผู้เล่น -->
+    <div class="character-box player-side">
+        <h3 id="player-name">ผู้กล้าภาษาไทย</h3>
+        <div class="bar-container">
+            <div id="player-hp-bar" class="health-bar"></div>
+        </div>
+        <p class="hp-text">HP: <span id="player-hp-text">500/500</span></p>
+        
+        <div class="bar-container">
+            <div id="player-mana-bar" class="mana-bar"></div>
+        </div>
+        <p class="hp-text">Mana: <span id="player-mana-text">0/5</span></p>
+        <div id="player-damage-float" class="floating-damage"></div>
+    </div>
+
+</div>
+
+<!-- ==================== CARD STACK (การ์ดพลัง) ==================== -->
+<div class="card-stack-container">
+    <h3>การ์ดพลังของคุณ (ใช้ Mana ในการร่าย)</h3>
+    <div id="card-hand" class="card-hand">
+        <!-- การ์ดจะถูกสร้างด้วย JavaScript และมาแสดงตรงนี้ -->
+    </div>
+</div>
 
     <!-- ==================== GAME SCRIPTS ==================== -->
     <script src="js/data.js"></script>
