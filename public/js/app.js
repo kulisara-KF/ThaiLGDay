@@ -1,11 +1,13 @@
 // นำ Config จาก Firebase ของคุณมาใส่ตรงนี้
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyArjT5xq3VIZfdQFaiWIggCJnBqCz6I3wk",
+  authDomain: "thai-go-game.firebaseapp.com",
+  databaseURL: "https://thai-go-game-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "thai-go-game",
+  storageBucket: "thai-go-game.firebasestorage.app",
+  messagingSenderId: "204988303831",
+  appId: "1:204988303831:web:686a889c675a3c4bf56392",
+  measurementId: "G-NZLJ3X1H94"
 };
 
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
