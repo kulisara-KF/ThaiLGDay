@@ -199,3 +199,38 @@ if (typeof module !== 'undefined' && module.exports) {
         getRequiredExp
     };
 }
+// ==================== POWER CARDS DATA ====================
+const POWER_CARDS = [
+    {
+        id: "card_attack",
+        name: "ดาบทะลวง",
+        type: "offensive",
+        manaCost: 2,
+        desc: "โจมตีศัตรูด้วยความรุนแรง 150% ของค่า ATK",
+        effect: (player, enemy) => { enemy.hp -= (player.atk * 1.5) - enemy.def; }
+    },
+    {
+        id: "card_shield",
+        name: "โล่เพชร",
+        type: "defensive",
+        manaCost: 1,
+        desc: "ลดความเสียหายจากการโจมตีครั้งต่อไป 50%",
+        effect: (player, enemy) => { player.shieldActive = true; }
+    },
+    {
+        id: "card_heal",
+        name: "โอสถทิพย์",
+        type: "support",
+        manaCost: 2,
+        desc: "ฟื้นฟู HP 30% ของ Max HP",
+        effect: (player, enemy) => { player.hp = Math.min(player.maxHp, player.hp + (player.maxHp * 0.3)); }
+    },
+    {
+        id: "card_hint",
+        name: "ตาทิพย์",
+        type: "utility",
+        manaCost: 1,
+        desc: "ตัดตัวเลือกที่ผิดออก 2 ข้อในคำถามถัดไป",
+        effect: (player, enemy) => { player.hintActive = true; }
+    }
+];
